@@ -13,8 +13,11 @@ jobs:
         with:
           python-version: 3.7
 
+      - name: Set up setuptools and wheel
+        run: python -m pip install --user --upgrade setuptools wheel
+
       - name: Build dist
-        run: python setup.py sdist
+        run: python setup.py sdist bdist_wheel
 
       - name: Publish to test PyPI
         uses: pypa/gh-action-pypi-publish@v1.1.0
