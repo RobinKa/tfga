@@ -7,6 +7,7 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@master
+
       - name: Set up Python 3.7
         uses: actions/setup-python@v1
         with:
@@ -16,7 +17,7 @@ jobs:
         run: python setup.py sdist
 
       - name: Publish to test PyPI
-      - uses: pypa/gh-action-pypi-publish@v1.1.0
+        uses: pypa/gh-action-pypi-publish@v1.1.0
         with:
           user: __token__
           password: ${{ secrets.test_pypi_password }}
