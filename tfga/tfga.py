@@ -2,6 +2,7 @@ import tensorflow as tf
 import numbers
 import numpy as np
 from .cayley import get_cayley_tensor, blades_from_bases
+from .mv_ops import mv_multiply, mv_add, mv_equal, mv_reversion, mv_grade_automorphism
 
 
 def get_blade_repr(blade_name):
@@ -138,6 +139,9 @@ class MultiVector:
     def algebra(self):
         return self._algebra
 
+    def __hash__(self):
+        return hash(self._blade_values.ref())
+
     def with_changes(self, blade_values=None, blade_indices=None):
         return MultiVector(
             blade_values=self.blade_values if blade_values is None else blade_values,
@@ -194,27 +198,19 @@ class MultiVector:
 
     def reversion(self):
         """Grade-reversion. See https://en.wikipedia.org/wiki/Paravector#Reversion_conjugation."""
-        blade_degrees = tf.cast(
-            tf.gather(self.algebra.blade_degrees, self.blade_indices), tf.float32)
-
-        # for each blade, 0 if even number of swaps required, else 1
-        odd_swaps = tf.cast(
-            tf.floor(blade_degrees * (blade_degrees - 0.5)) % 2, tf.float32)
-
-        # [0, 1] -> [-1, 1]
-        reversion_signs = 1.0 - 2.0 * odd_swaps
+        new_blade_values = mv_reversion(
+            self.blade_indices, self.blade_values, self.algebra.blade_degrees)
 
         return self.with_changes(
-            blade_values=reversion_signs * self.blade_values
+            blade_values=new_blade_values
         )
 
     def grade_automorphism(self):
         """Negates odd grades. See https://en.wikipedia.org/wiki/Paravector#Grade_automorphism."""
-        blade_degrees = tf.cast(
-            tf.gather(self.algebra.blade_degrees, self.blade_indices), tf.float32)
-        signs = 1.0 - 2.0 * (blade_degrees % 2)
+        new_blade_values = mv_grade_automorphism(
+            self.blade_indices, self.blade_values, self.algebra.blade_degrees)
         return self.with_changes(
-            blade_values=signs * self.blade_values
+            blade_values=new_blade_values
         )
 
     def conjugation(self):
@@ -251,19 +247,11 @@ class MultiVector:
         """Geometric product."""
         other = self.algebra.as_mv(other)
 
-        sub_cayley = tf.gather(self._algebra.cayley,
-                               self.blade_indices, axis=0)
-        sub_cayley = tf.gather(sub_cayley, other.blade_indices, axis=1)
-
-        # [N, 3]
-        x = tf.where(sub_cayley != 0)[:, 2]
-        result_blade_indices, _ = tf.unique(x, tf.int64)
-        sub_cayley = tf.gather(sub_cayley, result_blade_indices, axis=2)
-
-        result_blade_values = tf.einsum("...i,...j,...ijk->...k",
-                                        self._blade_values,
-                                        other.blade_values,
-                                        sub_cayley)
+        result_blade_indices, result_blade_values = mv_multiply(
+            self.blade_indices, self.blade_values,
+            other.blade_indices, other.blade_values,
+            self._algebra.cayley
+        )
 
         return self.with_changes(
             blade_values=result_blade_values,
@@ -292,73 +280,22 @@ class MultiVector:
     def __eq__(self, other):
         other = self.algebra.as_mv(other)
 
-        # TODO: Make sure blade indices are broadcastable.
-
-        # Align self and other indices (if possible)
-        # to the compare all indices and values.
-        reindex_a = tf.argsort(self.blade_indices)
-        reindex_b = tf.argsort(other.blade_indices)
-
-        sorted_ind_a = tf.gather(self.blade_indices, reindex_a, axis=-1)
-        sorted_ind_b = tf.gather(other.blade_indices, reindex_b, axis=-1)
-
-        sorted_val_a = tf.gather(self.blade_values, reindex_a, axis=-1)
-        sorted_val_b = tf.gather(other.blade_values, reindex_b, axis=-1)
-
-        return tf.reduce_all(sorted_ind_a == sorted_ind_b) and tf.reduce_all(sorted_val_a == sorted_val_b)
+        return mv_equal(
+            self.blade_indices, self.blade_values,
+            other.blade_indices, other.blade_values
+        )
 
     def __add__(self, other):
         other = self.algebra.as_mv(other)
 
-        # vals: [20, 21, 22] [23, 24, 25]
-        # ind: [1, 2, 3], [3, 2, 10]
-
-        # concat indices: [1, 2, 3, 3, 2, 10]
-        concat_indices = tf.concat(
-            [self.blade_indices, other.blade_indices],
-            axis=0
+        result_indices, result_values = mv_add(
+            self.blade_indices, self.blade_values,
+            other.blade_indices, other.blade_values
         )
 
-        # new_indices: [1, 2, 3, 10]
-        # remapped_indices (index of old values in new_indices): [0, 1, 2, 2, 1, 3]
-        new_indices, remapped_indices = tf.unique(concat_indices, tf.int64)
-
-        # concat values: [20, 21, 22, 23, 24, 25]
-        concat_values = tf.concat(
-            [self.blade_values, other.blade_values],
-            axis=len(self.batch_shape)
-        )
-
-        # data: [20, 21, 22, 23, 24, 25]
-        # segment_ids: [0, 1, 2, 2, 1, 3]
-        # result: [20, 21+24, 22+23, 25]
-
-        # unsorted_segment_sum only works on the first index so we need to transpose
-        # our values on the last index to the first index and later untranspose again.
-
-        # range: [0, 1, 2, 3]
-        # t: [3, 0, 1, 2]
-        # t^-1: [1, 2, 3, 0]
-        transpose_indices = tf.roll(
-            tf.range(len(concat_values.shape)), shift=1, axis=0)
-        untranspose_indices = tf.roll(
-            tf.range(len(concat_values.shape)), shift=-1, axis=0)
-
-        concat_values = tf.transpose(concat_values, transpose_indices)
-
-        summed_values = tf.math.unsorted_segment_sum(
-            data=concat_values,
-            segment_ids=remapped_indices,
-            num_segments=tf.reduce_max(remapped_indices) + 1
-        )
-
-        summed_values = tf.transpose(summed_values, untranspose_indices)
-
-        # blade_values: [20, 21+24, 22+23, 25]
-        # blade_indices: [1, 2, 3, 10]
         return self.with_changes(
-            blade_values=summed_values,
-            blade_indices=new_indices
+            blade_values=result_values,
+            blade_indices=result_indices
         )
 
     def __radd__(self, other):
