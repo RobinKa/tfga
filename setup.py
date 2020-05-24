@@ -10,7 +10,7 @@ setup(
         "tf_nightly_gpu": ["tf-nightly-gpu>=2.0.0"],
     },
     description="Clifford and Geometric Algebra with TensorFlow",
-    version="0.1",
+    version="0.1.1",
     url="https://github.com/RobinKa/tfga",
     author="Robin 'Tora' Kahlow",
     author_email="tora@warlock.ai",
