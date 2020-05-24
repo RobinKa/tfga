@@ -17,6 +17,7 @@ setup(
     },
     description="Clifford and Geometric Algebra with TensorFlow",
     long_description=long_description,
+    long_description_content_type="text/markdown",
     version="0.1.2",
     url="https://github.com/RobinKa/tfga",
     author="Robin 'Tora' Kahlow",
