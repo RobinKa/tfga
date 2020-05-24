@@ -1,7 +1,6 @@
 import tensorflow as tf
 
 
-@tf.function
 def mv_multiply(a_blade_indices, a_blade_values, b_blade_indices, b_blade_values, cayley):
     sub_cayley = tf.gather(cayley, a_blade_indices, axis=0)
     sub_cayley = tf.gather(sub_cayley, b_blade_indices, axis=1)
@@ -19,7 +18,6 @@ def mv_multiply(a_blade_indices, a_blade_values, b_blade_indices, b_blade_values
     return result_blade_indices, result_blade_values
 
 
-@tf.function
 def mv_add(a_blade_indices, a_blade_values, b_blade_indices, b_blade_values):
     # vals: [20, 21, 22] [23, 24, 25]
     # ind: [1, 2, 3], [3, 2, 10]
@@ -71,7 +69,6 @@ def mv_add(a_blade_indices, a_blade_values, b_blade_indices, b_blade_values):
     return new_indices, summed_values
 
 
-@tf.function
 def mv_equal(a_blade_indices, a_blade_values, b_blade_indices, b_blade_values):
     # TODO: Make sure blade indices are broadcastable.
 
@@ -89,7 +86,6 @@ def mv_equal(a_blade_indices, a_blade_values, b_blade_indices, b_blade_values):
     return tf.reduce_all(sorted_ind_a == sorted_ind_b) and tf.reduce_all(sorted_val_a == sorted_val_b)
 
 
-@tf.function
 def mv_reversion(a_blade_indices, a_blade_values, algebra_blade_degrees):
     blade_degrees = tf.cast(
         tf.gather(algebra_blade_degrees, a_blade_indices), tf.float32)
@@ -104,7 +100,6 @@ def mv_reversion(a_blade_indices, a_blade_values, algebra_blade_degrees):
     return reversion_signs * a_blade_values
 
 
-@tf.function
 def mv_grade_automorphism(a_blade_indices, a_blade_values, algebra_blade_degrees):
     blade_degrees = tf.cast(
         tf.gather(algebra_blade_degrees, a_blade_indices), tf.float32)
