@@ -6,7 +6,14 @@ jobs:
     name: Build and publish to PyPI
     runs-on: ubuntu-18.04
     steps:
-    - uses: pypa/gh-action-pypi-publish@v1.1.0
-      with:
-        user: __token__
-        password: ${{ secrets.pypi_password }}
+      - uses: actions/checkout@master
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+      - name: Build dist
+        run: python setup.py sdist
+      - uses: pypa/gh-action-pypi-publish@v1.1.0
+        with:
+          user: __token__
+          password: ${{ secrets.pypi_password }}
