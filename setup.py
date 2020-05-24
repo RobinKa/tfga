@@ -1,4 +1,10 @@
 from setuptools import setup
+import os
+
+# Read README.md
+this_directory = os.path.abspath(os.path.dirname(__file__))
+with open(os.path.join(this_directory, "README.md"), encoding="utf-8") as readme_file:
+    long_description = readme_file.read()
 
 setup(
     name="tfga",
@@ -10,7 +16,8 @@ setup(
         "tf_nightly_gpu": ["tf-nightly-gpu>=2.0.0"],
     },
     description="Clifford and Geometric Algebra with TensorFlow",
-    version="0.1.1",
+    long_description=long_description,
+    version="0.1.2",
     url="https://github.com/RobinKa/tfga",
     author="Robin 'Tora' Kahlow",
     author_email="tora@warlock.ai",
