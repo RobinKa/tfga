@@ -287,7 +287,7 @@ class MultiVector:
         return 0.5 * (self * other - other * self)
 
     def __rxor__(self, other):
-        return self ^ other
+        return -self ^ other
 
     def __eq__(self, other):
         other = self.algebra.as_mv(other)
