@@ -104,6 +104,7 @@ def mv_reversion(a_blade_indices, a_blade_values, algebra_blade_degrees):
     return reversion_signs * a_blade_values
 
 
+@tf.function
 def mv_grade_automorphism(a_blade_indices, a_blade_values, algebra_blade_degrees):
     blade_degrees = tf.cast(
         tf.gather(algebra_blade_degrees, a_blade_indices), tf.float32)

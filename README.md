@@ -43,4 +43,5 @@ print(~quaternion)
 
 ## Notebooks
 [Generic examples](notebooks/tfga.ipynb)
+
 [Quantum Electrodynamics using Geometric Algebra](notebooks/qed.ipynb)
