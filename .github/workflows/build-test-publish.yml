@@ -14,17 +14,17 @@ jobs:
           python-version: 3.7
 
       - name: Install and upgrade pip, setuptools and wheel
-        run: python -m pip install --user --upgrade pip setuptools wheel
+        run: python -m pip install --upgrade pip setuptools wheel
 
       - name: Install packages needed for testing and building
-        run: python -m pip install --user tensorflow numpy scipy
+        run: python -m pip install tensorflow numpy scipy
 
       - name: Run tests
         run: python -m unittest discover tests
 
       - name: Install sphinx
         if: contains(github.ref, 'master')
-        run: python -m pip install --user sphinx sphinx-markdown-builder
+        run: python -m pip install sphinx sphinx-markdown-builder
 
       - name: Run sphinx
         if: contains(github.ref, 'master')
