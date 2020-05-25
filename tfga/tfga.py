@@ -26,7 +26,7 @@ class GeometricAlgebra:
         elements in the metric.
 
         Args:
-            metric: Metric as a list. Specifies what basis vectors square to.
+            metric: Metric as a list. Specifies what basis vectors square to
         """
         self._metric = tf.convert_to_tensor(metric, dtype=tf.float32)
 
@@ -127,7 +127,7 @@ class GeometricAlgebra:
 
         Returns:
             `MultiVector` of the algebra of `kind` with all its
-            blades set to zero.
+            blades set to zero
         """
         blade_indices = self.get_kind_blade_indices(kind)
         mv = tf.zeros([*batch_shape, len(blade_indices)], dtype=dtype)
@@ -136,7 +136,7 @@ class GeometricAlgebra:
     def ones(self, batch_shape: List[int], kind: BladeKind = BladeKind.MV,
              dtype: tf.DType = tf.float32) -> MultiVector:
         """Returns a multivector of the algebra of a given kind with all its
-        blades set to one.
+        blades set to one
 
         Args:
             batch_shape: shape for how many multivectors to return
@@ -145,7 +145,7 @@ class GeometricAlgebra:
 
         Returns:
             `MultiVector` of the algebra of `kind` with all its
-            blades set to one.
+            blades set to one
         """
         blade_indices = self.get_kind_blade_indices(kind)
         mv = tf.ones([*batch_shape, len(blade_indices)], dtype=dtype)
@@ -164,7 +164,7 @@ class GeometricAlgebra:
 
         Returns:
             `MultiVector` of the algebra of `kind` with all its
-            blades set to `fill_value`.
+            blades set to `fill_value`
         """
         blade_indices = self.get_kind_blade_indices(kind)
         mv = tf.fill([*batch_shape, len(blade_indices)], fill_value)

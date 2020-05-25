@@ -23,10 +23,10 @@ def get_blade_repr(blade_name: str) -> str:
     - `""` -> `"1"`
 
     Args:
-        blade_name: name of the blade in the algebra (eg. `"12"`).
+        blade_name: name of the blade in the algebra (eg. `"12"`)
 
     Returns:
-        Representation to use for a given blade.
+        Representation to use for a given blade
     """
     if blade_name == "":
         return "1"

@@ -66,7 +66,7 @@ class MultiVector:
         Returns:
             Copy of this multivector with optional changes made to its
             blade values or indices if `blade_values` or `blade_indices`
-            were set respectively.
+            were set respectively
         """
         return MultiVector(
             blade_values=self.blade_values if blade_values is None else blade_values,
@@ -85,7 +85,7 @@ class MultiVector:
 
         Returns:
             boolean mask for whether this multivector's
-            `blade_indices` are of `kind`.
+            `blade_indices` are of `kind`
         """
         blade_degrees = tf.gather(
             self.algebra.blade_degrees, self.blade_indices
@@ -104,7 +104,7 @@ class MultiVector:
 
         Returns:
             `MultiVector` based on this one which
-            has only blades of `kind`.
+            has only blades of `kind`
         """
         kind_indices = self.get_kind_indices(kind)
 
@@ -125,7 +125,7 @@ class MultiVector:
 
         Returns:
             `tf.Tensor` based on this multivector which
-            has blade values of `kind`.
+            has blade values of `kind`
         """
         kind_indices = self.get_kind_indices(kind)
         result_values = tf.gather(self.blade_values, kind_indices, axis=-1)
@@ -140,7 +140,7 @@ class MultiVector:
 
         Returns:
             Whether this multivector is purely of a given kind
-            and has no non-zero values for blades not of the kind.
+            and has no non-zero values for blades not of the kind
         """
         other_kind_indices = self.get_kind_indices(kind, invert=True)
         return tf.reduce_all(tf.gather(
@@ -185,7 +185,7 @@ class MultiVector:
         See https://en.wikipedia.org/wiki/Paravector#Reversion_conjugation.
 
         Returns:
-            Grade-reversed `MultiVector`.
+            Grade-reversed `MultiVector`
         """
         new_blade_values = mv_reversion(
             self.blade_indices, self.blade_values, self.algebra.blade_degrees)
@@ -199,7 +199,7 @@ class MultiVector:
         See https://en.wikipedia.org/wiki/Paravector#Grade_automorphism.
 
         Returns:
-            `MultiVector` with odd grades negated.
+            `MultiVector` with odd grades negated
         """
         new_blade_values = mv_grade_automorphism(
             self.blade_indices, self.blade_values, self.algebra.blade_degrees)
@@ -212,7 +212,7 @@ class MultiVector:
         See https://en.wikipedia.org/wiki/Paravector#Clifford_conjugation.
 
         Returns:
-            `MultiVector` after `reversion()` and `grade_automorphism()`.
+            `MultiVector` after `reversion()` and `grade_automorphism()`
         """
         return self.reversion().grade_automorphism()
 
@@ -227,7 +227,7 @@ class MultiVector:
             other: scalar to divide by.
 
         Returns:
-            `MultiVector` divided by `other`.
+            `MultiVector` divided by `other`
         """
         other = self.algebra.as_mv(other)
 
@@ -244,7 +244,7 @@ class MultiVector:
         it exists.
 
         Returns:
-            inverted `MultiVector`.
+            inverted `MultiVector`
         """
         rev_self = ~self
         divisor = self * rev_self
@@ -260,7 +260,7 @@ class MultiVector:
             other: object to multiply with
 
         Returns:
-            geometric product of `self` and `other`.
+            geometric product of `self` and `other`
         """
         other = self.algebra.as_mv(other)
 
@@ -277,8 +277,8 @@ class MultiVector:
 
     def __rmul__(self, other: Union[numbers.Number, MultiVector, tf.Tensor]) -> MultiVector:
         """See `__mul__()`."""
-        # TODO: Check whether self and other commute.
-        return self * other
+        other = self.algebra.as_mv(other)
+        return other * self
 
     def __or__(self, other: Union[numbers.Number, MultiVector, tf.Tensor]) -> MultiVector:
         """Returns the inner product.
@@ -287,7 +287,7 @@ class MultiVector:
             other: object to calculate inner product with
 
         Returns:
-            inner product of `self` and `other`.
+            inner product of `self` and `other`
         """
         other = self.algebra.as_mv(other)
         return 0.5 * (self * other + other * self)
@@ -303,7 +303,7 @@ class MultiVector:
             other: object to calculate exterior product with
 
         Returns:
-            exterior product of `self` and `other`.
+            exterior product of `self` and `other`
         """
         other = self.algebra.as_mv(other)
         return 0.5 * (self * other - other * self)
@@ -321,7 +321,7 @@ class MultiVector:
             other: object to compare equality to.
 
         Returns:
-            Whether `self` is equal to another `other`.
+            Whether `self` is equal to another `other`
         """
         other = self.algebra.as_mv(other)
 
@@ -337,7 +337,7 @@ class MultiVector:
             other: object to add with
 
         Returns:
-            Addition of the multivector and `other`.
+            Addition of the multivector and `other`
         """
         other = self.algebra.as_mv(other)
 
@@ -359,7 +359,7 @@ class MultiVector:
         """Returns the negative multivector.
 
         Returns:
-            `MultiVector` negated.
+            `MultiVector` negated
         """
         return self.with_changes(
             blade_values=-self.blade_values
@@ -372,7 +372,7 @@ class MultiVector:
             other: object to subtract
 
         Returns:
-            Subtraction of the multivector and `other`.
+            Subtraction of the multivector and `other`
         """
         neg_other = -self.algebra.as_mv(other)
         return self + neg_other
@@ -387,7 +387,7 @@ class MultiVector:
 
         Returns:
             `MultiVector` with all of its values
-            without sign.
+            without sign
         """
         return self.with_changes(
             blade_values=tf.abs(self.blade_values)
@@ -399,7 +399,7 @@ class MultiVector:
         batch.
 
         Returns:
-            sliced `MultiVector`.
+            sliced `MultiVector`
         """
         def is_sequence(x):
             return (
@@ -501,7 +501,7 @@ class MultiVector:
         - mv.tile([3, 4]) -> mv with batch shape [3, 4]
 
         Args:
-            Tiled `MultiVector` according to `multiples`.
+            Tiled `MultiVector` according to `multiples`
         """
         expanded_shape = [1] * len(multiples) + [*self.blade_values.shape]
         expanded_multiples = [*multiples] + [1] * len(self.blade_values.shape)
@@ -519,10 +519,10 @@ class MultiVector:
         """Returns an approximation of the exponential using a centered taylor series.
 
         Args:
-            order: order of the approximation.
+            order: order of the approximation
 
         Returns:
-            Approximation of `exp(self)`.
+            Approximation of `exp(self)`
         """
         v = self.algebra.as_mv(1.0)
         result = self.algebra.as_mv(1.0)
@@ -538,10 +538,10 @@ class MultiVector:
 
         Args:
             x: power to raise the multivector to
-            order: order of the approximation.
+            order: order of the approximation
 
         Returns:
-            Approximation of `pow(self, x)`.
+            Approximation of `pow(self, x)`
         """
         from scipy.special import binom
 
@@ -564,7 +564,7 @@ class MultiVector:
         """Returns an approximation of the square root using a centered taylor series.
 
         Args:
-            order: order of the approximation.
+            order: order of the approximation
 
         Returns:
             Approximation of `sqrt(self)`.
@@ -576,10 +576,10 @@ class MultiVector:
         taylor series. Only converges for multivectors where `||mv - 1|| < 1`.
 
         Args:
-            order: order of the approximation.
+            order: order of the approximation
 
         Returns:
-            Approximation of `log(self)`.
+            Approximation of `log(self)`
         """
         result = self.algebra.as_mv(0.0)
 
@@ -600,7 +600,7 @@ class MultiVector:
             n: integer power to raise the multivector to
 
         Returns:
-            `MultiVector` to the power of `n`.
+            `MultiVector` to the power of `n`
         """
         if not isinstance(n, int):
             raise Exception("n must be an integer.")
