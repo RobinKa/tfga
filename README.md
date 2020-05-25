@@ -3,7 +3,7 @@ Python package for Geometric / Clifford Algebra with TensorFlow 2.
 
 [![Build status](https://github.com/RobinKa/tfga/workflows/pypi-publish/badge.svg)](https://github.com/RobinKa/tfga/actions) [![PyPI](https://badge.fury.io/py/tfga.svg)](https://badge.fury.io/py/tfga)
 
-[GitHub](https://github.com/RobinKa/tfga) **Docs (coming soon)**
+[GitHub](https://github.com/RobinKa/tfga) | [Docs](https://github.com/RobinKa/tfga/wiki/index)
 
 ## Installation
 Install using pip: `pip install tfga`
@@ -42,6 +42,6 @@ print(~quaternion)
 ```
 
 ## Notebooks
-[Generic examples](notebooks/tfga.ipynb)
+[Generic examples](https://github.com/RobinKa/tfga/tree/master/notebooks/tfga.ipynb)
 
-[Quantum Electrodynamics using Geometric Algebra](notebooks/qed.ipynb)
+[Quantum Electrodynamics using Geometric Algebra](https://github.com/RobinKa/tfga/tree/master/notebooks/qed.ipynb)
