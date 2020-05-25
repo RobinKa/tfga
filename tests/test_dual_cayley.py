@@ -1,7 +1,6 @@
 import unittest as ut
 import numpy as np
 
-from tfga import GeometricAlgebra
 from tfga.cayley import blades_from_bases, get_cayley_tensor
 
 dual_metric = [0]

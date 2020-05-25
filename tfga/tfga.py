@@ -183,6 +183,6 @@ class GeometricAlgebra:
             return x
         elif isinstance(x, numbers.Number):
             return self.fill([], fill_value=x, kind="scalar")
-        elif isinstance(x, tf.Tensor) and len(x.shape) == 0 or (len(x.shape == 1) and x.shape[0] == 1):
+        elif isinstance(x, tf.Tensor) and len(x.shape) == 0 or (len(x.shape) == 1 and x.shape[0] == 1):
             return self.fill([], fill_value=x, kind="scalar")
         raise Exception("Can't convert argument to multi-vector.")
