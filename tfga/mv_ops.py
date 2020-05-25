@@ -1,3 +1,4 @@
+"""Operations on multivectors used internally."""
 import tensorflow as tf
 
 

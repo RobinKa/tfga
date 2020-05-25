@@ -1,5 +1,8 @@
-import numpy as np
+"""Operations for constructing the cayley 3-tensor needed
+for the geometric product. Used internally.
+"""
 from itertools import combinations
+import numpy as np
 
 
 def _normal_swap(x):
