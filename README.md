@@ -12,7 +12,6 @@ Requirements:
 - Python 3
 - tensorflow 2
 - numpy
-- scipy (optional, for `approx_pow`)
 
 ## Basic usage
 ```python
