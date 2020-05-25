@@ -15,7 +15,7 @@ from .mv_ops import mv_multiply, mv_add, mv_equal, mv_reversion, mv_grade_automo
 class MultiVector:
     """Elements of a geometric algebra used for computation."""
 
-    def __init__(self, blade_values, blade_indices, algebra):
+    def __init__(self, blade_values: tf.Tensor, blade_indices: tf.Tensor, algebra: GeometricAlgebra):
         """Creates a multivector of a given algebra with given values
         for given indices.
 
@@ -46,7 +46,7 @@ class MultiVector:
         return self._blade_indices
 
     @property
-    def algebra(self):
+    def algebra(self) -> GeometricAlgebra:
         """`GeometricAlgebra` instance this multivector
         belongs to."""
         return self._algebra
@@ -531,45 +531,6 @@ class MultiVector:
             i_factorial = tf.exp(tf.math.lgamma(i + 1.0))
             result += v / i_factorial
         return result
-
-    def approx_pow(self, x: numbers.Number, order: int) -> MultiVector:
-        """Returns an approximation of the multivector to the power of `x`
-        using a centered taylor series.
-
-        Args:
-            x: power to raise the multivector to
-            order: order of the approximation
-
-        Returns:
-            Approximation of `pow(self, x)`
-        """
-        from scipy.special import binom
-
-        # TODO: binom only works with positive x.
-        # Use function that supports negative x.
-        b = binom(x, 0, dtype=np.float32)
-        result = self.algebra.as_mv(b)
-
-        self_minus_one = self - 1.0
-        v = None
-
-        for i in range(1, order + 1):
-            v = self_minus_one if v is None else v * self_minus_one
-            b = binom(x, i, dtype=np.float32)
-            result += b * v
-
-        return result
-
-    def approx_sqrt(self, order: int) -> MultiVector:
-        """Returns an approximation of the square root using a centered taylor series.
-
-        Args:
-            order: order of the approximation
-
-        Returns:
-            Approximation of `sqrt(self)`.
-        """
-        return self.approx_pow(0.5, order=order)
 
     def approx_log(self, order: int) -> MultiVector:
         """Returns an approximation of the natural logarithm using a centered
