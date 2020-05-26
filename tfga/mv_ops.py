@@ -2,7 +2,9 @@
 import tensorflow as tf
 
 
-def mv_multiply(a_blade_indices, a_blade_values, b_blade_indices, b_blade_values, cayley):
+def mv_multiply(a_blade_indices: tf.Tensor, a_blade_values: tf.Tensor,
+                b_blade_indices: tf.Tensor, b_blade_values: tf.Tensor,
+                cayley: tf.Tensor) -> tf.Tensor:
     sub_cayley = tf.gather(cayley, a_blade_indices, axis=0)
     sub_cayley = tf.gather(sub_cayley, b_blade_indices, axis=1)
 
@@ -19,7 +21,8 @@ def mv_multiply(a_blade_indices, a_blade_values, b_blade_indices, b_blade_values
     return result_blade_indices, result_blade_values
 
 
-def mv_add(a_blade_indices, a_blade_values, b_blade_indices, b_blade_values):
+def mv_add(a_blade_indices: tf.Tensor, a_blade_values: tf.Tensor,
+           b_blade_indices: tf.Tensor, b_blade_values: tf.Tensor) -> tf.Tensor:
     # vals: [20, 21, 22] [23, 24, 25]
     # ind: [1, 2, 3], [3, 2, 10]
 
@@ -70,7 +73,8 @@ def mv_add(a_blade_indices, a_blade_values, b_blade_indices, b_blade_values):
     return new_indices, summed_values
 
 
-def mv_equal(a_blade_indices, a_blade_values, b_blade_indices, b_blade_values):
+def mv_equal(a_blade_indices: tf.Tensor, a_blade_values: tf.Tensor,
+             b_blade_indices: tf.Tensor, b_blade_values: tf.Tensor) -> tf.Tensor:
     # TODO: Make sure blade indices are broadcastable.
 
     # Align a and b indices (if possible)

@@ -222,10 +222,12 @@ class MultiVector:
         Returns:
             Dual of the MultiVector
         """
-        new_blade_indices = tf.gather(
-            self.algebra.dual_blade_indices, self.blade_indices)
+        dual_indices = tf.gather(self.algebra.dual_blade_indices, self.blade_indices)
+        dual_signs = tf.gather(self.algebra.dual_blade_signs, self.blade_indices)
+        new_values = dual_signs * self.blade_values
         return self.with_changes(
-            blade_indices=new_blade_indices
+            blade_indices=dual_indices,
+            blade_values=new_values,
         )
 
     def __invert__(self) -> MultiVector:
@@ -292,7 +294,18 @@ class MultiVector:
         other = self.algebra.as_mv(other)
         return other * self
 
-    def regressive_prod(self, other):
+    def reg_prod(self, other: MultiVector) -> MultiVector:
+        """Returns the regressive product of the multivector and
+        another multivector.
+
+        Args:
+            other: object to take regressive product with
+
+        Returns:
+            regressive product of multivector and other
+        """
+        other = self.algebra.as_mv(other)
+
         return (self.dual() ^ other.dual()).dual()
 
     def __or__(self, other: Union[numbers.Number, MultiVector, tf.Tensor]) -> MultiVector:

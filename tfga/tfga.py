@@ -36,6 +36,7 @@ class GeometricAlgebra:
         self._blades, self._blade_degrees = blades_from_bases(self._bases)
         self._blade_degrees = tf.convert_to_tensor(self._blade_degrees)
         self._num_blades = len(self._blades)
+        self._max_degree = tf.reduce_max(self._blade_degrees)
 
         # [Blades, Blades, Blades]
         self._cayley, self._cayley_inner, self._cayley_outer = tf.convert_to_tensor(
@@ -52,8 +53,30 @@ class GeometricAlgebra:
             for i in range(self._num_bases)
         ]
 
-        self._dual_blade_indices = tf.reverse(
-            tf.range(self._num_blades), axis=[0])
+        self._blade_mvs = [
+            MultiVector(
+                blade_values=tf.convert_to_tensor([1], dtype=tf.float32),
+                blade_indices=[i],
+                algebra=self
+            )
+            for i in range(self._num_blades)
+        ]
+
+        # Find the dual by looking at the anti-diagonal in the Cayley tensor.
+        self._dual_blade_indices = []
+        self._dual_blade_signs = []
+
+        for blade_index in range(self._num_blades):
+            dual_index = self.num_blades - blade_index - 1
+            anti_diag = self._cayley[blade_index, dual_index]
+            dual_sign = tf.gather(anti_diag, tf.where(anti_diag != 0.0)[..., 0])[..., 0]
+            self._dual_blade_indices.append(dual_index)
+            self._dual_blade_signs.append(dual_sign)
+
+        self._dual_blade_indices = tf.convert_to_tensor(
+            self._dual_blade_indices, dtype=tf.int64)
+        self._dual_blade_signs = tf.convert_to_tensor(
+            self._dual_blade_signs, dtype=tf.float32)
 
     @property
     def metric(self) -> tf.Tensor:
@@ -97,9 +120,19 @@ class GeometricAlgebra:
         return self._blades
 
     @property
+    def blade_mvs(self) -> List[MultiVector]:
+        """List of all blade multivectors in the algebra."""
+        return self._blade_mvs
+
+    @property
     def dual_blade_indices(self) -> tf.Tensor:
-        """Indices of the dual blade of the blade indices."""
+        """Indices of the dual blades for each blade."""
         return self._dual_blade_indices
+
+    @property
+    def dual_blade_signs(self) -> tf.Tensor:
+        """Signs of the dual blades for each blade."""
+        return self._dual_blade_signs
 
     @property
     def num_blades(self) -> int:
@@ -114,7 +147,7 @@ class GeometricAlgebra:
     @property
     def max_degree(self) -> int:
         """Highest blade degree in the algebra."""
-        return self._num_blades - 1
+        return self._max_degree
 
     @property
     def basis_mvs(self) -> List[MultiVector]:
