@@ -81,7 +81,7 @@ def get_cayley_tensor(metric, bases, blades):
             t_geom[a_index, b_index, out_index] = sign
 
             # Degree went down -> part of inner
-            if len(result) == len(a) - len(b):
+            if len(result) == abs(len(a) - len(b)):
                 t_inner[a_index, b_index, out_index] = sign
 
             # Degree went up -> part of outer
