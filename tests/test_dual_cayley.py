@@ -18,7 +18,7 @@ class TestDualCayleyTensor(ut.TestCase):
             self.assertEqual(blade_degrees[blade_index], blade_degree)
 
     def test_cayley_tensor_correct(self):
-        cayley = get_cayley_tensor(dual_metric, dual_bases, dual_blades)
+        cayley, cayley_inner, cayley_outer = get_cayley_tensor(dual_metric, dual_bases, dual_blades)
 
         self.assertSequenceEqual(cayley.shape, [2, 2, 2])
 

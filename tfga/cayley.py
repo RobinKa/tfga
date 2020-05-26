@@ -66,7 +66,9 @@ def get_cayley_tensor(metric, bases, blades):
     dims = len(metric)
     num_blades = len(blades)
 
-    t = np.zeros((num_blades, num_blades, num_blades), dtype=np.int32)
+    t_geom = np.zeros((num_blades, num_blades, num_blades), dtype=np.int32)
+    t_inner = np.zeros((num_blades, num_blades, num_blades), dtype=np.int32)
+    t_outer = np.zeros((num_blades, num_blades, num_blades), dtype=np.int32)
 
     metric_dict = {v: metric[i] for i, v in enumerate(bases)}
 
@@ -76,6 +78,14 @@ def get_cayley_tensor(metric, bases, blades):
             a_index = blades.index(a)
             b_index = blades.index(b)
             out_index = blades.index(result)
-            t[a_index, b_index, out_index] = sign
+            t_geom[a_index, b_index, out_index] = sign
 
-    return t
+            # Degree went down -> part of inner
+            if len(result) == len(a) - len(b):
+                t_inner[a_index, b_index, out_index] = sign
+
+            # Degree went up -> part of outer
+            if len(result) == len(a) + len(b):
+                t_outer[a_index, b_index, out_index] = sign
+
+    return t_geom, t_inner, t_outer

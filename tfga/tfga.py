@@ -38,7 +38,7 @@ class GeometricAlgebra:
         self._num_blades = len(self._blades)
 
         # [Blades, Blades, Blades]
-        self._cayley = tf.convert_to_tensor(
+        self._cayley, self._cayley_inner, self._cayley_outer = tf.convert_to_tensor(
             get_cayley_tensor(self.metric, self._bases, self._blades),
             dtype=tf.float32
         )
@@ -51,6 +51,9 @@ class GeometricAlgebra:
             )
             for i in range(self._num_bases)
         ]
+
+        self._dual_blade_indices = tf.reverse(
+            tf.range(self._num_blades), axis=[0])
 
     @property
     def metric(self) -> tf.Tensor:
@@ -69,6 +72,16 @@ class GeometricAlgebra:
         return self._cayley
 
     @property
+    def cayley_inner(self) -> tf.Tensor:
+        """`Analagous to cayley but for inner product."""
+        return self._cayley_inner
+
+    @property
+    def cayley_outer(self) -> tf.Tensor:
+        """`Analagous to cayley but for outer product."""
+        return self._cayley_outer
+
+    @property
     def blades(self) -> List[str]:
         """List of all blade names.
 
@@ -82,6 +95,11 @@ class GeometricAlgebra:
         - Blades: `["", "0", "1", "2", "01", "02", "12", "012"]`
         """
         return self._blades
+
+    @property
+    def dual_blade_indices(self) -> tf.Tensor:
+        """Indices of the dual blade of the blade indices."""
+        return self._dual_blade_indices
 
     @property
     def num_blades(self) -> int:
@@ -186,4 +204,5 @@ class GeometricAlgebra:
         elif ((isinstance(x, tf.Tensor) or isinstance(x, np.ndarray)) and
               (len(x.shape) == 0 or (len(x.shape) == 1 and x.shape[0] == 1))):
             return self.fill([], fill_value=x, kind="scalar")
-        raise Exception("Can't convert argument of type %s to multi-vector." % type(x))
+        raise Exception(
+            "Can't convert argument of type %s to multi-vector." % type(x))

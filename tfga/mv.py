@@ -216,6 +216,18 @@ class MultiVector:
         """
         return self.reversion().grade_automorphism()
 
+    def dual(self) -> MultiVector:
+        """Returns the dual of the MultiVector.
+
+        Returns:
+            Dual of the MultiVector
+        """
+        new_blade_indices = tf.gather(
+            self.algebra.dual_blade_indices, self.blade_indices)
+        return self.with_changes(
+            blade_indices=new_blade_indices
+        )
+
     def __invert__(self) -> MultiVector:
         """Grade-reversion. See `reversion()`."""
         return self.reversion()
@@ -280,6 +292,9 @@ class MultiVector:
         other = self.algebra.as_mv(other)
         return other * self
 
+    def regressive_prod(self, other):
+        return (self.dual() ^ other.dual()).dual()
+
     def __or__(self, other: Union[numbers.Number, MultiVector, tf.Tensor]) -> MultiVector:
         """Returns the inner product.
 
@@ -290,7 +305,17 @@ class MultiVector:
             inner product of `self` and `other`
         """
         other = self.algebra.as_mv(other)
-        return 0.5 * (self * other + other * self)
+
+        result_blade_indices, result_blade_values = mv_multiply(
+            self.blade_indices, self.blade_values,
+            other.blade_indices, other.blade_values,
+            self._algebra.cayley_inner
+        )
+
+        return self.with_changes(
+            blade_values=result_blade_values,
+            blade_indices=result_blade_indices
+        )
 
     def __ror__(self, other: Union[numbers.Number, MultiVector, tf.Tensor]) -> MultiVector:
         """See `__or__()`."""
@@ -306,7 +331,17 @@ class MultiVector:
             exterior product of `self` and `other`
         """
         other = self.algebra.as_mv(other)
-        return 0.5 * (self * other - other * self)
+
+        result_blade_indices, result_blade_values = mv_multiply(
+            self.blade_indices, self.blade_values,
+            other.blade_indices, other.blade_values,
+            self._algebra.cayley_outer
+        )
+
+        return self.with_changes(
+            blade_values=result_blade_values,
+            blade_indices=result_blade_indices
+        )
 
     def __rxor__(self, other: Union[numbers.Number, MultiVector, tf.Tensor]) -> MultiVector:
         """See `__xor__()`."""
