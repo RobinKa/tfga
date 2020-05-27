@@ -4,23 +4,7 @@ for the geometric product. Used internally.
 from itertools import combinations
 import numpy as np
 
-
-def _normal_swap(x):
-    for i in range(len(x) - 1):
-        a, b = x[i], x[i + 1]
-        if int(a) > int(b):
-            x[i], x[i+1] = b, a
-            return False, x
-    return True, x
-
-
-def _get_normal_ordered(x):
-    sign = -1
-    done = False
-    while not done:
-        sign *= -1
-        done, x = _normal_swap(x)
-    return sign, x
+from .blades import get_normal_ordered
 
 
 def _collapse_same(x):
@@ -40,7 +24,7 @@ def _reduce_bases(a, b, metric):
     combined = list(a + b)
 
     # Bring into normal order:
-    sign, combined = _get_normal_ordered(combined)
+    sign, combined = get_normal_ordered(combined)
 
     done = False
     while not done:

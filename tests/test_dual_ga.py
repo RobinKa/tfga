@@ -115,9 +115,9 @@ class TestDualGeometricAlgebraMisc(ut.TestCase):
         self.assertEqual(x[""], one)
         self.assertEqual(x["0"], eps)
         self.assertEqual(x.scalar, 1.0)
-        self.assertEqual(x.get_part_mv("pseudoscalar"), eps)
-        self.assertEqual(x.get_part("scalar"), 1.0)
-        self.assertEqual(x.get_part("pseudoscalar"), 1.0)
+        self.assertEqual(x.mv_of_kind("pseudoscalar"), eps)
+        self.assertEqual(x.tensor_of_kind("scalar"), 1.0)
+        self.assertEqual(x.tensor_of_kind("pseudoscalar"), 1.0)
 
         # f(1) = 1^2 = 1, f'(1) = 2
         x_squared = x * x
@@ -128,9 +128,9 @@ class TestDualGeometricAlgebraMisc(ut.TestCase):
         self.assertEqual(y[""], five)
         self.assertEqual(y["0"], eps)
         self.assertEqual(y.scalar, 5.0)
-        self.assertEqual(y.get_part_mv("pseudoscalar"), eps)
-        self.assertEqual(y.get_part("scalar"), 5.0)
-        self.assertEqual(y.get_part("pseudoscalar"), 1.0)
+        self.assertEqual(y.mv_of_kind("pseudoscalar"), eps)
+        self.assertEqual(y.tensor_of_kind("scalar"), 5.0)
+        self.assertEqual(y.tensor_of_kind("pseudoscalar"), 1.0)
 
         # f(5) = 5^2 = 25, f'(5) = 10
         y_squared = y * y
@@ -156,9 +156,9 @@ class TestDualGeometricAlgebraMisc(ut.TestCase):
         self.assertEqual(x[""], one)
         self.assertEqual(x["0"], eps)
         self.assertAllElementsEqualTo(x.scalar, 1.0)
-        self.assertEqual(x.get_part_mv("pseudoscalar"), eps)
-        self.assertAllElementsEqualTo(x.get_part("scalar"), 1.0)
-        self.assertAllElementsEqualTo(x.get_part("pseudoscalar"), 1.0)
+        self.assertEqual(x.mv_of_kind("pseudoscalar"), eps)
+        self.assertAllElementsEqualTo(x.tensor_of_kind("scalar"), 1.0)
+        self.assertAllElementsEqualTo(x.tensor_of_kind("pseudoscalar"), 1.0)
 
         # f(1) = 1^2 = 1, f'(1) = 2
         x_squared = x * x
@@ -169,9 +169,9 @@ class TestDualGeometricAlgebraMisc(ut.TestCase):
         self.assertEqual(y[""], five)
         self.assertEqual(y["0"], eps)
         self.assertAllElementsEqualTo(y.scalar, 5.0)
-        self.assertEqual(y.get_part_mv("pseudoscalar"), eps)
-        self.assertAllElementsEqualTo(y.get_part("scalar"), 5.0)
-        self.assertAllElementsEqualTo(y.get_part("pseudoscalar"), 1.0)
+        self.assertEqual(y.mv_of_kind("pseudoscalar"), eps)
+        self.assertAllElementsEqualTo(y.tensor_of_kind("scalar"), 5.0)
+        self.assertAllElementsEqualTo(y.tensor_of_kind("pseudoscalar"), 1.0)
 
         # f(5) = 5^2 = 25, f'(5) = 10
         y_squared = y * y

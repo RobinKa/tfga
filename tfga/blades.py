@@ -1,5 +1,6 @@
 """Blade-related definitions and functions used across the library."""
 from enum import Enum
+from typing import List, Tuple
 import tensorflow as tf
 
 
@@ -81,3 +82,57 @@ def get_blade_of_kind_indices(blade_degrees: tf.Tensor, kind: BladeKind,
     cond = is_blade_kind(blade_degrees, kind, max_degree)
     cond = tf.math.logical_xor(cond, invert)
     return tf.where(cond)[:, 0]
+
+
+def _normal_swap(x: List[str]) -> List[str]:
+    for i in range(len(x) - 1):
+        a, b = x[i], x[i + 1]
+        if a > b:  # string comparison
+            x[i], x[i+1] = b, a
+            return False, x
+    return True, x
+
+
+def get_normal_ordered(blade_name: str) -> Tuple[int, str]:
+    """Returns the normal ordered blade name and its sign.
+    Example: 21 => -1, 12
+
+    Args:
+        blade_name: Blade name for which to return normal ordered
+        name and sign
+
+    Returns:
+        Sign and normal ordered blade name
+    """
+    blade_name = list(blade_name)
+    sign = -1
+    done = False
+    while not done:
+        sign *= -1
+        done, blade_name = _normal_swap(blade_name)
+    return sign, "".join(blade_name)
+
+
+def get_blade_indices_from_names(blade_names: List[str],
+                                 all_blade_names: List[str]) -> tf.Tensor:
+    """Finds blade indices for given blade names in a list of blade names.
+
+    Args:
+        blade_names: Blade names to return indices for. May be unnormalized.
+        all_blade_names: Blade names to use as index
+
+    Returns:
+        Blade indices for given blade names in a list of blade names in
+        the same order as passed.
+    """
+    signs_and_names = [get_normal_ordered(b) for b in blade_names]
+
+    blade_signs = [sign for sign, blade_name in signs_and_names]
+
+    blade_indices = [
+        all_blade_names.index(blade_name)
+        for sign, blade_name in signs_and_names
+    ]
+
+    return (tf.convert_to_tensor(blade_signs, dtype=tf.float32),
+            tf.convert_to_tensor(blade_indices, dtype=tf.int64))

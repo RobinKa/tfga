@@ -1,9 +1,12 @@
 # TFGA - TensorFlow Geometric Algebra
-Python package for Geometric / Clifford Algebra with TensorFlow 2.
-
 [![Build status](https://github.com/RobinKa/tfga/workflows/Build%20Test%20Publish/badge.svg)](https://github.com/RobinKa/tfga/actions) [![PyPI](https://badge.fury.io/py/tfga.svg)](https://badge.fury.io/py/tfga)
 
 [GitHub](https://github.com/RobinKa/tfga) | [Docs](https://github.com/RobinKa/tfga/wiki/tfga)
+
+Python package for Geometric / Clifford Algebra with TensorFlow 2.
+
+This project is a work in progress. Its API may change and the examples aren't polished yet.
+Suggestions either by opening and issue or by [sending me an email](tora@warlock.ai) are welcome.
 
 ## Installation
 Install using pip: `pip install tfga`
@@ -17,6 +20,8 @@ Requirements:
 ```python
 from tfga import GeometricAlgebra
 
+# Create an algebra with 3 basis vectors given their metric.
+# Used to create MultiVector instances.
 ga = GeometricAlgebra(metric=[1, 1, 1])
 
 # 1 e_0 + 1 e_1 + 1 e_2
@@ -38,9 +43,20 @@ print(ga.basis_mvs[0] ^ ga.basis_mvs[1])
 # = 5 + 5 e_10 + 5 e_20 + 5 e_21
 # = 5 - 5 e_01 - 5 e_02 - 5 e_12
 print(~quaternion)
+
+# tf.Tensor 5
+print(quaternion.scalar)
+
+# tf.Tensor 5 (ie. reversed sign of e_01 component)
+print(quaternion.tensor("10"))
+
+# MultiVector with only the e_01
+print(quaternion["10"])
 ```
 
 ## Notebooks
 [Generic examples](https://github.com/RobinKa/tfga/tree/master/notebooks/tfga.ipynb)
 
 [Quantum Electrodynamics using Geometric Algebra](https://github.com/RobinKa/tfga/tree/master/notebooks/qed.ipynb)
+
+[Projective Geometric Algebra](https://github.com/RobinKa/tfga/tree/master/notebooks/pga.ipynb)

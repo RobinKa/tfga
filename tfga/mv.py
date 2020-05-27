@@ -8,8 +8,10 @@ from typing import List, Union, Optional, Any
 import tensorflow as tf
 import numpy as np
 
-from .blades import BladeKind, get_blade_repr, get_blade_of_kind_indices
-from .mv_ops import mv_multiply, mv_add, mv_equal, mv_reversion, mv_grade_automorphism
+from .blades import (BladeKind, get_blade_repr, get_blade_of_kind_indices,
+                     get_blade_indices_from_names)
+from .mv_ops import (mv_multiply, mv_add, mv_equal,
+                     mv_reversion, mv_grade_automorphism)
 
 
 class MultiVector:
@@ -95,7 +97,7 @@ class MultiVector:
                                          self.algebra.max_degree,
                                          invert=invert)
 
-    def get_part_mv(self, kind: BladeKind) -> MultiVector:
+    def mv_of_kind(self, kind: BladeKind) -> MultiVector:
         """Returns a new multivector based on this one which
         has only blades of a given kind.
 
@@ -116,9 +118,9 @@ class MultiVector:
             blade_indices=result_indices
         )
 
-    def get_part(self, kind: BladeKind) -> tf.Tensor:
+    def tensor_of_kind(self, kind: BladeKind) -> tf.Tensor:
         """Returns a `tf.Tensor` based on this multivector
-        with blade values of a given kind
+        with blade values of a given kind.
 
         Args:
             kind: kind of blades to keep
@@ -152,12 +154,12 @@ class MultiVector:
     @property
     def scalar(self) -> tf.Tensor:
         """Scalar part of this multivector as `tf.Tensor`."""
-        return self.get_part(BladeKind.SCALAR)
+        return self.tensor("")
 
     @property
     def scalar_mv(self) -> MultiVector:
-        """Scalar part of this multivector as new `MultiVector`."""
-        return self.get_part_mv(BladeKind.SCALAR)
+        """New multivector with only the scalar part of this multivector."""
+        return self.mv_of_kind(BladeKind.SCALAR)
 
     @property
     def is_pure_scalar(self) -> bool:
@@ -222,8 +224,10 @@ class MultiVector:
         Returns:
             Dual of the MultiVector
         """
-        dual_indices = tf.gather(self.algebra.dual_blade_indices, self.blade_indices)
-        dual_signs = tf.gather(self.algebra.dual_blade_signs, self.blade_indices)
+        dual_indices = tf.gather(
+            self.algebra.dual_blade_indices, self.blade_indices)
+        dual_signs = tf.gather(
+            self.algebra.dual_blade_signs, self.blade_indices)
         new_values = dual_signs * self.blade_values
         return self.with_changes(
             blade_indices=dual_indices,
@@ -308,8 +312,17 @@ class MultiVector:
 
         return (self.dual() ^ other.dual()).dual()
 
+    def __and__(self, other: Union[numbers.Number, MultiVector, tf.Tensor]) -> MultiVector:
+        """See reg_prod()."""
+        return self.reg_prod(other)
+
+    def __rand__(self, other: Union[numbers.Number, MultiVector, tf.Tensor]) -> MultiVector:
+        """See reg_prod()."""
+        other = self.algebra.as_mv(other)
+        return other.reg_prod(self)
+
     def __or__(self, other: Union[numbers.Number, MultiVector, tf.Tensor]) -> MultiVector:
-        """Returns the inner product.
+        """Returns the inner product.umbers.Number, MultiVector, tf.Tensor]
 
         Args:
             other: object to calculate inner product with
@@ -441,10 +454,69 @@ class MultiVector:
             blade_values=tf.abs(self.blade_values)
         )
 
+    def tensor(self, blade_names: Union[str, List[str]]) -> tf.Tensor:
+        """Returns a tf.Tensor with the given blades on the last axis
+        in the same order. Blade names can be unnormalized and will have
+        correct sign on the output.
+
+        Args:
+            blade_names: Blade name or list of blade names to build a
+            tensor for. Can be unnormalized and will return correct sign.
+            Can contain duplicate blade names.
+
+        Returns:
+            tf.Tensor with the given blades on the last axis
+            in the same order
+        """
+        # If we are only given a single string, make it into a list
+        # so we can treat it the same way, but remember that we need
+        # to remove the last axis later when returning the result.
+        is_single_input = isinstance(blade_names, str)
+        if is_single_input:
+            blade_names = [blade_names]
+
+        query_signs, query_ind = get_blade_indices_from_names(
+            blade_names, self.algebra.blades)
+
+        blade_values = []
+        for blade_index in query_ind:
+            # Find the blade indices of the query that are present
+            # in this multivector. If an index is not present, use
+            # zeros for that index's values.
+            self_blade_index = tf.where(
+                self.blade_indices == blade_index)[..., 0]
+
+            blade_values.append(tf.cond(
+                len(self_blade_index) > 0,
+                lambda: self.blade_values[..., self_blade_index[0]],
+                lambda: tf.zeros(self.batch_shape, dtype=tf.float32)
+            ))
+
+        # Combine the different blade values (will be same order as
+        # query indices on the last axis) and multiply by the signs
+        # the query produced.
+        result = query_signs * tf.stack(blade_values, axis=-1)
+
+        # Remove the last axis if we only had a single input blade name
+        if is_single_input:
+            result = result[..., 0]
+
+        return result
+
     def __getitem__(self, key: Any) -> MultiVector:
         """Slices the multivector. Can slice by kind
         if a string or BladeKind was passed or by
         batch.
+
+        Examples:
+            # mv has batch_shape [10, 5] with blades e_1, e_2.
+            mv[:3, ["e_1", "e_12"]] # batch shape [3, 5] blades e_1
+            mv["e_1"] # batch shape [10, 5], blades e_1
+
+        Args:
+            key: Shape where the last index can be a string
+            or list of strings to only keep certain
+            blades. Will raise if duplicate blades are found.
 
         Returns:
             sliced `MultiVector`
@@ -469,46 +541,50 @@ class MultiVector:
         # Also remove that part from the key that will later be used for
         # indexing the batch dimensions.
         # Could do this better with a recursive function that generalizes more too.
-        blade_indices = None
+        blade_names = None
         if isinstance(key, str):
             # Key is a single string
-            blade_indices = tf.convert_to_tensor(
-                [[self.algebra.blades.index(key)]], dtype=tf.int64)
+            blade_names = [key]
             key = tuple()
         elif is_nonempty_str_sequence(key):
             # Key is sequence of strings
-            blade_indices = tf.convert_to_tensor(
-                [[self.algebra.blades.index(s) for s in key]], dtype=tf.int64)
+            blade_names = key
             key = tuple()
         elif is_nonempty_sequence(key) and isinstance(key[-1], str):
             # Single string at last index of key sequence
-            blade_indices = tf.convert_to_tensor(
-                [[self.algebra.blades.index(key[-1])]], dtype=tf.int64)
+            blade_names = [key[-1]]
             key = key[:-1]
         elif is_nonempty_sequence(key) and is_nonempty_str_sequence(key[-1]):
             # Sequence of strings at last index of key sequence
-            blade_indices = tf.convert_to_tensor(
-                [[self.algebra.blades.index(s) for s in key[-1]]], dtype=tf.int64)
+            blade_names = key[-1]
             key = key[:-1]
+
+        if blade_names is not None:
+            _, blade_indices = get_blade_indices_from_names(
+                blade_names, self.algebra.blades)
+        else:
+            blade_indices = None
 
         # Index multi-vector bases if we found an index for them above.
         if blade_indices is not None:
             # Don't allow duplicate indices
-            if len(blade_indices[0]) != len(tf.unique(blade_indices[0])[0]):
+            if len(blade_indices) != len(tf.unique(blade_indices)[0]):
                 raise Exception(
-                    "Duplicate blade indices passed: %s" % blade_indices[0])
+                    "Duplicate blade indices passed: %s" % blade_indices)
 
             # Tile our own sparse blade index across the search indices
             self_blade_indices = tf.tile(tf.expand_dims(
                 self.blade_indices, axis=-1), [1, len(blade_indices)])
 
+            blade_indices = tf.expand_dims(blade_indices, axis=0)
+
             # Find the indices of the search indices in our own index
             found_indices = tf.where(
                 self_blade_indices == blade_indices)[..., 0]
 
-            if len(found_indices) < blade_indices.shape[1]:
-                raise Exception("Could not find all passed blades. Passed blade indices: %s, available blade indices: %s" % (
-                    blade_indices[0], self.blade_indices))
+            # if len(found_indices) < blade_indices.shape[1]:
+            #    raise Exception("Could not find all passed blades. Passed blade indices: %s, available blade indices: %s" % (
+            #        blade_indices[0], self.blade_indices))
 
             # Get new values and indices at the now known own indices
             new_indices = tf.gather(self.blade_indices, found_indices, axis=-1)
