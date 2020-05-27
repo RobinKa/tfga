@@ -96,12 +96,12 @@ class GeometricAlgebra:
 
     @property
     def cayley_inner(self) -> tf.Tensor:
-        """`Analagous to cayley but for inner product."""
+        """Analagous to cayley but for inner product."""
         return self._cayley_inner
 
     @property
     def cayley_outer(self) -> tf.Tensor:
-        """`Analagous to cayley but for outer product."""
+        """Analagous to cayley but for outer product."""
         return self._cayley_outer
 
     @property
@@ -239,3 +239,22 @@ class GeometricAlgebra:
             return self.fill([], fill_value=x, kind="scalar")
         raise Exception(
             "Can't convert argument of type %s to multi-vector." % type(x))
+
+    def from_tensor(self, tensor: tf.Tensor, blade_indices: tf.Tensor) -> MultiVector:
+        """Creates a multivector from a tf.Tensor and blade indices.
+        The blade indices have to align with the last axis of the tensor.
+
+        Args:
+            tensor: tf.Tensor to take as values for a multivector
+            blade_indices: Blade indices corresponding to the tensor. Can
+            be obtained from blade names eg. using get_kind_blade_indices()
+            or as indices from the blades list property.
+
+        Returns:
+            MultiVector from tensor and blade indices
+        """
+        return MultiVector(
+            blade_values=tensor,
+            blade_indices=blade_indices,
+            algebra=self
+        )
