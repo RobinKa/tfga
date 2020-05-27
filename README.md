@@ -6,7 +6,7 @@
 Python package for Geometric / Clifford Algebra with TensorFlow 2.
 
 This project is a work in progress. Its API may change and the examples aren't polished yet.
-Suggestions either by opening and issue or by [sending me an email](tora@warlock.ai) are welcome.
+Pull requests and suggestions either by opening an issue or by [sending me an email](mailto:tora@warlock.ai) are welcome.
 
 ## Installation
 Install using pip: `pip install tfga`
