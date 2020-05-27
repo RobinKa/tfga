@@ -47,10 +47,10 @@ print(~quaternion)
 # tf.Tensor 5
 print(quaternion.scalar)
 
-# tf.Tensor 5 (ie. reversed sign of e_01 component)
+# tf.Tensor -5 (ie. reversed sign of e_01 component)
 print(quaternion.tensor("10"))
 
-# MultiVector with only the e_01
+# MultiVector with only e_01: 5 e_01
 print(quaternion["10"])
 ```
 
