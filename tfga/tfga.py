@@ -12,7 +12,7 @@ import numpy as np
 
 from .cayley import get_cayley_tensor, blades_from_bases
 from .mv import MultiVector
-from .blades import BladeKind, get_blade_of_kind_indices
+from .blades import BladeKind, get_blade_of_kind_indices, get_blade_indices_from_names
 
 
 class GeometricAlgebra:
@@ -69,7 +69,8 @@ class GeometricAlgebra:
         for blade_index in range(self._num_blades):
             dual_index = self.num_blades - blade_index - 1
             anti_diag = self._cayley[blade_index, dual_index]
-            dual_sign = tf.gather(anti_diag, tf.where(anti_diag != 0.0)[..., 0])[..., 0]
+            dual_sign = tf.gather(anti_diag, tf.where(
+                anti_diag != 0.0)[..., 0])[..., 0]
             self._dual_blade_indices.append(dual_index)
             self._dual_blade_signs.append(dual_sign)
 
@@ -255,6 +256,30 @@ class GeometricAlgebra:
         """
         return MultiVector(
             blade_values=tensor,
+            blade_indices=blade_indices,
+            algebra=self
+        )
+
+    def e(self, *blades: List[str]) -> MultiVector:
+        """Returns a multivector with the given blades set to 1.
+
+        Args:
+            blades: list of blade names, can be unnormalized
+
+        Returns:
+            MultiVector with blades set to 1
+        """
+
+        blade_signs, blade_indices = get_blade_indices_from_names(
+            blades, self.blades)
+
+        # Don't allow duplicate indices
+        if len(blade_indices) != len(tf.unique(blade_indices)[0]):
+            raise Exception("Duplicate blade indices passed: %s" %
+                            blade_indices)
+
+        return MultiVector(
+            blade_values=blade_signs,
             blade_indices=blade_indices,
             algebra=self
         )

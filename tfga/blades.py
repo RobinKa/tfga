@@ -102,7 +102,8 @@ def get_normal_ordered(blade_name: str) -> Tuple[int, str]:
         name and sign
 
     Returns:
-        Sign and normal ordered blade name
+        sign: sign of the blade
+        blade_name: normalized name of the blade
     """
     blade_name = list(blade_name)
     sign = -1
@@ -115,15 +116,17 @@ def get_normal_ordered(blade_name: str) -> Tuple[int, str]:
 
 def get_blade_indices_from_names(blade_names: List[str],
                                  all_blade_names: List[str]) -> tf.Tensor:
-    """Finds blade indices for given blade names in a list of blade names.
+    """Finds blade signs and indices for given blade names in a list of blade
+    names. Blade names can be unnormalized and their correct sign will be
+    returned.
 
     Args:
         blade_names: Blade names to return indices for. May be unnormalized.
         all_blade_names: Blade names to use as index
 
     Returns:
-        Blade indices for given blade names in a list of blade names in
-        the same order as passed.
+        blade_signs: signs for the passed blades in same order as passed
+        blade_indices: blade indices in the same order as passed
     """
     signs_and_names = [get_normal_ordered(b) for b in blade_names]
 
