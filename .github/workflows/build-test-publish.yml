@@ -24,19 +24,19 @@ jobs:
 
       - name: Install tfga and sphinx
         if: contains(github.ref, 'master')
-        run: python -m pip install sphinx sphinx-markdown-builder .
+        run: python -m pip install sphinx .
 
       - name: Run sphinx
         if: contains(github.ref, 'master')
-        run: sphinx-apidoc -o sphinx-docs tfga sphinx-apidoc --full -A "Robin 'Tora' Kahlow" && cd sphinx-docs && make markdown
+        run: sphinx-apidoc -o sphinx-docs tfga sphinx-apidoc --full -A "Robin 'Tora' Kahlow" && cd sphinx-docs && make html
 
-      - name: Upload documentation to wiki
+      - name: Push documentation to pages
         if: contains(github.ref, 'master')
-        uses: SwiftDocOrg/github-wiki-publish-action@v1
+        uses: JamesIves/github-pages-deploy-action@3.5.3
         with:
-          path: 'sphinx-docs/_build/markdown'
-        env:
-          GH_PERSONAL_ACCESS_TOKEN: ${{ secrets.gh_personal_access_token }}
+          ACCESS_TOKEN: ${{ secrets.gh_personal_access_token }}
+          BRANCH: gh-pages
+          FOLDER: 'sphinx-docs/_build/html'
 
       - name: Build dist
         run: python setup.py sdist bdist_wheel
