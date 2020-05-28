@@ -1,0 +1,763 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>tfga package &#8212; tfga  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Welcome to tfga’s documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="tfga-package">
+<h1>tfga package<a class="headerlink" href="#tfga-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-tfga.blades">
+<span id="tfga-blades-module"></span><h2>tfga.blades module<a class="headerlink" href="#module-tfga.blades" title="Permalink to this headline">¶</a></h2>
+<p>Blade-related definitions and functions used across the library.</p>
+<dl class="py class">
+<dt id="tfga.blades.BladeKind">
+<em class="property">class </em><code class="sig-prename descclassname">tfga.blades.</code><code class="sig-name descname">BladeKind</code><a class="reference internal" href="_modules/tfga/blades.html#BladeKind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.blades.BladeKind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></p>
+<p>Kind of blade depending on its degree.</p>
+<dl class="py attribute">
+<dt id="tfga.blades.BladeKind.EVEN">
+<code class="sig-name descname">EVEN</code><em class="property"> = 'even'</em><a class="headerlink" href="#tfga.blades.BladeKind.EVEN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="tfga.blades.BladeKind.MV">
+<code class="sig-name descname">MV</code><em class="property"> = 'mv'</em><a class="headerlink" href="#tfga.blades.BladeKind.MV" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="tfga.blades.BladeKind.ODD">
+<code class="sig-name descname">ODD</code><em class="property"> = 'odd'</em><a class="headerlink" href="#tfga.blades.BladeKind.ODD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="tfga.blades.BladeKind.PSEUDOSCALAR">
+<code class="sig-name descname">PSEUDOSCALAR</code><em class="property"> = 'pseudoscalar'</em><a class="headerlink" href="#tfga.blades.BladeKind.PSEUDOSCALAR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="tfga.blades.BladeKind.PSEUDOVECTOR">
+<code class="sig-name descname">PSEUDOVECTOR</code><em class="property"> = 'pseudovector'</em><a class="headerlink" href="#tfga.blades.BladeKind.PSEUDOVECTOR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="tfga.blades.BladeKind.SCALAR">
+<code class="sig-name descname">SCALAR</code><em class="property"> = 'scalar'</em><a class="headerlink" href="#tfga.blades.BladeKind.SCALAR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="tfga.blades.BladeKind.VECTOR">
+<code class="sig-name descname">VECTOR</code><em class="property"> = 'vector'</em><a class="headerlink" href="#tfga.blades.BladeKind.VECTOR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="tfga.blades.get_blade_indices_from_names">
+<code class="sig-prename descclassname">tfga.blades.</code><code class="sig-name descname">get_blade_indices_from_names</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">blade_names</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">all_blade_names</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; tensorflow.python.framework.ops.Tensor<a class="reference internal" href="_modules/tfga/blades.html#get_blade_indices_from_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.blades.get_blade_indices_from_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds blade signs and indices for given blade names in a list of blade
+names. Blade names can be unnormalized and their correct sign will be
+returned.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>blade_names: Blade names to return indices for. May be unnormalized.
+all_blade_names: Blade names to use as index</p>
+</dd>
+<dt>Returns:</dt><dd><p>blade_signs: signs for the passed blades in same order as passed
+blade_indices: blade indices in the same order as passed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="tfga.blades.get_blade_of_kind_indices">
+<code class="sig-prename descclassname">tfga.blades.</code><code class="sig-name descname">get_blade_of_kind_indices</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">blade_degrees</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em>, <em class="sig-param"><span class="n">kind</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#tfga.blades.BladeKind" title="tfga.blades.BladeKind">tfga.blades.BladeKind</a></span></em>, <em class="sig-param"><span class="n">max_degree</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">invert</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; tensorflow.python.framework.ops.Tensor<a class="reference internal" href="_modules/tfga/blades.html#get_blade_of_kind_indices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.blades.get_blade_of_kind_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds a boolean mask for whether blades are of a given kind.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>blade_degrees: List of blade degrees
+kind: kind of blade for which the mask will be true
+max_degree: maximum blade degree in the algebra
+invert: whether to invert the result</p>
+</dd>
+<dt>Returns:</dt><dd><p>boolean mask for whether blades are of a given kind</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="tfga.blades.get_blade_repr">
+<code class="sig-prename descclassname">tfga.blades.</code><code class="sig-name descname">get_blade_repr</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">blade_name</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; str<a class="reference internal" href="_modules/tfga/blades.html#get_blade_repr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.blades.get_blade_repr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the representation to use
+for a given blade.</p>
+<p>Examples:
+- <cite>“12”</cite> -&gt; <cite>“e_12”</cite>
+- <cite>“”</cite> -&gt; <cite>“1”</cite></p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>blade_name: name of the blade in the algebra (eg. <cite>“12”</cite>)</p>
+</dd>
+<dt>Returns:</dt><dd><p>Representation to use for a given blade</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="tfga.blades.get_normal_ordered">
+<code class="sig-prename descclassname">tfga.blades.</code><code class="sig-name descname">get_normal_ordered</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">blade_name</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>int<span class="p">, </span>str<span class="p">]</span><a class="reference internal" href="_modules/tfga/blades.html#get_normal_ordered"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.blades.get_normal_ordered" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the normal ordered blade name and its sign.
+Example: 21 =&gt; -1, 12</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>blade_name: Blade name for which to return normal ordered
+name and sign</p>
+</dd>
+<dt>Returns:</dt><dd><p>sign: sign of the blade
+blade_name: normalized name of the blade</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="tfga.blades.is_blade_kind">
+<code class="sig-prename descclassname">tfga.blades.</code><code class="sig-name descname">is_blade_kind</code><span class="sig-paren">(</span><em class="sig-param">blade_degrees: tensorflow.python.framework.ops.Tensor, kind: [&lt;enum 'BladeKind'&gt;, &lt;class 'str'&gt;], max_degree: int</em><span class="sig-paren">)</span> &#x2192; tensorflow.python.framework.ops.Tensor<a class="reference internal" href="_modules/tfga/blades.html#is_blade_kind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.blades.is_blade_kind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds a boolean mask for whether blade degrees are of a given kind.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>blade_degrees: list of blade degrees
+kind: kind of blade to check for
+max_degree: maximum blade degree in the algebra</p>
+</dd>
+<dt>Returns:</dt><dd><p>boolean mask for whether blade degrees are of a given kind</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-tfga.cayley">
+<span id="tfga-cayley-module"></span><h2>tfga.cayley module<a class="headerlink" href="#module-tfga.cayley" title="Permalink to this headline">¶</a></h2>
+<p>Operations for constructing the cayley 3-tensor needed
+for the geometric product. Used internally.</p>
+<dl class="py function">
+<dt id="tfga.cayley.blades_from_bases">
+<code class="sig-prename descclassname">tfga.cayley.</code><code class="sig-name descname">blades_from_bases</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">vector_bases</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/cayley.html#blades_from_bases"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.cayley.blades_from_bases" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="tfga.cayley.get_cayley_tensor">
+<code class="sig-prename descclassname">tfga.cayley.</code><code class="sig-name descname">get_cayley_tensor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">metric</span></em>, <em class="sig-param"><span class="n">bases</span></em>, <em class="sig-param"><span class="n">blades</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/cayley.html#get_cayley_tensor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.cayley.get_cayley_tensor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-tfga.mv">
+<span id="tfga-mv-module"></span><h2>tfga.mv module<a class="headerlink" href="#module-tfga.mv" title="Permalink to this headline">¶</a></h2>
+<p>Provides the <cite>MultiVector</cite> class used
+as elements of the <cite>GeometricAlgebra</cite> for
+computation.</p>
+<dl class="py class">
+<dt id="tfga.mv.MultiVector">
+<em class="property">class </em><code class="sig-prename descclassname">tfga.mv.</code><code class="sig-name descname">MultiVector</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">blade_values</span><span class="p">:</span> <span class="n">tf.Tensor</span></em>, <em class="sig-param"><span class="n">blade_indices</span><span class="p">:</span> <span class="n">tf.Tensor</span></em>, <em class="sig-param"><span class="n">algebra</span><span class="p">:</span> <span class="n">GeometricAlgebra</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/mv.html#MultiVector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.mv.MultiVector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Elements of a geometric algebra used for computation.</p>
+<dl class="py method">
+<dt id="tfga.mv.MultiVector.algebra">
+<em class="property">property </em><code class="sig-name descname">algebra</code><a class="headerlink" href="#tfga.mv.MultiVector.algebra" title="Permalink to this definition">¶</a></dt>
+<dd><p><cite>GeometricAlgebra</cite> instance this multivector
+belongs to.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.mv.MultiVector.approx_exp">
+<code class="sig-name descname">approx_exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">order</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#tfga.mv.MultiVector" title="tfga.mv.MultiVector">tfga.mv.MultiVector</a><a class="reference internal" href="_modules/tfga/mv.html#MultiVector.approx_exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.mv.MultiVector.approx_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an approximation of the exponential using a centered taylor series.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>order: order of the approximation</p>
+</dd>
+<dt>Returns:</dt><dd><p>Approximation of <cite>exp(self)</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.mv.MultiVector.approx_log">
+<code class="sig-name descname">approx_log</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">order</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#tfga.mv.MultiVector" title="tfga.mv.MultiVector">tfga.mv.MultiVector</a><a class="reference internal" href="_modules/tfga/mv.html#MultiVector.approx_log"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.mv.MultiVector.approx_log" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an approximation of the natural logarithm using a centered
+taylor series. Only converges for multivectors where <cite>||mv - 1|| &lt; 1</cite>.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>order: order of the approximation</p>
+</dd>
+<dt>Returns:</dt><dd><p>Approximation of <cite>log(self)</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.mv.MultiVector.batch_shape">
+<em class="property">property </em><code class="sig-name descname">batch_shape</code><a class="headerlink" href="#tfga.mv.MultiVector.batch_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Batch shape of this multivector
+(ie. how many multivectors this one contains).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.mv.MultiVector.blade_indices">
+<em class="property">property </em><code class="sig-name descname">blade_indices</code><a class="headerlink" href="#tfga.mv.MultiVector.blade_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indices of the blades of this multivector in the <cite>algebra</cite>.
+Values at the indices are given by <cite>blade_values</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.mv.MultiVector.blade_values">
+<em class="property">property </em><code class="sig-name descname">blade_values</code><a class="headerlink" href="#tfga.mv.MultiVector.blade_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Values for the blades. Indices for the values are given
+by <cite>blade_indices</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.mv.MultiVector.conjugation">
+<code class="sig-name descname">conjugation</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#tfga.mv.MultiVector" title="tfga.mv.MultiVector">tfga.mv.MultiVector</a><a class="reference internal" href="_modules/tfga/mv.html#MultiVector.conjugation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.mv.MultiVector.conjugation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combines reversion and grade automorphism.
+See <a class="reference external" href="https://en.wikipedia.org/wiki/Paravector#Clifford_conjugation">https://en.wikipedia.org/wiki/Paravector#Clifford_conjugation</a>.</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p><cite>MultiVector</cite> after <cite>reversion()</cite> and <cite>grade_automorphism()</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.mv.MultiVector.dual">
+<code class="sig-name descname">dual</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#tfga.mv.MultiVector" title="tfga.mv.MultiVector">tfga.mv.MultiVector</a><a class="reference internal" href="_modules/tfga/mv.html#MultiVector.dual"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.mv.MultiVector.dual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the dual of the MultiVector.</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>Dual of the MultiVector</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.mv.MultiVector.get_kind_indices">
+<code class="sig-name descname">get_kind_indices</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">kind</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#tfga.blades.BladeKind" title="tfga.blades.BladeKind">tfga.blades.BladeKind</a></span></em>, <em class="sig-param"><span class="n">invert</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; tensorflow.python.framework.ops.Tensor<a class="reference internal" href="_modules/tfga/mv.html#MultiVector.get_kind_indices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.mv.MultiVector.get_kind_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds a boolean mask for whether this multivector’s blade
+indices are of a given kind.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>kind: kind of blade indices to set to <cite>True</cite>
+invert: whether to invert the result</p>
+</dd>
+<dt>Returns:</dt><dd><p>boolean mask for whether this multivector’s
+<cite>blade_indices</cite> are of <cite>kind</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.mv.MultiVector.grade_automorphism">
+<code class="sig-name descname">grade_automorphism</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#tfga.mv.MultiVector" title="tfga.mv.MultiVector">tfga.mv.MultiVector</a><a class="reference internal" href="_modules/tfga/mv.html#MultiVector.grade_automorphism"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.mv.MultiVector.grade_automorphism" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the multivector with odd grades negated.
+See <a class="reference external" href="https://en.wikipedia.org/wiki/Paravector#Grade_automorphism">https://en.wikipedia.org/wiki/Paravector#Grade_automorphism</a>.</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p><cite>MultiVector</cite> with odd grades negated</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.mv.MultiVector.int_pow">
+<code class="sig-name descname">int_pow</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#tfga.mv.MultiVector" title="tfga.mv.MultiVector">tfga.mv.MultiVector</a><a class="reference internal" href="_modules/tfga/mv.html#MultiVector.int_pow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.mv.MultiVector.int_pow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the multivector to the power of an integer
+using repeated multiplication.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>n: integer power to raise the multivector to</p>
+</dd>
+<dt>Returns:</dt><dd><p><cite>MultiVector</cite> to the power of <cite>n</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.mv.MultiVector.inverse">
+<code class="sig-name descname">inverse</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#tfga.mv.MultiVector" title="tfga.mv.MultiVector">tfga.mv.MultiVector</a><a class="reference internal" href="_modules/tfga/mv.html#MultiVector.inverse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.mv.MultiVector.inverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the inverted multivector
+<cite>X^-1</cite> such that <cite>X * X^-1 = 1</cite> if
+it exists.</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>inverted <cite>MultiVector</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.mv.MultiVector.is_pure_kind">
+<code class="sig-name descname">is_pure_kind</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">kind</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#tfga.blades.BladeKind" title="tfga.blades.BladeKind">tfga.blades.BladeKind</a></span></em><span class="sig-paren">)</span> &#x2192; bool<a class="reference internal" href="_modules/tfga/mv.html#MultiVector.is_pure_kind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.mv.MultiVector.is_pure_kind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns whether this multivector is purely of a given kind
+and has no non-zero values for blades not of the kind.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>kind: kind of blade to check purity for</p>
+</dd>
+<dt>Returns:</dt><dd><p>Whether this multivector is purely of a given kind
+and has no non-zero values for blades not of the kind</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.mv.MultiVector.is_pure_scalar">
+<em class="property">property </em><code class="sig-name descname">is_pure_scalar</code><a class="headerlink" href="#tfga.mv.MultiVector.is_pure_scalar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whether the multivector is a pure scalar and has no
+other non-zero blade values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.mv.MultiVector.mv_of_kind">
+<code class="sig-name descname">mv_of_kind</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">kind</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#tfga.blades.BladeKind" title="tfga.blades.BladeKind">tfga.blades.BladeKind</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#tfga.mv.MultiVector" title="tfga.mv.MultiVector">tfga.mv.MultiVector</a><a class="reference internal" href="_modules/tfga/mv.html#MultiVector.mv_of_kind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.mv.MultiVector.mv_of_kind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a new multivector based on this one which
+has only blades of a given kind.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>kind: kind of blades to keep</p>
+</dd>
+<dt>Returns:</dt><dd><p><cite>MultiVector</cite> based on this one which
+has only blades of <cite>kind</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.mv.MultiVector.reg_prod">
+<code class="sig-name descname">reg_prod</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">other</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#tfga.mv.MultiVector" title="tfga.mv.MultiVector">tfga.mv.MultiVector</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#tfga.mv.MultiVector" title="tfga.mv.MultiVector">tfga.mv.MultiVector</a><a class="reference internal" href="_modules/tfga/mv.html#MultiVector.reg_prod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.mv.MultiVector.reg_prod" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the regressive product of the multivector and
+another multivector.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>other: object to take regressive product with</p>
+</dd>
+<dt>Returns:</dt><dd><p>regressive product of multivector and other</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.mv.MultiVector.reversion">
+<code class="sig-name descname">reversion</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#tfga.mv.MultiVector" title="tfga.mv.MultiVector">tfga.mv.MultiVector</a><a class="reference internal" href="_modules/tfga/mv.html#MultiVector.reversion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.mv.MultiVector.reversion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the grade-reversed multivector.
+See <a class="reference external" href="https://en.wikipedia.org/wiki/Paravector#Reversion_conjugation">https://en.wikipedia.org/wiki/Paravector#Reversion_conjugation</a>.</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>Grade-reversed <cite>MultiVector</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.mv.MultiVector.scalar">
+<em class="property">property </em><code class="sig-name descname">scalar</code><a class="headerlink" href="#tfga.mv.MultiVector.scalar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scalar part of this multivector as <cite>tf.Tensor</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.mv.MultiVector.scalar_mv">
+<em class="property">property </em><code class="sig-name descname">scalar_mv</code><a class="headerlink" href="#tfga.mv.MultiVector.scalar_mv" title="Permalink to this definition">¶</a></dt>
+<dd><p>New multivector with only the scalar part of this multivector.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.mv.MultiVector.tensor">
+<code class="sig-name descname">tensor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">blade_names</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>str<span class="p">, </span>List<span class="p">[</span>str<span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; tensorflow.python.framework.ops.Tensor<a class="reference internal" href="_modules/tfga/mv.html#MultiVector.tensor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.mv.MultiVector.tensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a tf.Tensor with the given blades on the last axis
+in the same order. Blade names can be unnormalized and will have
+correct sign on the output.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>blade_names: Blade name or list of blade names to build a
+tensor for. Can be unnormalized and will return correct sign.
+Can contain duplicate blade names.</p>
+</dd>
+<dt>Returns:</dt><dd><p>tf.Tensor with the given blades on the last axis
+in the same order</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.mv.MultiVector.tensor_of_kind">
+<code class="sig-name descname">tensor_of_kind</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">kind</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#tfga.blades.BladeKind" title="tfga.blades.BladeKind">tfga.blades.BladeKind</a></span></em><span class="sig-paren">)</span> &#x2192; tensorflow.python.framework.ops.Tensor<a class="reference internal" href="_modules/tfga/mv.html#MultiVector.tensor_of_kind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.mv.MultiVector.tensor_of_kind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a <cite>tf.Tensor</cite> based on this multivector
+with blade values of a given kind.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>kind: kind of blades to keep</p>
+</dd>
+<dt>Returns:</dt><dd><p><cite>tf.Tensor</cite> based on this multivector which
+has blade values of <cite>kind</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.mv.MultiVector.tile">
+<code class="sig-name descname">tile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">multiples</span><span class="p">:</span> <span class="n">List<span class="p">[</span>int<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#tfga.mv.MultiVector" title="tfga.mv.MultiVector">tfga.mv.MultiVector</a><a class="reference internal" href="_modules/tfga/mv.html#MultiVector.tile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.mv.MultiVector.tile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replicates the multivector across batch shape.</p>
+<p>Example: mv with batch_shape[]
+- mv.tile([3, 4]) -&gt; mv with batch shape [3, 4]</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>Tiled <cite>MultiVector</cite> according to <cite>multiples</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.mv.MultiVector.values_shape">
+<em class="property">property </em><code class="sig-name descname">values_shape</code><a class="headerlink" href="#tfga.mv.MultiVector.values_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shape of the individual multivector storage.
+Typically a <cite>list</cite> of size <cite>1</cite> with as many elements
+as this multivector has non-zero blade values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.mv.MultiVector.with_changes">
+<code class="sig-name descname">with_changes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">blade_values</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>tf.Tensor<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">blade_indices</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>tf.Tensor<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; self<a class="reference internal" href="_modules/tfga/mv.html#MultiVector.with_changes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.mv.MultiVector.with_changes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a copy of this multivector with optional changes made to its
+blade values or indices.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>blade_values: optional new values for the returned multivector
+blade_indices: optional new indices for the returned multivector</p>
+</dd>
+<dt>Returns:</dt><dd><p>Copy of this multivector with optional changes made to its
+blade values or indices if <cite>blade_values</cite> or <cite>blade_indices</cite>
+were set respectively</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-tfga.mv_ops">
+<span id="tfga-mv-ops-module"></span><h2>tfga.mv_ops module<a class="headerlink" href="#module-tfga.mv_ops" title="Permalink to this headline">¶</a></h2>
+<p>Operations on multivectors used internally.</p>
+<dl class="py function">
+<dt id="tfga.mv_ops.mv_add">
+<code class="sig-prename descclassname">tfga.mv_ops.</code><code class="sig-name descname">mv_add</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a_blade_indices</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em>, <em class="sig-param"><span class="n">a_blade_values</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em>, <em class="sig-param"><span class="n">b_blade_indices</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em>, <em class="sig-param"><span class="n">b_blade_values</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em><span class="sig-paren">)</span> &#x2192; tensorflow.python.framework.ops.Tensor<a class="reference internal" href="_modules/tfga/mv_ops.html#mv_add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.mv_ops.mv_add" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="tfga.mv_ops.mv_equal">
+<code class="sig-prename descclassname">tfga.mv_ops.</code><code class="sig-name descname">mv_equal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a_blade_indices</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em>, <em class="sig-param"><span class="n">a_blade_values</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em>, <em class="sig-param"><span class="n">b_blade_indices</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em>, <em class="sig-param"><span class="n">b_blade_values</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em><span class="sig-paren">)</span> &#x2192; tensorflow.python.framework.ops.Tensor<a class="reference internal" href="_modules/tfga/mv_ops.html#mv_equal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.mv_ops.mv_equal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="tfga.mv_ops.mv_grade_automorphism">
+<code class="sig-prename descclassname">tfga.mv_ops.</code><code class="sig-name descname">mv_grade_automorphism</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a_blade_indices</span></em>, <em class="sig-param"><span class="n">a_blade_values</span></em>, <em class="sig-param"><span class="n">algebra_blade_degrees</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/mv_ops.html#mv_grade_automorphism"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.mv_ops.mv_grade_automorphism" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="tfga.mv_ops.mv_multiply">
+<code class="sig-prename descclassname">tfga.mv_ops.</code><code class="sig-name descname">mv_multiply</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a_blade_indices</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em>, <em class="sig-param"><span class="n">a_blade_values</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em>, <em class="sig-param"><span class="n">b_blade_indices</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em>, <em class="sig-param"><span class="n">b_blade_values</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em>, <em class="sig-param"><span class="n">cayley</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em><span class="sig-paren">)</span> &#x2192; tensorflow.python.framework.ops.Tensor<a class="reference internal" href="_modules/tfga/mv_ops.html#mv_multiply"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.mv_ops.mv_multiply" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="tfga.mv_ops.mv_reversion">
+<code class="sig-prename descclassname">tfga.mv_ops.</code><code class="sig-name descname">mv_reversion</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a_blade_indices</span></em>, <em class="sig-param"><span class="n">a_blade_values</span></em>, <em class="sig-param"><span class="n">algebra_blade_degrees</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/mv_ops.html#mv_reversion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.mv_ops.mv_reversion" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-tfga.tfga">
+<span id="tfga-tfga-module"></span><h2>tfga.tfga module<a class="headerlink" href="#module-tfga.tfga" title="Permalink to this headline">¶</a></h2>
+<p>Provides classes and operations for performing MultiVector algebra
+with TensorFlow.</p>
+<p>The <cite>GeometricAlgebra</cite> class is used to construct the algebra given a metric.
+After that new multivectors of type <cite>MultiVector</cite> can be created from it
+that can be multiplied and added together among other operations.</p>
+<dl class="py class">
+<dt id="tfga.tfga.GeometricAlgebra">
+<em class="property">class </em><code class="sig-prename descclassname">tfga.tfga.</code><code class="sig-name descname">GeometricAlgebra</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">metric</span><span class="p">:</span> <span class="n">List<span class="p">[</span>float<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/tfga.html#GeometricAlgebra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.tfga.GeometricAlgebra" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class used as the basis for creating multi-vectors.
+Holds the metric and other quantities derived from it.</p>
+<dl class="py method">
+<dt id="tfga.tfga.GeometricAlgebra.as_mv">
+<code class="sig-name descname">as_mv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span><span class="p">:</span> <span class="n">Any</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#tfga.mv.MultiVector" title="tfga.mv.MultiVector">tfga.mv.MultiVector</a><a class="reference internal" href="_modules/tfga/tfga.html#GeometricAlgebra.as_mv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.as_mv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts any input to a <cite>MultiVector</cite> if possible.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>x: input to convert to a <cite>MultiVector</cite></p>
+</dd>
+<dt>Returns:</dt><dd><p><cite>x</cite> converted to a MultiVector</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.tfga.GeometricAlgebra.basis_mvs">
+<em class="property">property </em><code class="sig-name descname">basis_mvs</code><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.basis_mvs" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of basis vectors as multivectors.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.tfga.GeometricAlgebra.blade_degrees">
+<em class="property">property </em><code class="sig-name descname">blade_degrees</code><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.blade_degrees" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of blade-degree for each blade in the algebra.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.tfga.GeometricAlgebra.blade_mvs">
+<em class="property">property </em><code class="sig-name descname">blade_mvs</code><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.blade_mvs" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of all blade multivectors in the algebra.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.tfga.GeometricAlgebra.blades">
+<em class="property">property </em><code class="sig-name descname">blades</code><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.blades" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of all blade names.</p>
+<p>Blades are all possible independent combinations of
+basis vectors. Basis vectors are named starting
+from <cite>“0”</cite> and counting up. The scalar blade is the
+empty string <cite>“”</cite>.</p>
+<p>Example
+- Bases: <cite>[“0”, “1”, “2”]</cite>
+- Blades: <cite>[“”, “0”, “1”, “2”, “01”, “02”, “12”, “012”]</cite></p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.tfga.GeometricAlgebra.cayley">
+<em class="property">property </em><code class="sig-name descname">cayley</code><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.cayley" title="Permalink to this definition">¶</a></dt>
+<dd><p><cite>MxMxM</cite> tensor where <cite>M</cite> is the number of basis
+vectors in the algebra. Used for calculating the
+geometric product:</p>
+<p><cite>a * b = a &#64; (b &#64; cayley)</cite></p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.tfga.GeometricAlgebra.cayley_inner">
+<em class="property">property </em><code class="sig-name descname">cayley_inner</code><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.cayley_inner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Analagous to cayley but for inner product.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.tfga.GeometricAlgebra.cayley_outer">
+<em class="property">property </em><code class="sig-name descname">cayley_outer</code><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.cayley_outer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Analagous to cayley but for outer product.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.tfga.GeometricAlgebra.dual_blade_indices">
+<em class="property">property </em><code class="sig-name descname">dual_blade_indices</code><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.dual_blade_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indices of the dual blades for each blade.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.tfga.GeometricAlgebra.dual_blade_signs">
+<em class="property">property </em><code class="sig-name descname">dual_blade_signs</code><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.dual_blade_signs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signs of the dual blades for each blade.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.tfga.GeometricAlgebra.e">
+<code class="sig-name descname">e</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">blades</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#tfga.mv.MultiVector" title="tfga.mv.MultiVector">tfga.mv.MultiVector</a><a class="reference internal" href="_modules/tfga/tfga.html#GeometricAlgebra.e"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.e" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a multivector with the given blades set to 1.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>blades: list of blade names, can be unnormalized</p>
+</dd>
+<dt>Returns:</dt><dd><p>MultiVector with blades set to 1</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.tfga.GeometricAlgebra.fill">
+<code class="sig-name descname">fill</code><span class="sig-paren">(</span><em class="sig-param">batch_shape: List[int], fill_value: numbers.Number, kind=&lt;BladeKind.MV: 'mv'&gt;</em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#tfga.mv.MultiVector" title="tfga.mv.MultiVector">tfga.mv.MultiVector</a><a class="reference internal" href="_modules/tfga/tfga.html#GeometricAlgebra.fill"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.fill" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a multivector of the algebra of a given kind with all its
+blades set to the fill value. The dtype of the fill value will be used
+as the dtype for the multivector.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>batch_shape: shape for how many multivectors to return
+fill_value: value to use for all blades of <cite>kind</cite>
+kind: kind of multivector to create</p>
+</dd>
+<dt>Returns:</dt><dd><p><cite>MultiVector</cite> of the algebra of <cite>kind</cite> with all its
+blades set to <cite>fill_value</cite></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.tfga.GeometricAlgebra.from_tensor">
+<code class="sig-name descname">from_tensor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tensor</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em>, <em class="sig-param"><span class="n">blade_indices</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#tfga.mv.MultiVector" title="tfga.mv.MultiVector">tfga.mv.MultiVector</a><a class="reference internal" href="_modules/tfga/tfga.html#GeometricAlgebra.from_tensor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.from_tensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a multivector from a tf.Tensor and blade indices.
+The blade indices have to align with the last axis of the tensor.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>tensor: tf.Tensor to take as values for a multivector
+blade_indices: Blade indices corresponding to the tensor. Can
+be obtained from blade names eg. using get_kind_blade_indices()
+or as indices from the blades list property.</p>
+</dd>
+<dt>Returns:</dt><dd><p>MultiVector from tensor and blade indices</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.tfga.GeometricAlgebra.get_kind_blade_indices">
+<code class="sig-name descname">get_kind_blade_indices</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">kind</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#tfga.blades.BladeKind" title="tfga.blades.BladeKind">tfga.blades.BladeKind</a></span></em><span class="sig-paren">)</span> &#x2192; tensorflow.python.framework.ops.Tensor<a class="reference internal" href="_modules/tfga/tfga.html#GeometricAlgebra.get_kind_blade_indices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.get_kind_blade_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find all indices of blades of a given kind in the algebra.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>kind: kind of blade to give indices for</p>
+</dd>
+<dt>Returns:</dt><dd><p>indices of blades of a given kind in the algebra</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.tfga.GeometricAlgebra.max_degree">
+<em class="property">property </em><code class="sig-name descname">max_degree</code><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.max_degree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Highest blade degree in the algebra.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.tfga.GeometricAlgebra.metric">
+<em class="property">property </em><code class="sig-name descname">metric</code><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.metric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Metric list which contains the number that each
+basis vector in the algebra squares to.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.tfga.GeometricAlgebra.num_blades">
+<em class="property">property </em><code class="sig-name descname">num_blades</code><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.num_blades" title="Permalink to this definition">¶</a></dt>
+<dd><p>Total number of blades in the algebra.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.tfga.GeometricAlgebra.ones">
+<code class="sig-name descname">ones</code><span class="sig-paren">(</span><em class="sig-param">batch_shape: List[int], kind: tfga.blades.BladeKind = &lt;BladeKind.MV: 'mv'&gt;, dtype: tensorflow.python.framework.dtypes.DType = tf.float32</em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#tfga.mv.MultiVector" title="tfga.mv.MultiVector">tfga.mv.MultiVector</a><a class="reference internal" href="_modules/tfga/tfga.html#GeometricAlgebra.ones"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.ones" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a multivector of the algebra of a given kind with all its
+blades set to one</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>batch_shape: shape for how many multivectors to return
+kind: kind of multivector to create
+dtype: data type of the underlying multivector data</p>
+</dd>
+<dt>Returns:</dt><dd><p><cite>MultiVector</cite> of the algebra of <cite>kind</cite> with all its
+blades set to one</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.tfga.GeometricAlgebra.zeros">
+<code class="sig-name descname">zeros</code><span class="sig-paren">(</span><em class="sig-param">batch_shape: List[int], kind: tfga.blades.BladeKind = &lt;BladeKind.MV: 'mv'&gt;, dtype: tensorflow.python.framework.dtypes.DType = tf.float32</em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#tfga.mv.MultiVector" title="tfga.mv.MultiVector">tfga.mv.MultiVector</a><a class="reference internal" href="_modules/tfga/tfga.html#GeometricAlgebra.zeros"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.zeros" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a multivector of the algebra of a given kind with all its
+blades set to zero.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>batch_shape: shape for how many multivectors to return
+kind: kind of multivector to create
+dtype: data type of the underlying multivector data</p>
+</dd>
+<dt>Returns:</dt><dd><p><cite>MultiVector</cite> of the algebra of <cite>kind</cite> with all its
+blades set to zero</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-tfga">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-tfga" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">tfga</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">tfga package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-tfga.blades">tfga.blades module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-tfga.cayley">tfga.cayley module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-tfga.mv">tfga.mv module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-tfga.mv_ops">tfga.mv_ops module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-tfga.tfga">tfga.tfga module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-tfga">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to tfga’s documentation!</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Robin 'Tora' Kahlow.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/tfga.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

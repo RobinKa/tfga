@@ -1,0 +1,242 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>tfga.blades &#8212; tfga  documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for tfga.blades</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Blade-related definitions and functions used across the library.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+
+
+<div class="viewcode-block" id="BladeKind"><a class="viewcode-back" href="../../tfga.html#tfga.blades.BladeKind">[docs]</a><span class="k">class</span> <span class="nc">BladeKind</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Kind of blade depending on its degree.&quot;&quot;&quot;</span>
+    <span class="n">MV</span> <span class="o">=</span> <span class="s2">&quot;mv&quot;</span>
+    <span class="n">EVEN</span> <span class="o">=</span> <span class="s2">&quot;even&quot;</span>
+    <span class="n">ODD</span> <span class="o">=</span> <span class="s2">&quot;odd&quot;</span>
+    <span class="n">SCALAR</span> <span class="o">=</span> <span class="s2">&quot;scalar&quot;</span>
+    <span class="n">PSEUDOSCALAR</span> <span class="o">=</span> <span class="s2">&quot;pseudoscalar&quot;</span>
+    <span class="n">VECTOR</span> <span class="o">=</span> <span class="s2">&quot;vector&quot;</span>
+    <span class="n">PSEUDOVECTOR</span> <span class="o">=</span> <span class="s2">&quot;pseudovector&quot;</span></div>
+
+
+<div class="viewcode-block" id="get_blade_repr"><a class="viewcode-back" href="../../tfga.html#tfga.blades.get_blade_repr">[docs]</a><span class="k">def</span> <span class="nf">get_blade_repr</span><span class="p">(</span><span class="n">blade_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns the representation to use</span>
+<span class="sd">    for a given blade.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">    - `&quot;12&quot;` -&gt; `&quot;e_12&quot;`</span>
+<span class="sd">    - `&quot;&quot;` -&gt; `&quot;1&quot;`</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        blade_name: name of the blade in the algebra (eg. `&quot;12&quot;`)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Representation to use for a given blade</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">blade_name</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;1&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;e_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">blade_name</span></div>
+
+
+<div class="viewcode-block" id="is_blade_kind"><a class="viewcode-back" href="../../tfga.html#tfga.blades.is_blade_kind">[docs]</a><span class="k">def</span> <span class="nf">is_blade_kind</span><span class="p">(</span><span class="n">blade_degrees</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="p">[</span><span class="n">BladeKind</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">max_degree</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Finds a boolean mask for whether blade degrees are of a given kind.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        blade_degrees: list of blade degrees</span>
+<span class="sd">        kind: kind of blade to check for</span>
+<span class="sd">        max_degree: maximum blade degree in the algebra</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        boolean mask for whether blade degrees are of a given kind</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Convert kind to string representation</span>
+    <span class="c1"># for comparison.</span>
+    <span class="n">kind</span> <span class="o">=</span> <span class="n">kind</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="n">BladeKind</span><span class="p">)</span> <span class="k">else</span> <span class="n">kind</span>
+
+    <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">BladeKind</span><span class="o">.</span><span class="n">MV</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">blade_degrees</span><span class="p">)])</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">BladeKind</span><span class="o">.</span><span class="n">EVEN</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">blade_degrees</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">BladeKind</span><span class="o">.</span><span class="n">ODD</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">blade_degrees</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">BladeKind</span><span class="o">.</span><span class="n">SCALAR</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">blade_degrees</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">BladeKind</span><span class="o">.</span><span class="n">PSEUDOSCALAR</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">blade_degrees</span> <span class="o">==</span> <span class="n">max_degree</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">BladeKind</span><span class="o">.</span><span class="n">VECTOR</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">blade_degrees</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">BladeKind</span><span class="o">.</span><span class="n">PSEUDOVECTOR</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">blade_degrees</span> <span class="o">==</span> <span class="n">max_degree</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown blade kind: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">kind</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_blade_of_kind_indices"><a class="viewcode-back" href="../../tfga.html#tfga.blades.get_blade_of_kind_indices">[docs]</a><span class="k">def</span> <span class="nf">get_blade_of_kind_indices</span><span class="p">(</span><span class="n">blade_degrees</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="n">BladeKind</span><span class="p">,</span>
+                              <span class="n">max_degree</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Finds a boolean mask for whether blades are of a given kind.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        blade_degrees: List of blade degrees</span>
+<span class="sd">        kind: kind of blade for which the mask will be true</span>
+<span class="sd">        max_degree: maximum blade degree in the algebra</span>
+<span class="sd">        invert: whether to invert the result</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        boolean mask for whether blades are of a given kind</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cond</span> <span class="o">=</span> <span class="n">is_blade_kind</span><span class="p">(</span><span class="n">blade_degrees</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">max_degree</span><span class="p">)</span>
+    <span class="n">cond</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">logical_xor</span><span class="p">(</span><span class="n">cond</span><span class="p">,</span> <span class="n">invert</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">cond</span><span class="p">)[:,</span> <span class="mi">0</span><span class="p">]</span></div>
+
+
+<span class="k">def</span> <span class="nf">_normal_swap</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">a</span> <span class="o">&gt;</span> <span class="n">b</span><span class="p">:</span>  <span class="c1"># string comparison</span>
+            <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">x</span>
+    <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">x</span>
+
+
+<div class="viewcode-block" id="get_normal_ordered"><a class="viewcode-back" href="../../tfga.html#tfga.blades.get_normal_ordered">[docs]</a><span class="k">def</span> <span class="nf">get_normal_ordered</span><span class="p">(</span><span class="n">blade_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Returns the normal ordered blade name and its sign.</span>
+<span class="sd">    Example: 21 =&gt; -1, 12</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        blade_name: Blade name for which to return normal ordered</span>
+<span class="sd">        name and sign</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        sign: sign of the blade</span>
+<span class="sd">        blade_name: normalized name of the blade</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">blade_name</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">blade_name</span><span class="p">)</span>
+    <span class="n">sign</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">done</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
+        <span class="n">sign</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">done</span><span class="p">,</span> <span class="n">blade_name</span> <span class="o">=</span> <span class="n">_normal_swap</span><span class="p">(</span><span class="n">blade_name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sign</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">blade_name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_blade_indices_from_names"><a class="viewcode-back" href="../../tfga.html#tfga.blades.get_blade_indices_from_names">[docs]</a><span class="k">def</span> <span class="nf">get_blade_indices_from_names</span><span class="p">(</span><span class="n">blade_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                                 <span class="n">all_blade_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Finds blade signs and indices for given blade names in a list of blade</span>
+<span class="sd">    names. Blade names can be unnormalized and their correct sign will be</span>
+<span class="sd">    returned.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        blade_names: Blade names to return indices for. May be unnormalized.</span>
+<span class="sd">        all_blade_names: Blade names to use as index</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        blade_signs: signs for the passed blades in same order as passed</span>
+<span class="sd">        blade_indices: blade indices in the same order as passed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">signs_and_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_normal_ordered</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">blade_names</span><span class="p">]</span>
+
+    <span class="n">blade_signs</span> <span class="o">=</span> <span class="p">[</span><span class="n">sign</span> <span class="k">for</span> <span class="n">sign</span><span class="p">,</span> <span class="n">blade_name</span> <span class="ow">in</span> <span class="n">signs_and_names</span><span class="p">]</span>
+
+    <span class="n">blade_indices</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">all_blade_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">blade_name</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">sign</span><span class="p">,</span> <span class="n">blade_name</span> <span class="ow">in</span> <span class="n">signs_and_names</span>
+    <span class="p">]</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">blade_signs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">blade_indices</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int64</span><span class="p">))</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">tfga</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tfga.html">tfga package</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Robin 'Tora' Kahlow.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

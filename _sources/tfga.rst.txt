@@ -1,0 +1,54 @@
+tfga package
+============
+
+Submodules
+----------
+
+tfga.blades module
+------------------
+
+.. automodule:: tfga.blades
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+tfga.cayley module
+------------------
+
+.. automodule:: tfga.cayley
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+tfga.mv module
+--------------
+
+.. automodule:: tfga.mv
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+tfga.mv\_ops module
+-------------------
+
+.. automodule:: tfga.mv_ops
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+tfga.tfga module
+----------------
+
+.. automodule:: tfga.tfga
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: tfga
+   :members:
+   :undoc-members:
+   :show-inheritance:
