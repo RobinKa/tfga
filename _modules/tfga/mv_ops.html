@@ -46,10 +46,15 @@
     <span class="n">result_blade_indices</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
     <span class="n">sub_cayley</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">sub_cayley</span><span class="p">,</span> <span class="n">result_blade_indices</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
+    <span class="c1"># Multiply the blade values by the sliced cayley tensor.</span>
+    <span class="c1"># We pass optimize &quot;optimal&quot; here, from experiments it</span>
+    <span class="c1"># made no difference on CPU but on GPU resulted in a 5x</span>
+    <span class="c1"># speedup when multiplying 100_000 elements.</span>
     <span class="n">result_blade_values</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;...i,...j,...ijk-&gt;...k&quot;</span><span class="p">,</span>
                                     <span class="n">a_blade_values</span><span class="p">,</span>
                                     <span class="n">b_blade_values</span><span class="p">,</span>
-                                    <span class="n">sub_cayley</span><span class="p">)</span>
+                                    <span class="n">sub_cayley</span><span class="p">,</span>
+                                    <span class="n">optimize</span><span class="o">=</span><span class="s2">&quot;optimal&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">result_blade_indices</span><span class="p">,</span> <span class="n">result_blade_values</span></div>
 
