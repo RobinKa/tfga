@@ -91,7 +91,7 @@ class GeometricAlgebra:
         vectors in the algebra. Used for calculating the
         geometric product:
 
-        `a * b = a @ (b @ cayley)`
+        `a * b = b @ (a @ cayley)`
         """
         return self._cayley
 

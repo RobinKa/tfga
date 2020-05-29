@@ -13,10 +13,15 @@ def mv_multiply(a_blade_indices: tf.Tensor, a_blade_values: tf.Tensor,
     result_blade_indices, _ = tf.unique(x, tf.int64)
     sub_cayley = tf.gather(sub_cayley, result_blade_indices, axis=2)
 
+    # Multiply the blade values by the sliced cayley tensor.
+    # We pass optimize "optimal" here, from experiments it
+    # made no difference on CPU but on GPU resulted in a 5x
+    # speedup when multiplying 100_000 elements.
     result_blade_values = tf.einsum("...i,...j,...ijk->...k",
                                     a_blade_values,
                                     b_blade_values,
-                                    sub_cayley)
+                                    sub_cayley,
+                                    optimize="optimal")
 
     return result_blade_indices, result_blade_values
 
