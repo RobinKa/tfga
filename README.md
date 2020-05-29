@@ -1,7 +1,7 @@
 # TFGA - TensorFlow Geometric Algebra
 [![Build status](https://github.com/RobinKa/tfga/workflows/Build%20Test%20Publish/badge.svg)](https://github.com/RobinKa/tfga/actions) [![PyPI](https://badge.fury.io/py/tfga.svg)](https://badge.fury.io/py/tfga)
 
-[GitHub](https://github.com/RobinKa/tfga) | [Docs](https://github.com/RobinKa/tfga/wiki/tfga)
+[GitHub](https://github.com/RobinKa/tfga) | [Docs](https://tfga.warlock.ai)
 
 Python package for Geometric / Clifford Algebra with TensorFlow 2.
 
