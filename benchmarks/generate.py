@@ -10,22 +10,28 @@ def main():
         subprocess.call(
             [
                 "pytest", *paths,
-                "--benchmark-warmup", "on",
                 "--benchmark-json", os.path.join(results_dir, "%s.json" % name)
             ],
             env=env
         )
 
-    _call_pytest("clifford", "test_clifford.py::test_clifford_add_mv_mv",
-                 "test_clifford.py::test_clifford_raw_add_mv_mv",
-                 "test_clifford.py::test_clifford_mul_mv_mv",
-                 "test_clifford.py::test_clifford_raw_mul_mv_mv",)
-    _call_pytest("tfga-gpu", "test_tfga.py::test_tfga_add_mv_mv", "test_tfga.py::test_tfga_mul_mv_mv")
+    # Test tfga (default on gpu if available)
+    for i in [1, 10, 100, 1_000, 10_000, 100_000, 1_000_000]:
+        _call_pytest("tfga-gpu_mul-mv-mv_%d" % i, "test_tfga.py::test_tfga_mul_mv_mv[%d]" % i)
 
+    # Test tfga cpu (hide cuda gpus)
     cpu_env = os.environ.copy()
     cpu_env["CUDA_VISIBLE_DEVICES"] = "-1"
-    _call_pytest("tfga-cpu", "test_tfga.py::test_tfga_add_mv_mv", "test_tfga.py::test_tfga_mul_mv_mv", env=cpu_env)
+    for i in [1, 10, 100, 1_000, 10_000, 100_000, 1_000_000]:
+        _call_pytest("tfga_mul-mv-mv_%d" % i, "test_tfga.py::test_tfga_mul_mv_mv[%d]" % i, env=cpu_env)
 
+    # Test clifford
+    for i in [1, 10, 100, 1_000, 10_000, 100_000, 1_000_000]:
+        _call_pytest("clifford_mul-mv-mv_%d" % i, "test_tfga.py::test_clifford_mul_mv_mv[%d]" % i)
+
+    # Test clifford raw
+    for i in [1, 10, 100, 1_000, 10_000, 100_000, 1_000_000]:
+        _call_pytest("clifford-raw_mul-mv-mv_%d" % i, "test_tfga.py::test_clifford_raw_mul_mv_mv[%d]" % i)
 
 if __name__ == "__main__":
     main()
