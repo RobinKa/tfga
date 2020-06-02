@@ -34,7 +34,7 @@ def load_results(path):
 
 
 def main():
-    result_paths = glob(os.path.join("results", "*.json"))
+    result_paths = sorted(glob(os.path.join("results", "*.json")))
     out_path = "output"
 
     os.makedirs(out_path, exist_ok=True)
