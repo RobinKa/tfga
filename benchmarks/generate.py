@@ -16,7 +16,10 @@ def main():
             env=env
         )
 
-    _call_pytest("clifford", "test_clifford.py::test_clifford_add_mv_mv", "test_clifford.py::test_clifford_mul_mv_mv")
+    _call_pytest("clifford", "test_clifford.py::test_clifford_add_mv_mv",
+                 "test_clifford.py::test_clifford_raw_add_mv_mv",
+                 "test_clifford.py::test_clifford_mul_mv_mv",
+                 "test_clifford.py::test_clifford_raw_mul_mv_mv",)
     _call_pytest("tfga-gpu", "test_tfga.py::test_tfga_add_mv_mv", "test_tfga.py::test_tfga_mul_mv_mv")
 
     cpu_env = os.environ.copy()

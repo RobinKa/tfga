@@ -39,14 +39,14 @@ def test_clifford_add_mv_mv(num_elements, benchmark):
 
 
 @pytest.mark.parametrize("num_elements", [1, 10, 100, 1_000, 10_000, 100_000, 1_000_000])
-def test_clifford_clifford_raw_mul(num_elements, benchmark):
+def test_clifford_raw_mul_mv_mv(num_elements, benchmark):
     a = _mv_ones(num_elements).value
     b = _mv_ones(num_elements).value
     benchmark(_clifford_raw_mul, a, b)
 
 
 @pytest.mark.parametrize("num_elements", [1, 10, 100, 1_000, 10_000, 100_000, 1_000_000])
-def test_clifford_clifford_raw_add(num_elements, benchmark):
+def test_clifford_raw_add_mv_mv(num_elements, benchmark):
     a = _mv_ones(num_elements).value
     b = _mv_ones(num_elements).value
     benchmark(_clifford_raw_add, a, b)
