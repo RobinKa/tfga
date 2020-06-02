@@ -15,23 +15,26 @@ def main():
             env=env
         )
 
-    # Test tfga (default on gpu if available)
-    for i in [1, 10, 100, 1_000, 10_000, 100_000, 1_000_000]:
-        _call_pytest("tfga-gpu_mul-mv-mv_%d" % i, "test_tfga.py::test_tfga_mul_mv_mv[%d]" % i)
+    def _run_parameterized(lib_name, fn_name, fn_path, num_elements, env=None):
+        for i in num_elements:
+            _call_pytest("%s_%s_%d" % (lib_name, fn_name, i), fn_path % i, env=env)
 
-    # Test tfga cpu (hide cuda gpus)
+    num_elements = [1, 10, 100, 1_000, 10_000, 100_000, 1_000_000]
+
     cpu_env = os.environ.copy()
     cpu_env["CUDA_VISIBLE_DEVICES"] = "-1"
-    for i in [1, 10, 100, 1_000, 10_000, 100_000, 1_000_000]:
-        _call_pytest("tfga_mul-mv-mv_%d" % i, "test_tfga.py::test_tfga_mul_mv_mv[%d]" % i, env=cpu_env)
 
-    # Test clifford
-    for i in [1, 10, 100, 1_000, 10_000, 100_000, 1_000_000]:
-        _call_pytest("clifford_mul-mv-mv_%d" % i, "test_tfga.py::test_clifford_mul_mv_mv[%d]" % i)
+    # Multiply multivector batches
+    _run_parameterized("tfga-gpu", "mul-mv-mv", "test_tfga.py::test_tfga_mul_mv_mv[%d]", num_elements)
+    _run_parameterized("tfga", "mul-mv-mv", "test_tfga.py::test_tfga_mul_mv_mv[%d]", num_elements, env=cpu_env)
+    _run_parameterized("clifford", "mul-mv-mv", "test_clifford.py::test_clifford_mul_mv_mv[%d]", num_elements)
+    _run_parameterized("clifford-raw", "mul-mv-mv", "test_clifford.py::test_clifford_raw_mul_mv_mv[%d]", num_elements)
 
-    # Test clifford raw
-    for i in [1, 10, 100, 1_000, 10_000, 100_000, 1_000_000]:
-        _call_pytest("clifford-raw_mul-mv-mv_%d" % i, "test_tfga.py::test_clifford_raw_mul_mv_mv[%d]" % i)
+    # Add multivector batches
+    _run_parameterized("tfga-gpu", "add-mv-mv", "test_tfga.py::test_tfga_add_mv_mv[%d]", num_elements)
+    _run_parameterized("tfga", "add-mv-mv", "test_tfga.py::test_tfga_add_mv_mv[%d]", num_elements, env=cpu_env)
+    _run_parameterized("clifford", "add-mv-mv", "test_clifford.py::test_clifford_add_mv_mv[%d]", num_elements)
+    _run_parameterized("clifford-raw", "add-mv-mv", "test_clifford.py::test_clifford_raw_add_mv_mv[%d]", num_elements)
 
 if __name__ == "__main__":
     main()

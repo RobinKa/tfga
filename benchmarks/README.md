@@ -11,7 +11,7 @@ The benchmarks below were created with the following specs:
 - OS: Windows 10 Pro 1903
 
 And relevant libraries:
-- tfga: 0.1.9
+- tfga: 0.1.10
 - tf-gpu-nightly: 2.3.0-dev20200515
 - clifford: 1.3.0
 - numpy (mkl): 1.18.1
@@ -19,8 +19,8 @@ And relevant libraries:
 
 Also the environment variable `MKL_DEBUG_CPU_TYPE` was set to `5` in order to disable [crippling of AMD CPUs by MKL](https://www.reddit.com/r/MachineLearning/comments/f2pbvz/discussion_workaround_for_mkl_on_amd/).
 
-### Addition, Algebra=STA, A=All, B=All
-![](results/add_mv_mv.svg)
+### Addition A + B, Algebra=STA, A=Full Multivector, B=Full Multivector
+![](output/add-mv-mv.svg)
 
-### Geometric Product, Algebra=STA, A=All, B=All
-![](results/mul_mv_mv.svg)
+### Geometric Product A * B, Algebra=STA, A=Full Multivector, B=Full Multivector
+![](output/mul-mv-mv.svg)
