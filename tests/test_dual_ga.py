@@ -11,7 +11,7 @@ dual_blade_degrees = [len(blade) for blade in dual_blades]
 
 class TestDualGeometricAlgebraMultiply(ut.TestCase):
     def assertTensorsEqual(self, a, b):
-        self.assertTrue(tf.reduce_all(a == b))
+        self.assertTrue(tf.reduce_all(a == b), "%s not equal to %s" % (a, b))
 
     def test_mul_mv_mv(self):
         ga = GeometricAlgebra(metric=dual_metric)
@@ -76,7 +76,7 @@ class TestDualGeometricAlgebraMultiply(ut.TestCase):
 
 class TestDualGeometricAlgebraMisc(ut.TestCase):
     def assertTensorsEqual(self, a, b):
-        self.assertTrue(tf.reduce_all(a == b))
+        self.assertTrue(tf.reduce_all(a == b), "%s not equal to %s" % (a, b))
 
     def test_auto_diff_square(self):
         """Test automatic differentiation using

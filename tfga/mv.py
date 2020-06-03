@@ -1,12 +1,14 @@
 from __future__ import annotations
 from typing import Union
 
+from .blades import BladeKind
+
 
 class MultiVector:
     def __init__(self, blade_values, algebra):
         self._blade_values = blade_values
         self._algebra = algebra
-        self._n = -1
+        self._n = -1 # used for iteration (__iter__, __next__)
 
     @property
     def tensor(self):
@@ -24,17 +26,24 @@ class MultiVector:
         return self._blade_values.shape[0]
 
     def __iter__(self) -> self:
-        assert self._blade_values.shape.ndims > 1
-
         self._n = 0
         return self
 
     def __next__(self) -> self:
-        if self._n <= self._blade_values.shape[0]:
-            return MultiVector(
-                self._blade_values[self._n],
-                self._algebra
-            )
+        n = self._n
+        if n <= self._blade_values.shape[0]:
+            self._n += 1
+
+            # If we only have one axis left, return the
+            # actual numbers, otherwise return a new
+            # multivector.
+            if self._blade_values.shape.ndims == 1:
+                return self._blade_values[n]
+            else:
+                return MultiVector(
+                    self._blade_values[n],
+                    self._algebra
+                )
         raise StopIteration
 
     def __xor__(self, other: self) -> self:
@@ -126,3 +135,30 @@ class MultiVector:
             self._algebra.dual(self._blade_values),
             self._algebra
         )
+
+    def conjugation(self) -> self:
+        return MultiVector(
+            self._algebra.conjugation(self._blade_values),
+            self._algebra
+        )
+
+    def grade_automorphism(self) -> self:
+        return MultiVector(
+            self._algebra.grade_automorphism(self._blade_values),
+            self._algebra
+        )
+
+    def approx_exp(self) -> self:
+        return MultiVector(
+            self._algebra.approx_exp(self._blade_values),
+            self._algebra
+        )
+
+    def approx_log(self) -> self:
+        return MultiVector(
+            self._algebra.approx_log(self._blade_values),
+            self._algebra
+        )
+
+    def is_pure_kind(self, kind: BladeKind) -> bool:
+        return self._algebra.is_pure_kind(self._blade_values, kind=kind)

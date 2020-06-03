@@ -170,6 +170,8 @@ class GeometricAlgebra:
             Whether this multivector is purely of a given kind
             and has no non-zero values for blades not of the kind
         """
+        tensor = tf.convert_to_tensor(tensor, dtype_hint=tf.float32)
+        
         kind_indices = self.get_kind_blade_indices(kind, invert=True)
         return tf.reduce_all(tf.gather(
             tensor,
@@ -190,6 +192,8 @@ class GeometricAlgebra:
         Returns:
             MultiVector from tensor and blade indices
         """
+        tensor = tf.convert_to_tensor(tensor, dtype_hint=tf.float32)
+
         # Put last axis on first axis so scatter_nd becomes easier.
         # Later undo the transposition again.
         t = tf.concat([[tensor.shape.ndims - 1],
@@ -206,6 +210,7 @@ class GeometricAlgebra:
     def from_tensor_with_kind(self, tensor, kind):
         # Put last axis on first axis so scatter_nd becomes easier.
         # Later undo the transposition again.
+        tensor = tf.convert_to_tensor(tensor, dtype_hint=tf.float32)
         kind_indices = self.get_kind_blade_indices(kind)
         return self.from_tensor(tensor, kind_indices)
 
@@ -251,6 +256,7 @@ class GeometricAlgebra:
         Returns:
             Dual of the MultiVector
         """
+        tensor = tf.convert_to_tensor(tensor, dtype_hint=tf.float32)
         return self.dual_blade_signs * tf.gather(tensor, self.dual_blade_indices, axis=-1)
 
     def grade_automorphism(self, tensor: tf.Tensor) -> tf.Tensor:
@@ -260,10 +266,12 @@ class GeometricAlgebra:
         Returns:
             `MultiVector` with odd grades negated
         """
+        tensor = tf.convert_to_tensor(tensor, dtype_hint=tf.float32)
         return mv_grade_automorphism(tensor, self.blade_degrees)
 
     def reversion(self, tensor: tf.Tensor) -> tf.Tensor:
         """Grade-reversion. See `reversion()`."""
+        tensor = tf.convert_to_tensor(tensor, dtype_hint=tf.float32)
         return mv_reversion(tensor, self.blade_degrees)
 
     def conjugation(self, tensor: tf.Tensor) -> tf.Tensor:
@@ -273,6 +281,7 @@ class GeometricAlgebra:
         Returns:
             `MultiVector` after `reversion()` and `grade_automorphism()`
         """
+        tensor = tf.convert_to_tensor(tensor, dtype_hint=tf.float32)
         return self.grade_automorphism(self.reversion(tensor))
 
     def inverse(self, a: tf.Tensor) -> tf.Tensor:
@@ -283,6 +292,8 @@ class GeometricAlgebra:
         Returns:
             inverted `MultiVector`
         """
+        a = tf.convert_to_tensor(a, dtype_hint=tf.float32)
+
         rev_a = self.reversion(a)
         divisor = self.geom_prod(a, rev_a)
         if not self.is_pure_kind(divisor, BladeKind.SCALAR):
@@ -302,6 +313,9 @@ class GeometricAlgebra:
         Returns:
             regressive product of multivector and other
         """
+        a = tf.convert_to_tensor(a, dtype_hint=tf.float32)
+        b = tf.convert_to_tensor(b, dtype_hint=tf.float32)
+
         return self.dual(self.ext_prod(self.dual(a), self.dual(b)))
 
     def ext_prod(self, a: tf.Tensor, b: tf.Tensor) -> tf.Tensor:
@@ -313,6 +327,9 @@ class GeometricAlgebra:
         Returns:
             exterior product of `self` and `other`
         """
+        a = tf.convert_to_tensor(a, dtype_hint=tf.float32)
+        b = tf.convert_to_tensor(b, dtype_hint=tf.float32)
+
         return mv_multiply(a, b, self._cayley_outer)
 
     def geom_prod(self, a: tf.Tensor, b: tf.Tensor) -> tf.Tensor:
@@ -324,6 +341,9 @@ class GeometricAlgebra:
         Returns:
             geometric product of `self` and `other`
         """
+        a = tf.convert_to_tensor(a, dtype_hint=tf.float32)
+        b = tf.convert_to_tensor(b, dtype_hint=tf.float32)
+
         a = tf.convert_to_tensor(a)
         b = tf.convert_to_tensor(b)
         return mv_multiply(a, b, self._cayley)
@@ -337,9 +357,14 @@ class GeometricAlgebra:
         Returns:
             inner product of `self` and `other`
         """
+        a = tf.convert_to_tensor(a, dtype_hint=tf.float32)
+        b = tf.convert_to_tensor(b, dtype_hint=tf.float32)
+
         return mv_multiply(a, b, self._cayley_inner)
 
     def mv_repr(self, a: tf.Tensor) -> str:
+        a = tf.convert_to_tensor(a, dtype_hint=tf.float32)
+
         if len(a.shape) == 1:
             return "MultiVector[%s]" % " + ".join(
                 "%.2f*%s" % (value, get_blade_repr(blade_name))
@@ -359,6 +384,8 @@ class GeometricAlgebra:
         Returns:
             Approximation of `exp(self)`
         """
+        a = tf.convert_to_tensor(a, dtype_hint=tf.float32)
+
         v = self.from_scalar(1.0)
         result = self.from_scalar(1.0)
         for i in range(1, order + 1):
@@ -377,6 +404,8 @@ class GeometricAlgebra:
         Returns:
             Approximation of `log(self)`
         """
+        a = tf.convert_to_tensor(a, dtype_hint=tf.float32)
+
         result = self.from_scalar(0.0)
 
         a_minus_one = a - self.from_scalar(1.0)
@@ -398,6 +427,8 @@ class GeometricAlgebra:
         Returns:
             `MultiVector` to the power of `n`
         """
+        a = tf.convert_to_tensor(a, dtype_hint=tf.float32)
+
         if not isinstance(n, int):
             raise Exception("n must be an integer.")
         if n < 0:
@@ -413,6 +444,8 @@ class GeometricAlgebra:
         return result
 
     def keep_blades(self, a: tf.Tensor, blade_names: Union[List[str], str]) -> tf.Tensor:
+        a = tf.convert_to_tensor(a, dtype_hint=tf.float32)
+
         if isinstance(blade_names, str):
             blade_names = [blade_names]
 
@@ -424,6 +457,8 @@ class GeometricAlgebra:
         return self.from_tensor(blade_values, blade_indices)
 
     def select_blades(self, a: tf.Tensor, blade_names: Union[List[str], str]) -> tf.Tensor:
+        a = tf.convert_to_tensor(a, dtype_hint=tf.float32)
+
         is_single_blade = isinstance(blade_names, str)
         if is_single_blade:
             blade_names = [blade_names]
@@ -439,4 +474,4 @@ class GeometricAlgebra:
         return result
 
     def __call__(self, a: tf.Tensor) -> MultiVector:
-        return MultiVector(a, self)
+        return MultiVector(tf.convert_to_tensor(a), self)
