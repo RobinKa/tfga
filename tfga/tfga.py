@@ -13,6 +13,7 @@ import numpy as np
 from .cayley import get_cayley_tensor, blades_from_bases
 from .blades import BladeKind, get_blade_of_kind_indices, get_blade_indices_from_names, get_blade_repr
 from .mv_ops import mv_multiply, mv_reversion, mv_grade_automorphism
+from .mv import MultiVector
 
 
 class GeometricAlgebra:
@@ -239,6 +240,11 @@ class GeometricAlgebra:
             # a, b -> b
             return tf.reduce_sum(x, axis=-2)
 
+    def __getattr__(self, name):
+        if name.startswith("e") and (name[1:] == "" or int(name[1:]) >= 0):
+            return self.e(name[1:])
+        raise AttributeError
+
     def dual(self, tensor: tf.Tensor) -> tf.Tensor:
         """Returns the dual of the MultiVector.
 
@@ -431,3 +437,6 @@ class GeometricAlgebra:
             return result[..., 0]
 
         return result
+
+    def __call__(self, a: tf.Tensor) -> MultiVector:
+        return MultiVector(a, self)
