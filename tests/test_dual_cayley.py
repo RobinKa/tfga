@@ -1,3 +1,9 @@
+import tensorflow as tf
+
+# Make tensorflow not take over the entire GPU memory
+for gpu in tf.config.experimental.list_physical_devices('GPU'):
+    tf.config.experimental.set_memory_growth(gpu, True)
+    
 import unittest as ut
 import numpy as np
 
