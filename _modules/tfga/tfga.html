@@ -31,25 +31,28 @@
           <div class="body" role="main">
             
   <h1>Source code for tfga.tfga</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Provides classes and operations for performing MultiVector algebra</span>
+<span></span><span class="sd">&quot;&quot;&quot;Provides classes and operations for performing geometric algebra</span>
 <span class="sd">with TensorFlow.</span>
 
 <span class="sd">The `GeometricAlgebra` class is used to construct the algebra given a metric.</span>
-<span class="sd">After that new multivectors of type `MultiVector` can be created from it</span>
-<span class="sd">that can be multiplied and added together among other operations.</span>
+<span class="sd">It exposes methods for operating on `tf.Tensor` instances where their last</span>
+<span class="sd">axis is interpreted as blades of the algebra.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">import</span> <span class="nn">numbers</span>
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">.cayley</span> <span class="kn">import</span> <span class="n">get_cayley_tensor</span><span class="p">,</span> <span class="n">blades_from_bases</span>
+<span class="kn">from</span> <span class="nn">.blades</span> <span class="kn">import</span> <span class="n">BladeKind</span><span class="p">,</span> <span class="n">get_blade_of_kind_indices</span><span class="p">,</span> <span class="n">get_blade_indices_from_names</span><span class="p">,</span> <span class="n">get_blade_repr</span>
+<span class="kn">from</span> <span class="nn">.mv_ops</span> <span class="kn">import</span> <span class="n">mv_multiply</span><span class="p">,</span> <span class="n">mv_reversion</span><span class="p">,</span> <span class="n">mv_grade_automorphism</span>
 <span class="kn">from</span> <span class="nn">.mv</span> <span class="kn">import</span> <span class="n">MultiVector</span>
-<span class="kn">from</span> <span class="nn">.blades</span> <span class="kn">import</span> <span class="n">BladeKind</span><span class="p">,</span> <span class="n">get_blade_of_kind_indices</span><span class="p">,</span> <span class="n">get_blade_indices_from_names</span>
 
 
 <div class="viewcode-block" id="GeometricAlgebra"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra">[docs]</a><span class="k">class</span> <span class="nc">GeometricAlgebra</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Class used as the basis for creating multi-vectors.</span>
+    <span class="sd">&quot;&quot;&quot;Class used for performing geometric algebra operations on `tf.Tensor` instances.</span>
+<span class="sd">    Exposes methods for operating on `tf.Tensor` instances where their last</span>
+<span class="sd">    axis is interpreted as blades of the algebra.</span>
 <span class="sd">    Holds the metric and other quantities derived from it.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -77,23 +80,8 @@
             <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span>
         <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_basis_mvs</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">MultiVector</span><span class="p">(</span>
-                <span class="n">blade_values</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">([</span><span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
-                <span class="n">blade_indices</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">([</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int64</span><span class="p">),</span>
-                <span class="n">algebra</span><span class="o">=</span><span class="bp">self</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_bases</span><span class="p">)</span>
-        <span class="p">]</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_blade_mvs</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">MultiVector</span><span class="p">(</span>
-                <span class="n">blade_values</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">([</span><span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
-                <span class="n">blade_indices</span><span class="o">=</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                <span class="n">algebra</span><span class="o">=</span><span class="bp">self</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_blades</span><span class="p">)</span>
-        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_blade_mvs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_blades</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_basis_mvs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_blade_mvs</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">1</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_bases</span><span class="p">]</span>
 
         <span class="c1"># Find the dual by looking at the anti-diagonal in the Cayley tensor.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dual_blade_indices</span> <span class="o">=</span> <span class="p">[]</span>
@@ -112,10 +100,23 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_dual_blade_signs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_dual_blade_signs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
+<div class="viewcode-block" id="GeometricAlgebra.print"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.print">[docs]</a>    <span class="k">def</span> <span class="nf">print</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Same as the default `print` function but formats `tf.Tensor`</span>
+<span class="sd">        instances that have as many elements on their last axis</span>
+<span class="sd">        as the algebra has blades using `mv_repr()`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">_is_mv</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">ndims</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_blades</span>
+        <span class="n">new_args</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">mv_repr</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">if</span> <span class="n">_is_mv</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">else</span> <span class="n">arg</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">]</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="o">*</span><span class="n">new_args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">metric</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Metric list which contains the number that each</span>
-<span class="sd">        basis vector in the algebra squares to.&quot;&quot;&quot;</span>
+<span class="sd">        basis vector in the algebra squares to</span>
+<span class="sd">        (ie. the diagonal of the metric tensor).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metric</span>
 
     <span class="nd">@property</span>
@@ -124,7 +125,7 @@
 <span class="sd">        vectors in the algebra. Used for calculating the</span>
 <span class="sd">        geometric product:</span>
 
-<span class="sd">        `a * b = b @ (a @ cayley)`</span>
+<span class="sd">        `a_i, b_j, cayley_ijk -&gt; c_k`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cayley</span>
 
@@ -154,8 +155,8 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_blades</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">blade_mvs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">MultiVector</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;List of all blade multivectors in the algebra.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">blade_mvs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;List of all blade tensors in the algebra.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_blade_mvs</span>
 
     <span class="nd">@property</span>
@@ -184,138 +185,427 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_degree</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">basis_mvs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">MultiVector</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;List of basis vectors as multivectors.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">basis_mvs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;List of basis vectors as tf.Tensor.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_basis_mvs</span>
 
-<div class="viewcode-block" id="GeometricAlgebra.get_kind_blade_indices"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.get_kind_blade_indices">[docs]</a>    <span class="k">def</span> <span class="nf">get_kind_blade_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="n">BladeKind</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<div class="viewcode-block" id="GeometricAlgebra.get_kind_blade_indices"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.get_kind_blade_indices">[docs]</a>    <span class="k">def</span> <span class="nf">get_kind_blade_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="n">BladeKind</span><span class="p">,</span> <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Find all indices of blades of a given kind in the algebra.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            kind: kind of blade to give indices for</span>
+<span class="sd">            invert: whether to return all blades not of the kind</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            indices of blades of a given kind in the algebra</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">get_blade_of_kind_indices</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_degrees</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_degree</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="n">invert</span><span class="p">)</span></div>
 
-        <span class="k">return</span> <span class="n">get_blade_of_kind_indices</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_degrees</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_degree</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="GeometricAlgebra.zeros"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.zeros">[docs]</a>    <span class="k">def</span> <span class="nf">zeros</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_shape</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">kind</span><span class="p">:</span> <span class="n">BladeKind</span> <span class="o">=</span> <span class="n">BladeKind</span><span class="o">.</span><span class="n">MV</span><span class="p">,</span>
-              <span class="n">dtype</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">DType</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns a multivector of the algebra of a given kind with all its</span>
-<span class="sd">        blades set to zero.</span>
+<div class="viewcode-block" id="GeometricAlgebra.is_pure_kind"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.is_pure_kind">[docs]</a>    <span class="k">def</span> <span class="nf">is_pure_kind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="n">BladeKind</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns whether the given tensor is purely of a given kind</span>
+<span class="sd">        and has no non-zero values for blades not of the kind.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            batch_shape: shape for how many multivectors to return</span>
-<span class="sd">            kind: kind of multivector to create</span>
-<span class="sd">            dtype: data type of the underlying multivector data</span>
+<span class="sd">            tensor: tensor to check purity for</span>
+<span class="sd">            kind: kind of blade to check purity for</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            `MultiVector` of the algebra of `kind` with all its</span>
-<span class="sd">            blades set to zero</span>
+<span class="sd">            Whether the tensor is purely of a given kind</span>
+<span class="sd">            and has no non-zero values for blades not of the kind</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">blade_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_kind_blade_indices</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span>
-        <span class="n">mv</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="o">*</span><span class="n">batch_shape</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">blade_indices</span><span class="p">)],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">MultiVector</span><span class="p">(</span><span class="n">blade_values</span><span class="o">=</span><span class="n">mv</span><span class="p">,</span> <span class="n">blade_indices</span><span class="o">=</span><span class="n">blade_indices</span><span class="p">,</span> <span class="n">algebra</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span></div>
+        <span class="n">tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
-<div class="viewcode-block" id="GeometricAlgebra.ones"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.ones">[docs]</a>    <span class="k">def</span> <span class="nf">ones</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_shape</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">kind</span><span class="p">:</span> <span class="n">BladeKind</span> <span class="o">=</span> <span class="n">BladeKind</span><span class="o">.</span><span class="n">MV</span><span class="p">,</span>
-             <span class="n">dtype</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">DType</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns a multivector of the algebra of a given kind with all its</span>
-<span class="sd">        blades set to one</span>
+        <span class="n">kind_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_kind_blade_indices</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_all</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
+            <span class="n">tensor</span><span class="p">,</span>
+            <span class="n">kind_indices</span><span class="p">,</span>
+            <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
+        <span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GeometricAlgebra.from_tensor"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.from_tensor">[docs]</a>    <span class="k">def</span> <span class="nf">from_tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">blade_indices</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Creates a geometric algebra tf.Tensor from a tf.Tensor and blade</span>
+<span class="sd">        indices. The blade indices have to align with the last axis of the</span>
+<span class="sd">        tensor.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            batch_shape: shape for how many multivectors to return</span>
-<span class="sd">            kind: kind of multivector to create</span>
-<span class="sd">            dtype: data type of the underlying multivector data</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            `MultiVector` of the algebra of `kind` with all its</span>
-<span class="sd">            blades set to one</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">blade_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_kind_blade_indices</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span>
-        <span class="n">mv</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="o">*</span><span class="n">batch_shape</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">blade_indices</span><span class="p">)],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">MultiVector</span><span class="p">(</span><span class="n">blade_values</span><span class="o">=</span><span class="n">mv</span><span class="p">,</span> <span class="n">blade_indices</span><span class="o">=</span><span class="n">blade_indices</span><span class="p">,</span> <span class="n">algebra</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="GeometricAlgebra.fill"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.fill">[docs]</a>    <span class="k">def</span> <span class="nf">fill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_shape</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">fill_value</span><span class="p">:</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">,</span>
-             <span class="n">kind</span><span class="o">=</span><span class="n">BladeKind</span><span class="o">.</span><span class="n">MV</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns a multivector of the algebra of a given kind with all its</span>
-<span class="sd">        blades set to the fill value. The dtype of the fill value will be used</span>
-<span class="sd">        as the dtype for the multivector.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            batch_shape: shape for how many multivectors to return</span>
-<span class="sd">            fill_value: value to use for all blades of `kind`</span>
-<span class="sd">            kind: kind of multivector to create</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            `MultiVector` of the algebra of `kind` with all its</span>
-<span class="sd">            blades set to `fill_value`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">blade_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_kind_blade_indices</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span>
-        <span class="n">mv</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">fill</span><span class="p">([</span><span class="o">*</span><span class="n">batch_shape</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">blade_indices</span><span class="p">)],</span> <span class="n">fill_value</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">MultiVector</span><span class="p">(</span><span class="n">blade_values</span><span class="o">=</span><span class="n">mv</span><span class="p">,</span> <span class="n">blade_indices</span><span class="o">=</span><span class="n">blade_indices</span><span class="p">,</span> <span class="n">algebra</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="GeometricAlgebra.as_mv"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.as_mv">[docs]</a>    <span class="k">def</span> <span class="nf">as_mv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Converts any input to a `MultiVector` if possible.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            x: input to convert to a `MultiVector`</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            `x` converted to a MultiVector</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">MultiVector</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">x</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">):</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fill</span><span class="p">([],</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;scalar&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="p">((</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">))</span> <span class="ow">and</span>
-              <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">))):</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fill</span><span class="p">([],</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;scalar&quot;</span><span class="p">)</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-            <span class="s2">&quot;Can&#39;t convert argument of type </span><span class="si">%s</span><span class="s2"> to multi-vector.&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">))</span></div>
-
-<div class="viewcode-block" id="GeometricAlgebra.from_tensor"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.from_tensor">[docs]</a>    <span class="k">def</span> <span class="nf">from_tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">blade_indices</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Creates a multivector from a tf.Tensor and blade indices.</span>
-<span class="sd">        The blade indices have to align with the last axis of the tensor.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            tensor: tf.Tensor to take as values for a multivector</span>
+<span class="sd">            tensor: tf.Tensor to take as values for the geometric algebra tensor</span>
 <span class="sd">            blade_indices: Blade indices corresponding to the tensor. Can</span>
 <span class="sd">            be obtained from blade names eg. using get_kind_blade_indices()</span>
 <span class="sd">            or as indices from the blades list property.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            MultiVector from tensor and blade indices</span>
+<span class="sd">            Geometric algebra tf.Tensor from tensor and blade indices</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">MultiVector</span><span class="p">(</span>
-            <span class="n">blade_values</span><span class="o">=</span><span class="n">tensor</span><span class="p">,</span>
-            <span class="n">blade_indices</span><span class="o">=</span><span class="n">blade_indices</span><span class="p">,</span>
-            <span class="n">algebra</span><span class="o">=</span><span class="bp">self</span>
-        <span class="p">)</span></div>
+        <span class="n">tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
-<div class="viewcode-block" id="GeometricAlgebra.e"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.e">[docs]</a>    <span class="k">def</span> <span class="nf">e</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">blades</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns a multivector with the given blades set to 1.</span>
+        <span class="c1"># Put last axis on first axis so scatter_nd becomes easier.</span>
+        <span class="c1"># Later undo the transposition again.</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([[</span><span class="n">tensor</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">ndims</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span>
+                       <span class="n">tf</span><span class="o">.</span><span class="n">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">tensor</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">ndims</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">t_inv</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">tf</span><span class="o">.</span><span class="n">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">tensor</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">ndims</span><span class="p">),</span> <span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+
+        <span class="n">tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">scatter_nd</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">blade_indices</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span> <span class="n">tensor</span><span class="p">,</span>
+                               <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_blades</span><span class="p">]</span> <span class="o">+</span> <span class="n">tensor</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">t_inv</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GeometricAlgebra.from_tensor_with_kind"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.from_tensor_with_kind">[docs]</a>    <span class="k">def</span> <span class="nf">from_tensor_with_kind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="n">BladeKind</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Creates a geometric algebra tf.Tensor from a tf.Tensor and a kind.</span>
+<span class="sd">        The kind&#39;s blade indices have to align with the last axis of the</span>
+<span class="sd">        tensor.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            tensor: tf.Tensor to take as values for the geometric algebra tensor</span>
+<span class="sd">            kind: Kind corresponding to the tensor</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Geometric algebra tf.Tensor from tensor and kind</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Put last axis on first axis so scatter_nd becomes easier.</span>
+        <span class="c1"># Later undo the transposition again.</span>
+        <span class="n">tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">kind_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_kind_blade_indices</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">from_tensor</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">kind_indices</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GeometricAlgebra.from_scalar"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.from_scalar">[docs]</a>    <span class="k">def</span> <span class="nf">from_scalar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scalar</span><span class="p">:</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Creates a geometric algebra tf.Tensor with scalar elements.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            scalar: Elements to be used as scalars</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Geometric algebra tf.Tensor from scalars</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">from_tensor_with_kind</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">scalar</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span> <span class="n">BladeKind</span><span class="o">.</span><span class="n">SCALAR</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GeometricAlgebra.e"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.e">[docs]</a>    <span class="k">def</span> <span class="nf">e</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">blades</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns a geometric algebra tf.Tensor with the given blades set</span>
+<span class="sd">        to 1.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            blades: list of blade names, can be unnormalized</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            MultiVector with blades set to 1</span>
+<span class="sd">            tf.Tensor with blades set to 1</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="n">blade_signs</span><span class="p">,</span> <span class="n">blade_indices</span> <span class="o">=</span> <span class="n">get_blade_indices_from_names</span><span class="p">(</span>
             <span class="n">blades</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blades</span><span class="p">)</span>
 
-        <span class="c1"># Don&#39;t allow duplicate indices</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">blade_indices</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">blade_indices</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Duplicate blade indices passed: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
-                            <span class="n">blade_indices</span><span class="p">)</span>
+        <span class="n">blade_indices</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">blade_indices</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">MultiVector</span><span class="p">(</span>
-            <span class="n">blade_values</span><span class="o">=</span><span class="n">blade_signs</span><span class="p">,</span>
-            <span class="n">blade_indices</span><span class="o">=</span><span class="n">blade_indices</span><span class="p">,</span>
-            <span class="n">algebra</span><span class="o">=</span><span class="bp">self</span>
-        <span class="p">)</span></div></div>
+        <span class="c1"># Don&#39;t allow duplicate indices</span>
+        <span class="k">assert</span> <span class="n">blade_indices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">blade_indices</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">blade_signs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_mvs</span><span class="p">,</span> <span class="n">blade_indices</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># a, b -&gt; b</span>
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns basis blade tensors if name was a basis.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;e&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span> <span class="ow">or</span> <span class="nb">int</span><span class="p">(</span><span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">e</span><span class="p">(</span><span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span>
+
+<div class="viewcode-block" id="GeometricAlgebra.dual"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.dual">[docs]</a>    <span class="k">def</span> <span class="nf">dual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns the dual of the geometric algebra tensor.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            tensor: Geometric algebra tensor to return dual for</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dual of the geometric algebra tensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dual_blade_signs</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dual_blade_indices</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GeometricAlgebra.grade_automorphism"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.grade_automorphism">[docs]</a>    <span class="k">def</span> <span class="nf">grade_automorphism</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns the geometric algebra tensor with odd grades negated.</span>
+<span class="sd">        See https://en.wikipedia.org/wiki/Paravector#Grade_automorphism.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            tensor: Geometric algebra tensor to return grade automorphism for</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Geometric algebra tensor with odd grades negated</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">mv_grade_automorphism</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_degrees</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GeometricAlgebra.reversion"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.reversion">[docs]</a>    <span class="k">def</span> <span class="nf">reversion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Grade-reversion. See `reversion()`.&quot;&quot;&quot;</span>
+        <span class="n">tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">mv_reversion</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_degrees</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GeometricAlgebra.conjugation"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.conjugation">[docs]</a>    <span class="k">def</span> <span class="nf">conjugation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Combines reversion and grade automorphism.</span>
+<span class="sd">        See https://en.wikipedia.org/wiki/Paravector#Clifford_conjugation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            tensor: Geometric algebra tensor to return conjugate for</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Geometric algebra tensor after `reversion()` and `grade_automorphism()`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">grade_automorphism</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reversion</span><span class="p">(</span><span class="n">tensor</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="GeometricAlgebra.inverse"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.inverse">[docs]</a>    <span class="k">def</span> <span class="nf">inverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns the inverted geometric algebra tensor</span>
+<span class="sd">        `X^-1` such that `X * X^-1 = 1` if</span>
+<span class="sd">        it exists.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            a: Geometric algebra tensor to return inverse for</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            inverted geometric algebra tensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="n">rev_a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reversion</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+        <span class="n">divisor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geom_prod</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">rev_a</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_pure_kind</span><span class="p">(</span><span class="n">divisor</span><span class="p">,</span> <span class="n">BladeKind</span><span class="o">.</span><span class="n">SCALAR</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;Can&#39;t invert multi-vector (inversion divisor V ~V not scalar: </span><span class="si">%s</span><span class="s2">).&quot;</span> <span class="o">%</span> <span class="n">divisor</span><span class="p">)</span>
+
+        <span class="c1"># Divide by scalar part</span>
+        <span class="k">return</span> <span class="n">rev_a</span> <span class="o">/</span> <span class="n">divisor</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="GeometricAlgebra.reg_prod"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.reg_prod">[docs]</a>    <span class="k">def</span> <span class="nf">reg_prod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns the regressive product of two geometric</span>
+<span class="sd">        algebra tensors.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            a: Geometric algebra tensor on the left hand side of</span>
+<span class="sd">            the regressive product</span>
+<span class="sd">            b: Geometric algebra tensor on the right hand side of</span>
+<span class="sd">            the regressive product</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            regressive product of a and b</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ext_prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dual</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">dual</span><span class="p">(</span><span class="n">b</span><span class="p">)))</span></div>
+
+<div class="viewcode-block" id="GeometricAlgebra.ext_prod"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.ext_prod">[docs]</a>    <span class="k">def</span> <span class="nf">ext_prod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns the exterior product of two geometric</span>
+<span class="sd">        algebra tensors.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            a: Geometric algebra tensor on the left hand side of</span>
+<span class="sd">            the exterior product</span>
+<span class="sd">            b: Geometric algebra tensor on the right hand side of</span>
+<span class="sd">            the exterior product</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            exterior product of a and b</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">mv_multiply</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cayley_outer</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GeometricAlgebra.geom_prod"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.geom_prod">[docs]</a>    <span class="k">def</span> <span class="nf">geom_prod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns the geometric product of two geometric</span>
+<span class="sd">        algebra tensors.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            a: Geometric algebra tensor on the left hand side of</span>
+<span class="sd">            the geometric product</span>
+<span class="sd">            b: Geometric algebra tensor on the right hand side of</span>
+<span class="sd">            the geometric product</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            geometric product of a and b</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="n">a</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">mv_multiply</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cayley</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GeometricAlgebra.inner_prod"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.inner_prod">[docs]</a>    <span class="k">def</span> <span class="nf">inner_prod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns the inner product of two geometric</span>
+<span class="sd">        algebra tensors.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            a: Geometric algebra tensor on the left hand side of</span>
+<span class="sd">            the inner product</span>
+<span class="sd">            b: Geometric algebra tensor on the right hand side of</span>
+<span class="sd">            the inner product</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            inner product of a and b</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">mv_multiply</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cayley_inner</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GeometricAlgebra.mv_repr"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.mv_repr">[docs]</a>    <span class="k">def</span> <span class="nf">mv_repr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns a string representation for the given</span>
+<span class="sd">        geometric algebra tensor.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            a: Geometric algebra tensor to return the representation for</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            string representation for `a`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;MultiVector[</span><span class="si">%s</span><span class="s2">]&quot;</span> <span class="o">%</span> <span class="s2">&quot; + &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="si">%.2f</span><span class="s2">*</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">get_blade_repr</span><span class="p">(</span><span class="n">blade_name</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">value</span><span class="p">,</span> <span class="n">blade_name</span>
+                <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blades</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="mi">0</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;MultiVector[batch_shape=</span><span class="si">%s</span><span class="s2">]&quot;</span> <span class="o">%</span> <span class="n">a</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="GeometricAlgebra.approx_exp"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.approx_exp">[docs]</a>    <span class="k">def</span> <span class="nf">approx_exp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns an approximation of the exponential using a centered taylor series.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            a: Geometric algebra tensor to return exponential for</span>
+<span class="sd">            order: order of the approximation</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Approximation of `exp(a)`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">from_scalar</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">from_scalar</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">order</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geom_prod</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+            <span class="n">i_factorial</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">lgamma</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">))</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="n">v</span> <span class="o">/</span> <span class="n">i_factorial</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="GeometricAlgebra.approx_log"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.approx_log">[docs]</a>    <span class="k">def</span> <span class="nf">approx_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns an approximation of the natural logarithm using a centered</span>
+<span class="sd">        taylor series. Only converges for multivectors where `||mv - 1|| &lt; 1`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            a: Geometric algebra tensor to return logarithm for</span>
+<span class="sd">            order: order of the approximation</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Approximation of `log(a)`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">from_scalar</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+
+        <span class="n">a_minus_one</span> <span class="o">=</span> <span class="n">a</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">from_scalar</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">order</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">a_minus_one</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">v</span> <span class="o">*</span> <span class="n">a_minus_one</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="p">(((</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span> <span class="o">**</span> <span class="n">i</span><span class="p">)</span> <span class="o">/</span> <span class="n">i</span><span class="p">)</span> <span class="o">*</span> <span class="n">v</span>
+
+        <span class="k">return</span> <span class="o">-</span><span class="n">result</span></div>
+
+<div class="viewcode-block" id="GeometricAlgebra.int_pow"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.int_pow">[docs]</a>    <span class="k">def</span> <span class="nf">int_pow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns the geometric algebra tensor to the power of an integer</span>
+<span class="sd">        using repeated multiplication.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            a: Geometric algebra tensor to raise</span>
+<span class="sd">            n: integer power to raise the multivector to</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            `a` to the power of `n`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;n must be an integer.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Can&#39;t raise to negative powers.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># TODO: more efficient (ones only in scalar)</span>
+            <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">e</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">a</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geom_prod</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="GeometricAlgebra.keep_blades"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.keep_blades">[docs]</a>    <span class="k">def</span> <span class="nf">keep_blades</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">blade_names</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Takes a geometric algebra tensor and returns it with only the given</span>
+<span class="sd">        blades as non-zeros.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            a: Geometric algebra tensor to copy</span>
+<span class="sd">            blade_names: Blades to keep</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            `a` with only `blade_names` elements as non-zeros</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">blade_names</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">blade_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">blade_names</span><span class="p">]</span>
+
+        <span class="n">_</span><span class="p">,</span> <span class="n">blade_indices</span> <span class="o">=</span> <span class="n">get_blade_indices_from_names</span><span class="p">(</span>
+            <span class="n">blade_names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blades</span><span class="p">)</span>
+
+        <span class="n">blade_values</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">blade_indices</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">from_tensor</span><span class="p">(</span><span class="n">blade_values</span><span class="p">,</span> <span class="n">blade_indices</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GeometricAlgebra.select_blades"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.select_blades">[docs]</a>    <span class="k">def</span> <span class="nf">select_blades</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">blade_names</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Takes a geometric algebra tensor and returns a `tf.Tensor` with the</span>
+<span class="sd">        blades in blade_names on the last axis.</span>
+
+
+<span class="sd">        Args:</span>
+<span class="sd">            a: Geometric algebra tensor to copy</span>
+<span class="sd">            blade_names: Blades to keep</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            `tf.Tensor` based on `a` with `blade_names` on last axis.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="n">is_single_blade</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">blade_names</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_single_blade</span><span class="p">:</span>
+            <span class="n">blade_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">blade_names</span><span class="p">]</span>
+
+        <span class="n">blade_signs</span><span class="p">,</span> <span class="n">blade_indices</span> <span class="o">=</span> <span class="n">get_blade_indices_from_names</span><span class="p">(</span>
+            <span class="n">blade_names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blades</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">blade_signs</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">blade_indices</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">is_single_blade</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Creates a `MultiVector` from a geometric algebra tensor.</span>
+<span class="sd">        Mainly used as a wrapper for the algebra&#39;s functions for convenience.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            a: Geometric algebra tensor to return `MultiVector` for</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            `MultiVector` for `a`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">MultiVector</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="bp">self</span><span class="p">)</span></div>
 </pre></div>
 
           </div>

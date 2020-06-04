@@ -31,707 +31,213 @@
           <div class="body" role="main">
             
   <h1>Source code for tfga.mv</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Provides the `MultiVector` class used</span>
-<span class="sd">as elements of the `GeometricAlgebra` for</span>
-<span class="sd">computation.</span>
+<span></span><span class="sd">&quot;&quot;&quot;Defines the `MultiVector` class which is used as a convenience wrapper</span>
+<span class="sd">for `GeometricAlgebra` operations.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="c1"># Needed for typings in MultiVector and taking returning MultiVector</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span>
-<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
 
-<span class="kn">from</span> <span class="nn">.blades</span> <span class="kn">import</span> <span class="p">(</span><span class="n">BladeKind</span><span class="p">,</span> <span class="n">get_blade_repr</span><span class="p">,</span> <span class="n">get_blade_of_kind_indices</span><span class="p">,</span>
-                     <span class="n">get_blade_indices_from_names</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.mv_ops</span> <span class="kn">import</span> <span class="p">(</span><span class="n">mv_multiply</span><span class="p">,</span> <span class="n">mv_add</span><span class="p">,</span> <span class="n">mv_equal</span><span class="p">,</span>
-                     <span class="n">mv_reversion</span><span class="p">,</span> <span class="n">mv_grade_automorphism</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.blades</span> <span class="kn">import</span> <span class="n">BladeKind</span>
 
 
 <div class="viewcode-block" id="MultiVector"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector">[docs]</a><span class="k">class</span> <span class="nc">MultiVector</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Elements of a geometric algebra used for computation.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Wrapper for geometric algebra tensors using `GeometricAlgebra`</span>
+<span class="sd">    operations in a less verbose way using operators.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blade_values</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">blade_indices</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">algebra</span><span class="p">:</span> <span class="n">GeometricAlgebra</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Creates a multivector of a given algebra with given values</span>
-<span class="sd">        for given indices.</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blade_values</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">algebra</span><span class="p">:</span> <span class="n">GeometricAlgebra</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initializes a MultiVector from a geometric algebra `tf.Tensor`</span>
+<span class="sd">        and its corresponding `GeometricAlgebra`.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            blade_values: values to use for each blade index</span>
-<span class="sd">            blade_indices: indices of the blades within `algebra`</span>
-<span class="sd">                            to go with `blade_values`.</span>
-<span class="sd">            algebra: `GeometricAlgebra` instance that this multivector</span>
-<span class="sd">                        belongs to.</span>
+<span class="sd">            blade_values: Geometric algebra `tf.Tensor` with as many elements</span>
+<span class="sd">            on its last axis as blades in the algebra</span>
+<span class="sd">            algebra: `GeometricAlgebra` instance corresponding to the geometric</span>
+<span class="sd">            algebra tensor</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># blade_values: [*Batch, len(blade_indices)]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_blade_indices</span> <span class="o">=</span> <span class="n">blade_indices</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span> <span class="o">=</span> <span class="n">blade_values</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span> <span class="o">=</span> <span class="n">algebra</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># used for iteration (__iter__, __next__)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">blade_values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Values for the blades. Indices for the values are given</span>
-<span class="sd">        by `blade_indices`.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Geometric algebra tensor holding the values of this multivector.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">blade_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Indices of the blades of this multivector in the `algebra`.</span>
-<span class="sd">        Values at the indices are given by `blade_values`.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_blade_indices</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">algebra</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeometricAlgebra</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;`GeometricAlgebra` instance this multivector</span>
-<span class="sd">        belongs to.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">algebra</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;`GeometricAlgebra` instance this multivector belongs to.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span>
 
-    <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="o">.</span><span class="n">ref</span><span class="p">())</span>
-
-<div class="viewcode-block" id="MultiVector.with_changes"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.with_changes">[docs]</a>    <span class="k">def</span> <span class="nf">with_changes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blade_values</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                     <span class="n">blade_indices</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">self</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns a copy of this multivector with optional changes made to its</span>
-<span class="sd">        blade values or indices.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            blade_values: optional new values for the returned multivector</span>
-<span class="sd">            blade_indices: optional new indices for the returned multivector</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Copy of this multivector with optional changes made to its</span>
-<span class="sd">            blade values or indices if `blade_values` or `blade_indices`</span>
-<span class="sd">            were set respectively</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">batch_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Batch shape of the multivector (ie. the shape of all axes except</span>
+<span class="sd">        for the last one in the geometric algebra tensor).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Number of elements on the first axis of the geometric algebra</span>
+<span class="sd">        tensor.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">self</span><span class="p">:</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">self</span><span class="p">:</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_n</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="c1"># If we only have one axis left, return the</span>
+            <span class="c1"># actual numbers, otherwise return a new</span>
+            <span class="c1"># multivector.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">ndims</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">MultiVector</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">[</span><span class="n">n</span><span class="p">],</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span>
+                <span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">StopIteration</span>
+
+    <span class="k">def</span> <span class="fm">__xor__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">self</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Exterior product. See `GeometricAlgebra.ext_prod()`&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">MultiVector</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">MultiVector</span><span class="p">(</span>
-            <span class="n">blade_values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_values</span> <span class="k">if</span> <span class="n">blade_values</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">blade_values</span><span class="p">,</span>
-            <span class="n">blade_indices</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_indices</span> <span class="k">if</span> <span class="n">blade_indices</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">blade_indices</span><span class="p">,</span>
-            <span class="n">algebra</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">algebra</span>
-        <span class="p">)</span></div>
-
-<div class="viewcode-block" id="MultiVector.get_kind_indices"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.get_kind_indices">[docs]</a>    <span class="k">def</span> <span class="nf">get_kind_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="n">BladeKind</span><span class="p">,</span>
-                         <span class="n">invert</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Finds a boolean mask for whether this multivector&#39;s blade</span>
-<span class="sd">        indices are of a given kind.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            kind: kind of blade indices to set to `True`</span>
-<span class="sd">            invert: whether to invert the result</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            boolean mask for whether this multivector&#39;s</span>
-<span class="sd">            `blade_indices` are of `kind`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">blade_degrees</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">blade_degrees</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">ext_prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span>
         <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">get_blade_of_kind_indices</span><span class="p">(</span><span class="n">blade_degrees</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span>
-                                         <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">max_degree</span><span class="p">,</span>
-                                         <span class="n">invert</span><span class="o">=</span><span class="n">invert</span><span class="p">)</span></div>
+    <span class="k">def</span> <span class="fm">__or__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">self</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Inner product. See `GeometricAlgebra.inner_prod()`&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">MultiVector</span><span class="p">)</span>
 
-<div class="viewcode-block" id="MultiVector.mv_of_kind"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.mv_of_kind">[docs]</a>    <span class="k">def</span> <span class="nf">mv_of_kind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="n">BladeKind</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns a new multivector based on this one which</span>
-<span class="sd">        has only blades of a given kind.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            kind: kind of blades to keep</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            `MultiVector` based on this one which</span>
-<span class="sd">            has only blades of `kind`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">kind_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_kind_indices</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span>
-
-        <span class="n">result_indices</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_indices</span><span class="p">,</span> <span class="n">kind_indices</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">result_values</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_values</span><span class="p">,</span> <span class="n">kind_indices</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">with_changes</span><span class="p">(</span>
-            <span class="n">blade_values</span><span class="o">=</span><span class="n">result_values</span><span class="p">,</span>
-            <span class="n">blade_indices</span><span class="o">=</span><span class="n">result_indices</span>
-        <span class="p">)</span></div>
-
-<div class="viewcode-block" id="MultiVector.tensor_of_kind"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.tensor_of_kind">[docs]</a>    <span class="k">def</span> <span class="nf">tensor_of_kind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="n">BladeKind</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns a `tf.Tensor` based on this multivector</span>
-<span class="sd">        with blade values of a given kind.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            kind: kind of blades to keep</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            `tf.Tensor` based on this multivector which</span>
-<span class="sd">            has blade values of `kind`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">kind_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_kind_indices</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span>
-        <span class="n">result_values</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_values</span><span class="p">,</span> <span class="n">kind_indices</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">result_values</span></div>
-
-<div class="viewcode-block" id="MultiVector.is_pure_kind"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.is_pure_kind">[docs]</a>    <span class="k">def</span> <span class="nf">is_pure_kind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="n">BladeKind</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns whether this multivector is purely of a given kind</span>
-<span class="sd">        and has no non-zero values for blades not of the kind.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            kind: kind of blade to check purity for</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Whether this multivector is purely of a given kind</span>
-<span class="sd">            and has no non-zero values for blades not of the kind</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">other_kind_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_kind_indices</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_all</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">blade_values</span><span class="p">,</span>
-            <span class="n">other_kind_indices</span><span class="p">,</span>
-            <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
-        <span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span></div>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">scalar</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Scalar part of this multivector as `tf.Tensor`.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">scalar_mv</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;New multivector with only the scalar part of this multivector.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mv_of_kind</span><span class="p">(</span><span class="n">BladeKind</span><span class="o">.</span><span class="n">SCALAR</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">is_pure_scalar</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Whether the multivector is a pure scalar and has no</span>
-<span class="sd">        other non-zero blade values.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_pure_kind</span><span class="p">(</span><span class="n">BladeKind</span><span class="o">.</span><span class="n">SCALAR</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">batch_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Batch shape of this multivector</span>
-<span class="sd">        (ie. how many multivectors this one contains).</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_values</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">values_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Shape of the individual multivector storage.</span>
-<span class="sd">        Typically a `list` of size `1` with as many elements</span>
-<span class="sd">        as this multivector has non-zero blade values.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span>
-
-<div class="viewcode-block" id="MultiVector.reversion"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.reversion">[docs]</a>    <span class="k">def</span> <span class="nf">reversion</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns the grade-reversed multivector.</span>
-<span class="sd">        See https://en.wikipedia.org/wiki/Paravector#Reversion_conjugation.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Grade-reversed `MultiVector`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">new_blade_values</span> <span class="o">=</span> <span class="n">mv_reversion</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">blade_degrees</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">with_changes</span><span class="p">(</span>
-            <span class="n">blade_values</span><span class="o">=</span><span class="n">new_blade_values</span>
-        <span class="p">)</span></div>
-
-<div class="viewcode-block" id="MultiVector.grade_automorphism"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.grade_automorphism">[docs]</a>    <span class="k">def</span> <span class="nf">grade_automorphism</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns the multivector with odd grades negated.</span>
-<span class="sd">        See https://en.wikipedia.org/wiki/Paravector#Grade_automorphism.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            `MultiVector` with odd grades negated</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">new_blade_values</span> <span class="o">=</span> <span class="n">mv_grade_automorphism</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">blade_degrees</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">with_changes</span><span class="p">(</span>
-            <span class="n">blade_values</span><span class="o">=</span><span class="n">new_blade_values</span>
-        <span class="p">)</span></div>
-
-<div class="viewcode-block" id="MultiVector.conjugation"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.conjugation">[docs]</a>    <span class="k">def</span> <span class="nf">conjugation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Combines reversion and grade automorphism.</span>
-<span class="sd">        See https://en.wikipedia.org/wiki/Paravector#Clifford_conjugation.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            `MultiVector` after `reversion()` and `grade_automorphism()`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reversion</span><span class="p">()</span><span class="o">.</span><span class="n">grade_automorphism</span><span class="p">()</span></div>
-
-<div class="viewcode-block" id="MultiVector.dual"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.dual">[docs]</a>    <span class="k">def</span> <span class="nf">dual</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns the dual of the MultiVector.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Dual of the MultiVector</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">dual_indices</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">dual_blade_indices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices</span><span class="p">)</span>
-        <span class="n">dual_signs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">dual_blade_signs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices</span><span class="p">)</span>
-        <span class="n">new_values</span> <span class="o">=</span> <span class="n">dual_signs</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_values</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">with_changes</span><span class="p">(</span>
-            <span class="n">blade_indices</span><span class="o">=</span><span class="n">dual_indices</span><span class="p">,</span>
-            <span class="n">blade_values</span><span class="o">=</span><span class="n">new_values</span><span class="p">,</span>
-        <span class="p">)</span></div>
-
-    <span class="k">def</span> <span class="fm">__invert__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Grade-reversion. See `reversion()`.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reversion</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="fm">__truediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">,</span> <span class="n">MultiVector</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Division of a multi-vector by a scalar.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            other: scalar to divide by.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            `MultiVector` divided by `other`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">as_mv</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">other</span><span class="o">.</span><span class="n">is_pure_scalar</span><span class="p">:</span>
-            <span class="n">divisor</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">scalar</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">with_changes</span><span class="p">(</span><span class="n">blade_values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_values</span> <span class="o">/</span> <span class="n">divisor</span><span class="p">)</span>
-
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-            <span class="s2">&quot;Division of two multi-vectors is ambiguous (left or right inverse?). Use a.inverse() * b or b * a.inverse() instead.&quot;</span><span class="p">)</span>
-
-<div class="viewcode-block" id="MultiVector.inverse"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.inverse">[docs]</a>    <span class="k">def</span> <span class="nf">inverse</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns the inverted multivector</span>
-<span class="sd">        `X^-1` such that `X * X^-1 = 1` if</span>
-<span class="sd">        it exists.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            inverted `MultiVector`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">rev_self</span> <span class="o">=</span> <span class="o">~</span><span class="bp">self</span>
-        <span class="n">divisor</span> <span class="o">=</span> <span class="bp">self</span> <span class="o">*</span> <span class="n">rev_self</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">divisor</span><span class="o">.</span><span class="n">is_pure_scalar</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-                <span class="s2">&quot;Can&#39;t invert multi-vector (inversion divisor V ~V not scalar: </span><span class="si">%s</span><span class="s2">).&quot;</span> <span class="o">%</span> <span class="n">divisor</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">rev_self</span> <span class="o">/</span> <span class="n">divisor</span></div>
-
-    <span class="k">def</span> <span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">,</span> <span class="n">MultiVector</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns the geometric product.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            other: object to multiply with</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            geometric product of `self` and `other`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">as_mv</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-
-        <span class="n">result_blade_indices</span><span class="p">,</span> <span class="n">result_blade_values</span> <span class="o">=</span> <span class="n">mv_multiply</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_values</span><span class="p">,</span>
-            <span class="n">other</span><span class="o">.</span><span class="n">blade_indices</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">blade_values</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">cayley</span>
+        <span class="k">return</span> <span class="n">MultiVector</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">inner_prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span>
         <span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">with_changes</span><span class="p">(</span>
-            <span class="n">blade_values</span><span class="o">=</span><span class="n">result_blade_values</span><span class="p">,</span>
-            <span class="n">blade_indices</span><span class="o">=</span><span class="n">result_blade_indices</span>
+    <span class="k">def</span> <span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">self</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Geometric product. See `GeometricAlgebra.geom_prod()`&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">MultiVector</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">MultiVector</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">geom_prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__rmul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">,</span> <span class="n">MultiVector</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;See `__mul__()`.&quot;&quot;&quot;</span>
-        <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">as_mv</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">other</span> <span class="o">*</span> <span class="bp">self</span>
+    <span class="k">def</span> <span class="fm">__and__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">self</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Regressive product. See `GeometricAlgebra.reg_prod()`&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">MultiVector</span><span class="p">)</span>
 
-<div class="viewcode-block" id="MultiVector.reg_prod"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.reg_prod">[docs]</a>    <span class="k">def</span> <span class="nf">reg_prod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">MultiVector</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns the regressive product of the multivector and</span>
-<span class="sd">        another multivector.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            other: object to take regressive product with</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            regressive product of multivector and other</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">as_mv</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dual</span><span class="p">()</span> <span class="o">^</span> <span class="n">other</span><span class="o">.</span><span class="n">dual</span><span class="p">())</span><span class="o">.</span><span class="n">dual</span><span class="p">()</span></div>
-
-    <span class="k">def</span> <span class="fm">__and__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">,</span> <span class="n">MultiVector</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;See reg_prod().&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reg_prod</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="fm">__rand__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">,</span> <span class="n">MultiVector</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;See reg_prod().&quot;&quot;&quot;</span>
-        <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">as_mv</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">other</span><span class="o">.</span><span class="n">reg_prod</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="fm">__or__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">,</span> <span class="n">MultiVector</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns the inner product.umbers.Number, MultiVector, tf.Tensor]</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            other: object to calculate inner product with</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            inner product of `self` and `other`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">as_mv</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-
-        <span class="n">result_blade_indices</span><span class="p">,</span> <span class="n">result_blade_values</span> <span class="o">=</span> <span class="n">mv_multiply</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_values</span><span class="p">,</span>
-            <span class="n">other</span><span class="o">.</span><span class="n">blade_indices</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">blade_values</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">cayley_inner</span>
+        <span class="k">return</span> <span class="n">MultiVector</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">reg_prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span>
         <span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">with_changes</span><span class="p">(</span>
-            <span class="n">blade_values</span><span class="o">=</span><span class="n">result_blade_values</span><span class="p">,</span>
-            <span class="n">blade_indices</span><span class="o">=</span><span class="n">result_blade_indices</span>
+    <span class="k">def</span> <span class="fm">__invert__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">self</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Reversion. See `GeometricAlgebra.reversion()`&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">MultiVector</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">reversion</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__ror__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">,</span> <span class="n">MultiVector</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;See `__or__()`.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span> <span class="o">|</span> <span class="n">other</span>
-
-    <span class="k">def</span> <span class="fm">__xor__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">,</span> <span class="n">MultiVector</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns the exterior product.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            other: object to calculate exterior product with</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            exterior product of `self` and `other`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">as_mv</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-
-        <span class="n">result_blade_indices</span><span class="p">,</span> <span class="n">result_blade_values</span> <span class="o">=</span> <span class="n">mv_multiply</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_values</span><span class="p">,</span>
-            <span class="n">other</span><span class="o">.</span><span class="n">blade_indices</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">blade_values</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">cayley_outer</span>
+    <span class="k">def</span> <span class="nf">__negate__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">self</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Negation.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">MultiVector</span><span class="p">(</span>
+            <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span>
         <span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">with_changes</span><span class="p">(</span>
-            <span class="n">blade_values</span><span class="o">=</span><span class="n">result_blade_values</span><span class="p">,</span>
-            <span class="n">blade_indices</span><span class="o">=</span><span class="n">result_blade_indices</span>
+    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">self</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Addition of multivectors.&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">MultiVector</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">MultiVector</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__rxor__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">,</span> <span class="n">MultiVector</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;See `__xor__()`.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="o">-</span><span class="bp">self</span> <span class="o">^</span> <span class="n">other</span>
+    <span class="k">def</span> <span class="fm">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">self</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Subtraction of multivectors.&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">MultiVector</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">,</span> <span class="n">MultiVector</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns whether the multivector is equal to another one.</span>
-<span class="sd">        Two multivectors are equal if all their elements are equal</span>
-<span class="sd">        for all multivectors in the batch.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            other: object to compare equality to.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Whether `self` is equal to another `other`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">as_mv</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">mv_equal</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_values</span><span class="p">,</span>
-            <span class="n">other</span><span class="o">.</span><span class="n">blade_indices</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">blade_values</span>
+        <span class="k">return</span> <span class="n">MultiVector</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span> <span class="o">-</span> <span class="n">other</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">,</span> <span class="n">MultiVector</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns the addition of the multivector and `other`.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            other: object to add with</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Addition of the multivector and `other`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">as_mv</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-
-        <span class="n">result_indices</span><span class="p">,</span> <span class="n">result_values</span> <span class="o">=</span> <span class="n">mv_add</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_values</span><span class="p">,</span>
-            <span class="n">other</span><span class="o">.</span><span class="n">blade_indices</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">blade_values</span>
+    <span class="k">def</span> <span class="fm">__pow__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">self</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Multivector raised to an integer power.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">MultiVector</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">int_pow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">,</span> <span class="n">n</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span>
         <span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">with_changes</span><span class="p">(</span>
-            <span class="n">blade_values</span><span class="o">=</span><span class="n">result_values</span><span class="p">,</span>
-            <span class="n">blade_indices</span><span class="o">=</span><span class="n">result_indices</span>
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="bp">self</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;`MultiVector` with only passed blades as non-zeros.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">MultiVector</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">keep_blades</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">,</span> <span class="n">key</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">,</span> <span class="n">MultiVector</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;See `__add__()`.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span> <span class="o">+</span> <span class="n">other</span>
-
-    <span class="k">def</span> <span class="fm">__neg__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns the negative multivector.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            `MultiVector` negated</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">with_changes</span><span class="p">(</span>
-            <span class="n">blade_values</span><span class="o">=-</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_values</span>
-        <span class="p">)</span>
-
-    <span class="k">def</span> <span class="fm">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">,</span> <span class="n">MultiVector</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns the subtraction of the multivector and `other`.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            other: object to subtract</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Subtraction of the multivector and `other`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">neg_other</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">as_mv</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span> <span class="o">+</span> <span class="n">neg_other</span>
-
-    <span class="k">def</span> <span class="fm">__rsub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">,</span> <span class="n">MultiVector</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;See `__sub__()`.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="o">-</span><span class="bp">self</span> <span class="o">+</span> <span class="n">other</span>
-
-    <span class="k">def</span> <span class="fm">__abs__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns the multivector with all of its values</span>
-<span class="sd">        without sign.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            `MultiVector` with all of its values</span>
-<span class="sd">            without sign</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">with_changes</span><span class="p">(</span>
-            <span class="n">blade_values</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_values</span><span class="p">)</span>
-        <span class="p">)</span>
-
-<div class="viewcode-block" id="MultiVector.tensor"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.tensor">[docs]</a>    <span class="k">def</span> <span class="nf">tensor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">blade_names</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns a tf.Tensor with the given blades on the last axis</span>
-<span class="sd">        in the same order. Blade names can be unnormalized and will have</span>
-<span class="sd">        correct sign on the output.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            blade_names: Blade name or list of blade names to build a</span>
-<span class="sd">            tensor for. Can be unnormalized and will return correct sign.</span>
-<span class="sd">            Can contain duplicate blade names.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            tf.Tensor with the given blades on the last axis</span>
-<span class="sd">            in the same order</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># If we are only given a single string, make it into a list</span>
-        <span class="c1"># so we can treat it the same way, but remember that we need</span>
-        <span class="c1"># to remove the last axis later when returning the result.</span>
-        <span class="n">is_single_input</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">blade_names</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">is_single_input</span><span class="p">:</span>
-            <span class="n">blade_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">blade_names</span><span class="p">]</span>
-
-        <span class="n">query_signs</span><span class="p">,</span> <span class="n">query_ind</span> <span class="o">=</span> <span class="n">get_blade_indices_from_names</span><span class="p">(</span>
-            <span class="n">blade_names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">blades</span><span class="p">)</span>
-
-        <span class="n">blade_values</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">blade_index</span> <span class="ow">in</span> <span class="n">query_ind</span><span class="p">:</span>
-            <span class="c1"># Find the blade indices of the query that are present</span>
-            <span class="c1"># in this multivector. If an index is not present, use</span>
-            <span class="c1"># zeros for that index&#39;s values.</span>
-            <span class="n">self_blade_index</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices</span> <span class="o">==</span> <span class="n">blade_index</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-
-            <span class="n">blade_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span>
-                <span class="nb">len</span><span class="p">(</span><span class="n">self_blade_index</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span>
-                <span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_values</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">self_blade_index</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
-                <span class="k">lambda</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-            <span class="p">))</span>
-
-        <span class="c1"># Combine the different blade values (will be same order as</span>
-        <span class="c1"># query indices on the last axis) and multiply by the signs</span>
-        <span class="c1"># the query produced.</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">query_signs</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">blade_values</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-
-        <span class="c1"># Remove the last axis if we only had a single input blade name</span>
-        <span class="k">if</span> <span class="n">is_single_input</span><span class="p">:</span>
-            <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-
-        <span class="k">return</span> <span class="n">result</span></div>
-
-    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Slices the multivector. Can slice by kind</span>
-<span class="sd">        if a string or BladeKind was passed or by</span>
-<span class="sd">        batch.</span>
-
-<span class="sd">        Examples:</span>
-<span class="sd">            # mv has batch_shape [10, 5] with blades e_1, e_2.</span>
-<span class="sd">            mv[:3, [&quot;e_1&quot;, &quot;e_12&quot;]] # batch shape [3, 5] blades e_1</span>
-<span class="sd">            mv[&quot;e_1&quot;] # batch shape [10, 5], blades e_1</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            key: Shape where the last index can be a string</span>
-<span class="sd">            or list of strings to only keep certain</span>
-<span class="sd">            blades. Will raise if duplicate blades are found.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            sliced `MultiVector`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">def</span> <span class="nf">is_sequence</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-            <span class="k">return</span> <span class="p">(</span>
-                <span class="p">(</span><span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s2">&quot;strip&quot;</span><span class="p">))</span> <span class="ow">and</span>
-                <span class="nb">hasattr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s2">&quot;__getitem__&quot;</span><span class="p">)</span> <span class="ow">and</span>
-                <span class="nb">hasattr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s2">&quot;__iter__&quot;</span><span class="p">)</span>
-            <span class="p">)</span>
-
-        <span class="k">def</span> <span class="nf">is_nonempty_sequence</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">is_sequence</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
-
-        <span class="k">def</span> <span class="nf">is_nonempty_str_sequence</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">is_nonempty_sequence</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">x</span><span class="p">)</span>
-
-        <span class="n">mv</span> <span class="o">=</span> <span class="bp">self</span>
-
-        <span class="c1"># Find blade index of passed blade strings in global blade index if</span>
-        <span class="c1"># a string or a sequence of strings was passed in some way.</span>
-        <span class="c1"># Also remove that part from the key that will later be used for</span>
-        <span class="c1"># indexing the batch dimensions.</span>
-        <span class="c1"># Could do this better with a recursive function that generalizes more too.</span>
-        <span class="n">blade_names</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="c1"># Key is a single string</span>
-            <span class="n">blade_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span><span class="p">]</span>
-            <span class="n">key</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
-        <span class="k">elif</span> <span class="n">is_nonempty_str_sequence</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
-            <span class="c1"># Key is sequence of strings</span>
-            <span class="n">blade_names</span> <span class="o">=</span> <span class="n">key</span>
-            <span class="n">key</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
-        <span class="k">elif</span> <span class="n">is_nonempty_sequence</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="c1"># Single string at last index of key sequence</span>
-            <span class="n">blade_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
-            <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="n">is_nonempty_sequence</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="ow">and</span> <span class="n">is_nonempty_str_sequence</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
-            <span class="c1"># Sequence of strings at last index of key sequence</span>
-            <span class="n">blade_names</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-
-        <span class="k">if</span> <span class="n">blade_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">_</span><span class="p">,</span> <span class="n">blade_indices</span> <span class="o">=</span> <span class="n">get_blade_indices_from_names</span><span class="p">(</span>
-                <span class="n">blade_names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">blades</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">blade_indices</span> <span class="o">=</span> <span class="kc">None</span>
-
-        <span class="c1"># Index multi-vector bases if we found an index for them above.</span>
-        <span class="k">if</span> <span class="n">blade_indices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># Don&#39;t allow duplicate indices</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">blade_indices</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">blade_indices</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
-                    <span class="s2">&quot;Duplicate blade indices passed: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">blade_indices</span><span class="p">)</span>
-
-            <span class="c1"># Tile our own sparse blade index across the search indices</span>
-            <span class="n">self_blade_indices</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">blade_indices</span><span class="p">)])</span>
-
-            <span class="n">blade_indices</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">blade_indices</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-
-            <span class="c1"># Find the indices of the search indices in our own index</span>
-            <span class="n">found_indices</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
-                <span class="n">self_blade_indices</span> <span class="o">==</span> <span class="n">blade_indices</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-
-            <span class="c1"># if len(found_indices) &lt; blade_indices.shape[1]:</span>
-            <span class="c1">#    raise Exception(&quot;Could not find all passed blades. Passed blade indices: %s, available blade indices: %s&quot; % (</span>
-            <span class="c1">#        blade_indices[0], self.blade_indices))</span>
-
-            <span class="c1"># Get new values and indices at the now known own indices</span>
-            <span class="n">new_indices</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_indices</span><span class="p">,</span> <span class="n">found_indices</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-            <span class="n">new_values</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_values</span><span class="p">,</span> <span class="n">found_indices</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-
-            <span class="n">mv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">with_changes</span><span class="p">(</span>
-                <span class="n">blade_values</span><span class="o">=</span><span class="n">new_values</span><span class="p">,</span>
-                <span class="n">blade_indices</span><span class="o">=</span><span class="n">new_indices</span>
-            <span class="p">)</span>
-
-        <span class="c1"># Use rest of key for normal indexing (usually used for batch indexing).</span>
-        <span class="c1"># TODO: Need to change blade_indices if they key slices the indices.</span>
-        <span class="c1"># Could just count the length of the key and look at batch_shape,</span>
-        <span class="c1"># but that still misses ellipsis.</span>
-        <span class="k">return</span> <span class="n">mv</span><span class="o">.</span><span class="n">with_changes</span><span class="p">(</span>
-            <span class="n">blade_values</span><span class="o">=</span><span class="n">mv</span><span class="o">.</span><span class="n">blade_values</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-        <span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]):</span>
+        <span class="sd">&quot;&quot;&quot;`tf.Tensor` with passed blades on last axis.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">select_blades</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_values</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">def</span> <span class="nf">_blade_value_repr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
-                <span class="n">blade_repr</span> <span class="o">=</span> <span class="n">get_blade_repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">blades</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
-                <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%.2f</span><span class="s2">*</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">blade_repr</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">mv_repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">)</span>
 
-            <span class="k">return</span> <span class="s2">&quot;MultiVector[</span><span class="si">%s</span><span class="s2">]&quot;</span> <span class="o">%</span> <span class="s2">&quot; + &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                <span class="n">_blade_value_repr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">value</span><span class="p">,</span> <span class="n">index</span>
-                <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="mi">0</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot;MultiVector[batch_shape=</span><span class="si">%s</span><span class="s2">, blades=[</span><span class="si">%s</span><span class="s2">]]&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_shape</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">get_blade_repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">blades</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices</span><span class="p">))</span>
-
-<div class="viewcode-block" id="MultiVector.tile"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.tile">[docs]</a>    <span class="k">def</span> <span class="nf">tile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">multiples</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Replicates the multivector across batch shape.</span>
-
-<span class="sd">        Example: mv with batch_shape[]</span>
-<span class="sd">        - mv.tile([3, 4]) -&gt; mv with batch shape [3, 4]</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            Tiled `MultiVector` according to `multiples`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">expanded_shape</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">multiples</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_values</span><span class="o">.</span><span class="n">shape</span><span class="p">]</span>
-        <span class="n">expanded_multiples</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">multiples</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_values</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-
-        <span class="n">new_blade_values</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span>
-            <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_values</span><span class="p">,</span> <span class="n">expanded_shape</span><span class="p">),</span>
-            <span class="n">multiples</span><span class="o">=</span><span class="n">expanded_multiples</span>
-        <span class="p">)</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">with_changes</span><span class="p">(</span>
-            <span class="n">blade_values</span><span class="o">=</span><span class="n">new_blade_values</span>
+<div class="viewcode-block" id="MultiVector.inverse"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.inverse">[docs]</a>    <span class="k">def</span> <span class="nf">inverse</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">self</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Inverse. See `GeometricAlgebra.inverse()`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">MultiVector</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">inverse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="MultiVector.approx_exp"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.approx_exp">[docs]</a>    <span class="k">def</span> <span class="nf">approx_exp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns an approximation of the exponential using a centered taylor series.</span>
+<div class="viewcode-block" id="MultiVector.dual"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.dual">[docs]</a>    <span class="k">def</span> <span class="nf">dual</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">self</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Dual. See `GeometricAlgebra.dual()`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">MultiVector</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">dual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span>
+        <span class="p">)</span></div>
 
-<span class="sd">        Args:</span>
-<span class="sd">            order: order of the approximation</span>
+<div class="viewcode-block" id="MultiVector.conjugation"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.conjugation">[docs]</a>    <span class="k">def</span> <span class="nf">conjugation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">self</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Conjugation. See `GeometricAlgebra.conjugation()`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">MultiVector</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">conjugation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span>
+        <span class="p">)</span></div>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            Approximation of `exp(self)`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">as_mv</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">as_mv</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">order</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span> <span class="o">*</span> <span class="n">v</span>
-            <span class="n">i_factorial</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">lgamma</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">))</span>
-            <span class="n">result</span> <span class="o">+=</span> <span class="n">v</span> <span class="o">/</span> <span class="n">i_factorial</span>
-        <span class="k">return</span> <span class="n">result</span></div>
+<div class="viewcode-block" id="MultiVector.grade_automorphism"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.grade_automorphism">[docs]</a>    <span class="k">def</span> <span class="nf">grade_automorphism</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">self</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Grade automorphism. See `GeometricAlgebra.grade_automorphism()`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">MultiVector</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">grade_automorphism</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span>
+        <span class="p">)</span></div>
 
-<div class="viewcode-block" id="MultiVector.approx_log"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.approx_log">[docs]</a>    <span class="k">def</span> <span class="nf">approx_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns an approximation of the natural logarithm using a centered</span>
-<span class="sd">        taylor series. Only converges for multivectors where `||mv - 1|| &lt; 1`.</span>
+<div class="viewcode-block" id="MultiVector.approx_exp"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.approx_exp">[docs]</a>    <span class="k">def</span> <span class="nf">approx_exp</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">self</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Approximate exponential. See `GeometricAlgebra.approx_exp()`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">MultiVector</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">approx_exp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span>
+        <span class="p">)</span></div>
 
-<span class="sd">        Args:</span>
-<span class="sd">            order: order of the approximation</span>
+<div class="viewcode-block" id="MultiVector.approx_log"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.approx_log">[docs]</a>    <span class="k">def</span> <span class="nf">approx_log</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">self</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Approximate logarithm. See `GeometricAlgebra.approx_log()`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">MultiVector</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">approx_log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span>
+        <span class="p">)</span></div>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            Approximation of `log(self)`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">as_mv</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
-
-        <span class="n">self_minus_one</span> <span class="o">=</span> <span class="bp">self</span> <span class="o">-</span> <span class="mf">1.0</span>
-        <span class="n">v</span> <span class="o">=</span> <span class="kc">None</span>
-
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">order</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="n">v</span> <span class="o">=</span> <span class="n">self_minus_one</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">v</span> <span class="o">*</span> <span class="n">self_minus_one</span>
-            <span class="n">result</span> <span class="o">+=</span> <span class="p">(((</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span> <span class="o">**</span> <span class="n">i</span><span class="p">)</span> <span class="o">/</span> <span class="n">i</span><span class="p">)</span> <span class="o">*</span> <span class="n">v</span>
-
-        <span class="k">return</span> <span class="o">-</span><span class="n">result</span></div>
-
-<div class="viewcode-block" id="MultiVector.int_pow"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.int_pow">[docs]</a>    <span class="k">def</span> <span class="nf">int_pow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns the multivector to the power of an integer</span>
-<span class="sd">        using repeated multiplication.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            n: integer power to raise the multivector to</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            `MultiVector` to the power of `n`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;n must be an integer.&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Can&#39;t raise to negative powers.&quot;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">as_mv</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
-
-        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="n">result</span> <span class="o">*=</span> <span class="bp">self</span>
-        <span class="k">return</span> <span class="n">result</span></div></div>
+<div class="viewcode-block" id="MultiVector.is_pure_kind"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.is_pure_kind">[docs]</a>    <span class="k">def</span> <span class="nf">is_pure_kind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="n">BladeKind</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Whether the `MultiVector` is of a pure kind.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">is_pure_kind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">)</span></div></div>
 </pre></div>
 
           </div>
