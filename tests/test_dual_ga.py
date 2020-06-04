@@ -1,8 +1,13 @@
+import tensorflow as tf
+
+# Make tensorflow not take over the entire GPU memory
+for gpu in tf.config.experimental.list_physical_devices('GPU'):
+    tf.config.experimental.set_memory_growth(gpu, True)
+
+from tfga import GeometricAlgebra
 import unittest as ut
 import numpy as np
 import tensorflow as tf
-
-from tfga import GeometricAlgebra
 
 dual_metric = [0]
 dual_bases = ["0"]
@@ -11,93 +16,73 @@ dual_blade_degrees = [len(blade) for blade in dual_blades]
 
 
 class TestDualGeometricAlgebraMultiply(ut.TestCase):
+    def assertTensorsEqual(self, a, b):
+        self.assertTrue(tf.reduce_all(a == b), "%s not equal to %s" % (a, b))
+
     def test_mul_mv_mv(self):
         ga = GeometricAlgebra(metric=dual_metric)
 
-        zero = ga.zeros([], kind="scalar")
-        one = ga.ones([], kind="scalar")
-        eps = ga.ones([], kind="pseudoscalar")
-        ten = ga.fill([], fill_value=10.0, kind="scalar")
+        zero = ga.from_scalar(0.0)
+        one = ga.from_scalar(1.0)
+        eps = ga.from_tensor_with_kind(tf.ones(1), kind="pseudoscalar")
+        ten = ga.from_scalar(10.0)
 
-        self.assertEqual(eps * eps, zero)
-        self.assertEqual(one * one, one)
-        self.assertEqual(zero * one, zero)
-        self.assertEqual(one * zero, zero)
-        self.assertEqual(one * eps, eps)
-        self.assertEqual(eps * one, eps)
-        self.assertEqual(zero * zero, zero)
-        self.assertEqual(ten * zero, zero)
-        self.assertEqual(zero * ten, zero)
-        self.assertEqual((ten * eps) * eps, zero)
-        self.assertEqual(ten * one, ten)
-        self.assertEqual(one * ten, ten)
-
-    def test_mul_py_mv(self):
-        ga = GeometricAlgebra(metric=dual_metric)
-
-        zero = ga.zeros([], kind="scalar")
-        zero_py = 0.0
-        one = ga.ones([], kind="scalar")
-        one_py = 1.0
-        eps = ga.ones([], kind="pseudoscalar")
-        ten = ga.fill([], fill_value=10.0, kind="scalar")
-        ten_py = 10.0
-
-        self.assertEqual(one * one_py, one)
-        self.assertEqual(one_py * one, one)
-        self.assertEqual(zero * one_py, zero)
-        self.assertEqual(one_py * zero, zero)
-        self.assertEqual(zero_py * one, zero)
-        self.assertEqual(one * zero_py, zero)
-        self.assertEqual(one_py * eps, eps)
-        self.assertEqual(eps * one_py, eps)
-        self.assertEqual(zero_py * zero, zero)
-        self.assertEqual(zero * zero_py, zero)
-        self.assertEqual(ten_py * zero, zero)
-        self.assertEqual(zero * ten_py, zero)
-        self.assertEqual(ten * zero_py, zero)
-        self.assertEqual(zero_py * ten, zero)
-        self.assertEqual((ten_py * eps) * eps, zero)
-        self.assertEqual(ten_py * one, ten)
-        self.assertEqual(one * ten_py, ten)
-        self.assertEqual(ten * one_py, ten)
-        self.assertEqual(one_py * ten, ten)
+        self.assertTensorsEqual(ga.geom_prod(eps, eps), zero)
+        self.assertTensorsEqual(ga.geom_prod(one, one), one)
+        self.assertTensorsEqual(ga.geom_prod(zero, one), zero)
+        self.assertTensorsEqual(ga.geom_prod(one, zero), zero)
+        self.assertTensorsEqual(ga.geom_prod(one, eps), eps)
+        self.assertTensorsEqual(ga.geom_prod(eps, one), eps)
+        self.assertTensorsEqual(ga.geom_prod(zero, zero), zero)
+        self.assertTensorsEqual(ga.geom_prod(ten, zero), zero)
+        self.assertTensorsEqual(ga.geom_prod(zero, ten), zero)
+        self.assertTensorsEqual(
+            ga.geom_prod(ga.geom_prod(ten, eps), eps),
+            zero
+        )
+        self.assertTensorsEqual(ga.geom_prod(ten, one), ten)
+        self.assertTensorsEqual(ga.geom_prod(one, ten), ten)
 
     def test_mul_tf_mv(self):
         ga = GeometricAlgebra(metric=dual_metric)
 
-        zero = ga.zeros([], kind="scalar")
-        zero_tf = ga.as_mv(tf.convert_to_tensor(0.0, dtype=tf.float32))
-        one = ga.ones([], kind="scalar")
-        one_tf = ga.as_mv(tf.convert_to_tensor(1.0, dtype=tf.float32))
-        eps = ga.ones([], kind="pseudoscalar")
-        ten = ga.fill([], fill_value=10.0, kind="scalar")
-        ten_tf = ga.as_mv(tf.convert_to_tensor([10.0], dtype=tf.float32))
+        zero = ga.from_scalar(0.0)
+        one = ga.from_scalar(1.0)
+        eps = ga.from_tensor_with_kind(tf.ones(1), kind="pseudoscalar")
+        ten = ga.from_scalar(10.0)
 
-        self.assertEqual(one * one_tf, one)
-        self.assertEqual(one_tf * one, one)
-        self.assertEqual(zero * one_tf, zero)
-        self.assertEqual(one_tf * zero, zero)
-        self.assertEqual(zero_tf * one, zero)
-        self.assertEqual(one * zero_tf, zero)
-        self.assertEqual(one_tf * eps, eps)
-        self.assertEqual(eps * one_tf, eps)
-        self.assertEqual(zero_tf * zero, zero)
-        self.assertEqual(zero * zero_tf, zero)
-        self.assertEqual(ten_tf * zero, zero)
-        self.assertEqual(zero * ten_tf, zero)
-        self.assertEqual(ten * zero_tf, zero)
-        self.assertEqual(zero_tf * ten, zero)
-        self.assertEqual((ten_tf * eps) * eps, zero)
-        self.assertEqual(ten_tf * one, ten)
-        self.assertEqual(one * ten_tf, ten)
-        self.assertEqual(ten * one_tf, ten)
-        self.assertEqual(one_tf * ten, ten)
+        zero_tf = tf.convert_to_tensor([0, 0], dtype=tf.float32)
+        one_tf = tf.convert_to_tensor([1, 0], dtype=tf.float32)
+        eps_tf = tf.convert_to_tensor([0, 1], dtype=tf.float32)
+        ten_tf = tf.convert_to_tensor([10, 0], dtype=tf.float32)
+
+        self.assertTensorsEqual(ga.geom_prod(one, one_tf), one)
+        self.assertTensorsEqual(ga.geom_prod(one_tf, one), one)
+        self.assertTensorsEqual(ga.geom_prod(zero, one_tf), zero)
+        self.assertTensorsEqual(ga.geom_prod(one_tf, zero), zero)
+        self.assertTensorsEqual(ga.geom_prod(zero_tf, one), zero)
+        self.assertTensorsEqual(ga.geom_prod(one, zero_tf), zero)
+        self.assertTensorsEqual(ga.geom_prod(one_tf, eps), eps)
+        self.assertTensorsEqual(ga.geom_prod(eps, one_tf), eps)
+        self.assertTensorsEqual(ga.geom_prod(zero_tf, zero), zero)
+        self.assertTensorsEqual(ga.geom_prod(zero, zero_tf), zero)
+        self.assertTensorsEqual(ga.geom_prod(ten_tf, zero), zero)
+        self.assertTensorsEqual(ga.geom_prod(zero, ten_tf), zero)
+        self.assertTensorsEqual(ga.geom_prod(ten, zero_tf), zero)
+        self.assertTensorsEqual(ga.geom_prod(zero_tf, ten), zero)
+        self.assertTensorsEqual(
+            ga.geom_prod(ga.geom_prod(ten_tf, eps), eps),
+            zero
+        )
+        self.assertTensorsEqual(ga.geom_prod(ten_tf, one), ten)
+        self.assertTensorsEqual(ga.geom_prod(one, ten_tf), ten)
+        self.assertTensorsEqual(ga.geom_prod(ten, one_tf), ten)
+        self.assertTensorsEqual(ga.geom_prod(one_tf, ten), ten)
 
 
 class TestDualGeometricAlgebraMisc(ut.TestCase):
-    def assertAllElementsEqualTo(self, tensor, value):
-        return tf.reduce_all(tensor == value)
+    def assertTensorsEqual(self, a, b):
+        self.assertTrue(tf.reduce_all(a == b), "%s not equal to %s" % (a, b))
 
     def test_auto_diff_square(self):
         """Test automatic differentiation using
@@ -107,35 +92,23 @@ class TestDualGeometricAlgebraMisc(ut.TestCase):
         """
         ga = GeometricAlgebra(metric=dual_metric)
 
-        one = ga.ones([], kind="scalar")
-        five = 5.0 * ga.ones([], kind="scalar")
-        eps = ga.ones([], kind="pseudoscalar")
+        one = ga.from_scalar(1.0)
+        five = ga.from_scalar(5.0)
+        eps = ga.from_tensor_with_kind(tf.ones(1), kind="pseudoscalar")
 
         x = one + eps
-        self.assertEqual(x[""], one)
-        self.assertEqual(x["0"], eps)
-        self.assertEqual(x.scalar, 1.0)
-        self.assertEqual(x.mv_of_kind("pseudoscalar"), eps)
-        self.assertEqual(x.tensor_of_kind("scalar"), 1.0)
-        self.assertEqual(x.tensor_of_kind("pseudoscalar"), 1.0)
 
         # f(1) = 1^2 = 1, f'(1) = 2
-        x_squared = x * x
-        self.assertEqual(x_squared.scalar, 1.0)
-        self.assertEqual(x_squared["0"], 2.0 * eps)
+        x_squared = ga.geom_prod(x, x)
+        self.assertTensorsEqual(ga.select_blades(x_squared, ""), 1.0)
+        self.assertTensorsEqual(ga.select_blades(x_squared, "0"), 2.0)
 
         y = five + eps
-        self.assertEqual(y[""], five)
-        self.assertEqual(y["0"], eps)
-        self.assertEqual(y.scalar, 5.0)
-        self.assertEqual(y.mv_of_kind("pseudoscalar"), eps)
-        self.assertEqual(y.tensor_of_kind("scalar"), 5.0)
-        self.assertEqual(y.tensor_of_kind("pseudoscalar"), 1.0)
 
         # f(5) = 5^2 = 25, f'(5) = 10
-        y_squared = y * y
-        self.assertEqual(y_squared.scalar, 25.0)
-        self.assertEqual(y_squared["0"], eps * 10.0)
+        y_squared = ga.geom_prod(y, y)
+        self.assertTensorsEqual(ga.select_blades(y_squared, ""), 25.0)
+        self.assertTensorsEqual(ga.select_blades(y_squared, "0"), 10.0)
 
     def test_batched_auto_diff_square(self):
         """Test automatic differentiation using
@@ -146,62 +119,48 @@ class TestDualGeometricAlgebraMisc(ut.TestCase):
         """
         ga = GeometricAlgebra(metric=dual_metric)
 
-        batch_shape = [3, 4]
-
-        one = ga.ones(batch_shape, kind="scalar")
-        five = 5.0 * ga.ones(batch_shape, kind="scalar")
-        eps = ga.ones(batch_shape, kind="pseudoscalar")
+        one = ga.from_tensor_with_kind(tf.ones([3, 4, 1]), kind="scalar")
+        five = ga.from_tensor_with_kind(tf.fill([3, 4, 1], 5.0), kind="scalar")
+        eps = ga.from_tensor_with_kind(tf.ones([3, 4, 1]), kind="pseudoscalar")
 
         x = one + eps
-        self.assertEqual(x[""], one)
-        self.assertEqual(x["0"], eps)
-        self.assertAllElementsEqualTo(x.scalar, 1.0)
-        self.assertEqual(x.mv_of_kind("pseudoscalar"), eps)
-        self.assertAllElementsEqualTo(x.tensor_of_kind("scalar"), 1.0)
-        self.assertAllElementsEqualTo(x.tensor_of_kind("pseudoscalar"), 1.0)
 
         # f(1) = 1^2 = 1, f'(1) = 2
-        x_squared = x * x
-        self.assertAllElementsEqualTo(x_squared.scalar, 1.0)
-        self.assertEqual(x_squared["0"], 2.0 * eps)
+        x_squared = ga.geom_prod(x, x)
+        self.assertTensorsEqual(ga.select_blades(x_squared, ""), 1.0)
+        self.assertTensorsEqual(ga.select_blades(x_squared, "0"), 2.0)
 
         y = five + eps
-        self.assertEqual(y[""], five)
-        self.assertEqual(y["0"], eps)
-        self.assertAllElementsEqualTo(y.scalar, 5.0)
-        self.assertEqual(y.mv_of_kind("pseudoscalar"), eps)
-        self.assertAllElementsEqualTo(y.tensor_of_kind("scalar"), 5.0)
-        self.assertAllElementsEqualTo(y.tensor_of_kind("pseudoscalar"), 1.0)
 
         # f(5) = 5^2 = 25, f'(5) = 10
-        y_squared = y * y
-        self.assertAllElementsEqualTo(y_squared.scalar, 25.0)
-        self.assertEqual(y_squared["0"], eps * 10.0)
+        y_squared = ga.geom_prod(y, y)
+        self.assertTensorsEqual(ga.select_blades(y_squared, ""), 25.0)
+        self.assertTensorsEqual(ga.select_blades(y_squared, "0"), 10.0)
 
     def test_mul_inverse(self):
         ga = GeometricAlgebra(metric=dual_metric)
 
         # a = 2
-        a = ga.fill([], fill_value=2.0, kind="scalar")
+        a = ga.from_tensor_with_kind(tf.fill([1], 2.0), kind="scalar")
 
         # b = 3 + 3e0
-        b = ga.fill([], fill_value=3.0, kind="mv")
+        b = ga.from_tensor_with_kind(tf.fill([2], 3.0), kind="mv")
 
         # a * b = 2 * (3 + 3e0) = 6 + 6e0
-        c = a * b
-        self.assertEqual(c, 6.0 + 6.0 * ga.basis_mvs[0])
+        c = ga.geom_prod(a, b)
+        self.assertTensorsEqual(c, ga.from_scalar(6.0) + 6.0 * ga.e("0"))
 
         # a^-1 = 1 / 2
-        a_inv = a.inverse()
-        self.assertEqual(a_inv, 0.5)
+        a_inv = ga.inverse(a)
+        self.assertTensorsEqual(ga.select_blades(a_inv, ""), 0.5)
 
         # c = a * b
         # => a_inv * c = b
-        self.assertEqual(a_inv * c, b)
+        self.assertTensorsEqual(ga.geom_prod(a_inv, c), b)
 
         # Since a is scalar, should commute too.
         # => c * a_inv = b
-        self.assertEqual(c * a_inv, b)
+        self.assertTensorsEqual(ga.geom_prod(c, a_inv), b)
 
         # b is not invertible and will throw an exception
-        self.assertRaises(Exception, b.inverse)
+        self.assertRaises(Exception, ga.inverse, b)

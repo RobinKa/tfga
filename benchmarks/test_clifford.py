@@ -21,7 +21,7 @@ def _clifford_mul(a, b):
 gmt_func = D.gmt_func
 @numba.njit(parallel=True, nogil=True)
 def _clifford_raw_mul(a, b):
-    op = np.zeros(a.shape)
+    op = np.empty(a.shape, dtype=np.float32)
     for i in numba.prange(op.shape[0]):
         op[i, :] = gmt_func(a[i, :], b[i, :])
     return a * b
