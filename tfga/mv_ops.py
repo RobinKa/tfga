@@ -1,8 +1,7 @@
-"""Operations on multivectors used internally."""
+"""Operations on geometric algebra tensors used internally."""
 import tensorflow as tf
 
 
-#@tf.function
 def mv_multiply(a_blade_values: tf.Tensor, b_blade_values: tf.Tensor,
                 cayley: tf.Tensor) -> tf.Tensor:
     # ...i, ijk -> ...jk
@@ -31,7 +30,6 @@ def mv_reversion(a_blade_values, algebra_blade_degrees):
     return reversion_signs * a_blade_values
 
 
-@tf.function
 def mv_grade_automorphism(a_blade_values, algebra_blade_degrees):
     algebra_blade_degrees = tf.cast(algebra_blade_degrees, tf.float32)
     signs = 1.0 - 2.0 * (algebra_blade_degrees % 2.0)
