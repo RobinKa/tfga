@@ -5,7 +5,8 @@
 
 Python package for Geometric / Clifford Algebra with TensorFlow 2.
 
-This project is a work in progress. Its API may change and the examples aren't polished yet.
+**This project is a work in progress. Its API may change and the examples aren't polished yet.**
+
 Pull requests and suggestions either by opening an issue or by [sending me an email](mailto:tora@warlock.ai) are welcome.
 
 ## Installation
@@ -39,7 +40,7 @@ quaternion = ga.from_tensor_with_kind(tf.fill(dims=4, value=5), kind="even")
 # 5 + 1 e_0 + 1 e_1 + 1 e_2 + 5 e_01 + 5 e_02 + 5 e_12
 multivector = ordinary_vector + quaternion
 
-# Inner product e_0 | 1 e_0 + 1 e_1 + 1 e_2 = 1
+# Inner product e_0 | (e_0 + e_1 + e_2) = 1
 # ga.print is like print, but has extra formatting for geometric algebra tf.Tensor instances.
 ga.print(ga.inner_prod(ga.e0, ordinary_vector))
 
