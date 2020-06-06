@@ -86,6 +86,8 @@ print(mv_a ^ mv_b)
 ## Notebooks
 [Generic examples](https://github.com/RobinKa/tfga/tree/master/notebooks/tfga.ipynb)
 
+[Classical Electromagnetism using Geometric Algebra](https://github.com/RobinKa/tfga/tree/master/notebooks/em.ipynb)
+
 [Quantum Electrodynamics using Geometric Algebra](https://github.com/RobinKa/tfga/tree/master/notebooks/qed.ipynb)
 
 [Projective Geometric Algebra](https://github.com/RobinKa/tfga/tree/master/notebooks/pga.ipynb)

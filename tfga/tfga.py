@@ -168,6 +168,17 @@ class GeometricAlgebra:
         """
         return get_blade_of_kind_indices(self.blade_degrees, kind, self.max_degree, invert=invert)
 
+    def get_blade_indices_of_degree(self, degree: int) -> tf.Tensor:
+        """Find all indices of blades of the given degree.
+
+        Args:
+            degree: degree to return blades for
+
+        Returns:
+            indices of blades with the given degree in the algebra
+        """
+        return tf.gather(tf.range(self.num_blades), tf.where(self.blade_degrees == degree)[..., 0])
+
     def is_pure_kind(self, tensor: tf.Tensor, kind: BladeKind) -> bool:
         """Returns whether the given tensor is purely of a given kind
         and has no non-zero values for blades not of the kind.
