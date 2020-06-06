@@ -201,6 +201,17 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">get_blade_of_kind_indices</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_degrees</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_degree</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="n">invert</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="GeometricAlgebra.get_blade_indices_of_degree"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.get_blade_indices_of_degree">[docs]</a>    <span class="k">def</span> <span class="nf">get_blade_indices_of_degree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">degree</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Find all indices of blades of the given degree.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            degree: degree to return blades for</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            indices of blades with the given degree in the algebra</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_blades</span><span class="p">),</span> <span class="n">tf</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_degrees</span> <span class="o">==</span> <span class="n">degree</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span></div>
+
 <div class="viewcode-block" id="GeometricAlgebra.is_pure_kind"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.is_pure_kind">[docs]</a>    <span class="k">def</span> <span class="nf">is_pure_kind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="n">BladeKind</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Returns whether the given tensor is purely of a given kind</span>
 <span class="sd">        and has no non-zero values for blades not of the kind.</span>
