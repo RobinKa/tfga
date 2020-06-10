@@ -11,7 +11,10 @@ import tensorflow as tf
 import numpy as np
 
 from .cayley import get_cayley_tensor, blades_from_bases
-from .blades import BladeKind, get_blade_of_kind_indices, get_blade_indices_from_names, get_blade_repr
+from .blades import (
+    BladeKind, get_blade_of_kind_indices, get_blade_indices_from_names,
+    get_blade_repr, invert_blade_indices
+)
 from .mv_ops import mv_multiply, mv_reversion, mv_grade_automorphism
 from .mv import MultiVector
 
@@ -179,6 +182,31 @@ class GeometricAlgebra:
         """
         return tf.gather(tf.range(self.num_blades), tf.where(self.blade_degrees == degree)[..., 0])
 
+    def is_pure(self, tensor: tf.Tensor, blade_indices: tf.Tensor) -> bool:
+        """Returns whether the given tensor is purely of the given blades
+        and has no non-zero values for blades not in the given blades.
+
+        Args:
+            tensor: tensor to check purity for
+            blade_indices: blade indices to check purity for
+
+        Returns:
+            Whether the tensor is purely of the given blades
+            and has no non-zero values for blades not in the given blades
+        """
+        tensor = tf.convert_to_tensor(tensor, dtype_hint=tf.float32)
+        blade_indices = tf.convert_to_tensor(
+            blade_indices, dtype_hint=tf.int64)
+
+        inverted_blade_indices = invert_blade_indices(
+            self.num_blades, blade_indices)
+
+        return tf.reduce_all(tf.gather(
+            tensor,
+            inverted_blade_indices,
+            axis=-1
+        ) == 0)
+
     def is_pure_kind(self, tensor: tf.Tensor, kind: BladeKind) -> bool:
         """Returns whether the given tensor is purely of a given kind
         and has no non-zero values for blades not of the kind.
@@ -192,11 +220,11 @@ class GeometricAlgebra:
             and has no non-zero values for blades not of the kind
         """
         tensor = tf.convert_to_tensor(tensor, dtype_hint=tf.float32)
+        inverted_kind_indices = self.get_kind_blade_indices(kind, invert=True)
 
-        kind_indices = self.get_kind_blade_indices(kind, invert=True)
         return tf.reduce_all(tf.gather(
             tensor,
-            kind_indices,
+            inverted_kind_indices,
             axis=-1
         ) == 0)
 

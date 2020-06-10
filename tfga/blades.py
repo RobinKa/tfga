@@ -66,6 +66,24 @@ def is_blade_kind(blade_degrees: tf.Tensor, kind: [BladeKind, str], max_degree: 
     raise Exception("Unknown blade kind: %s" % kind)
 
 
+def invert_blade_indices(num_blades: int, blade_indices: tf.Tensor) -> tf.Tensor:
+    """Returns all blade indices except for the given ones.
+
+    Args:
+        num_blades: Total number of blades in the algebra
+        blade_indices: blade indices to exclude
+
+    Returns:
+        All blade indices except for the given ones
+    """
+
+    all_blades = tf.range(num_blades, dtype=blade_indices.dtype)
+    return tf.sparse.to_dense(tf.sets.difference(
+        tf.expand_dims(all_blades, axis=0),
+        tf.expand_dims(blade_indices, axis=0)
+    ))[0]
+
+
 def get_blade_of_kind_indices(blade_degrees: tf.Tensor, kind: BladeKind,
                               max_degree: int, invert: bool = False) -> tf.Tensor:
     """Finds a boolean mask for whether blades are of a given kind.
@@ -85,6 +103,8 @@ def get_blade_of_kind_indices(blade_degrees: tf.Tensor, kind: BladeKind,
 
 
 def _normal_swap(x: List[str]) -> List[str]:
+    """Swaps the first unordered blade pair and returns the new list as well
+    as whether a swap was performed."""
     for i in range(len(x) - 1):
         a, b = x[i], x[i + 1]
         if a > b:  # string comparison

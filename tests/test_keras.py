@@ -75,7 +75,7 @@ class TestKerasLayers(ut.TestCase):
         self.assertTensorsEqual(
             geom_to_tensor_kind_layer(geom_tensor), gt_tensor)
 
-    def test_geometric_product_dense_mv(self):
+    def test_geometric_product_dense_v_v(self):
         sta = GeometricAlgebra([1, -1, -1, -1])
 
         geom_tensor = tf.concat(
@@ -83,9 +83,65 @@ class TestKerasLayers(ut.TestCase):
             axis=-1
         )
 
+        vector_blade_indices = [1, 2, 3, 4]
+
         geom_prod_layer = GeometricProductDense(
             sta, 8,
-            blade_indices_w=[1, 2, 3, 4], blade_indices_b=[0]
+            blade_indices_kernel=vector_blade_indices,
+            blade_indices_bias=vector_blade_indices
         )
 
         result = geom_prod_layer(geom_tensor)
+
+        # vector * vector + vector -> scalar + bivector
+        expected_result_indices = [0, 5, 6, 7, 8, 9, 10]
+
+        self.assertTrue(sta.is_pure(result, expected_result_indices))
+
+    def test_geometric_product_dense_s_mv(self):
+        sta = GeometricAlgebra([1, -1, -1, -1])
+
+        geom_tensor = tf.concat(
+            [tf.ones([20, 6, 1]), tf.zeros([20, 6, 15])],
+            axis=-1
+        )
+
+        mv_blade_indices = list(range(16))
+
+        geom_prod_layer = GeometricProductDense(
+            sta, 8,
+            blade_indices_kernel=mv_blade_indices,
+            blade_indices_bias=mv_blade_indices
+        )
+
+        result = geom_prod_layer(geom_tensor)
+
+        # scalar * multivector + multivector -> multivector
+        # Check that nothing is zero (it would be extremely unlikely
+        # but not impossible to randomly get a zero here).
+        self.assertTrue(tf.reduce_all(result != 0.0))
+
+    def test_geometric_product_dense_sequence(self):
+        sta = GeometricAlgebra([1, -1, -1, -1])
+
+        tensor = tf.ones([20, 6, 4])
+
+        vector_blade_indices = [1, 2, 3, 4]
+        mv_blade_indices = list(range(16))
+
+        # vector * vector + vector -> scalar + bivector
+        scalar_bivector_blade_indices = [0, 5, 6, 7, 8, 9, 10]
+
+        sequence = tf.keras.Sequential([
+            TensorToGeometric(sta, blade_indices=vector_blade_indices),
+            GeometricProductDense(
+                sta, 8,
+                blade_indices_kernel=vector_blade_indices,
+                blade_indices_bias=vector_blade_indices
+            ),
+            GeometricToTensor(sta, blade_indices=scalar_bivector_blade_indices)
+        ])
+
+        result = sequence(tensor)
+
+        self.assertEqual(result.shape[-1], len(scalar_bivector_blade_indices))
