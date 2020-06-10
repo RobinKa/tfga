@@ -10,6 +10,15 @@ from .tfga import GeometricAlgebra
 
 
 class TensorToGeometric(layers.Layer):
+    """Layer for converting tensors with given blade indices to
+    geometric algebra tensors.
+
+    Args:
+        algebra: GeometricAlgebra instance to use
+        blade_indices: blade indices to interpret the last axis of the
+        input tensor as
+    """
+
     def __init__(self, algebra: GeometricAlgebra, blade_indices: List[int],
                  **kwargs):
         super().__init__(**kwargs)
@@ -29,6 +38,15 @@ class TensorToGeometric(layers.Layer):
 
 
 class TensorWithKindToGeometric(layers.Layer):
+    """Layer for converting tensors with given blade kind to
+    geometric algebra tensors.
+
+    Args:
+        algebra: GeometricAlgebra instance to use
+        kind: blade kind indices to interpret the last axis of the
+        input tensor as
+    """
+
     def __init__(self, algebra: GeometricAlgebra, kind: BladeKind,
                  **kwargs):
         super().__init__(**kwargs)
@@ -48,6 +66,13 @@ class TensorWithKindToGeometric(layers.Layer):
 
 
 class GeometricToTensor(layers.Layer):
+    """Layer for extracting given blades from geometric algebra tensors.
+
+    Args:
+        algebra: GeometricAlgebra instance to use
+        blade_indices: blade indices to extract
+    """
+
     def __init__(self, algebra: GeometricAlgebra, blade_indices: List[int],
                  **kwargs):
         super().__init__(**kwargs)
@@ -67,6 +92,13 @@ class GeometricToTensor(layers.Layer):
 
 
 class GeometricToTensorWithKind(GeometricToTensor):
+    """Layer for extracting blades of a kind from geometric algebra tensors.
+
+    Args:
+        algebra: GeometricAlgebra instance to use
+        kind: blade indices of kind to extract
+    """
+
     def __init__(self, algebra: GeometricAlgebra, kind: BladeKind,
                  **kwargs):
         blade_indices = algebra.get_kind_blade_indices(kind)
@@ -75,6 +107,16 @@ class GeometricToTensorWithKind(GeometricToTensor):
 
 
 class GeometricProductDense(layers.Layer):
+    """Analagous to Keras' Dense layer but using multivector-valued matrices
+    instead of scalar ones and geometric multiplication instead of standard
+    multiplication.
+
+    Args:
+        algebra: GeometricAlgebra instance to use for the parameters
+        blade_indices_kernel: Blade indices to use for the kernel parameter
+        blade_indices_bias: Blade indices to use for the bias parameter (if used)
+    """
+
     def __init__(
         self,
         algebra: GeometricAlgebra,
@@ -199,6 +241,16 @@ class GeometricProductDense(layers.Layer):
 
 
 class GeometricSandwichProductDense(GeometricProductDense):
+    """Analagous to Keras' Dense layer but using multivector-valued matrices
+    instead of scalar ones and geometric sandwich multiplication instead of
+    standard multiplication.
+
+    Args:
+        algebra: GeometricAlgebra instance to use for the parameters
+        blade_indices_kernel: Blade indices to use for the kernel parameter
+        blade_indices_bias: Blade indices to use for the bias parameter (if used)
+    """
+
     def __init__(
         self, algebra, units, blade_indices_kernel, blade_indices_bias=None,
         activation=None, use_bias=True, kernel_initializer="glorot_uniform",
