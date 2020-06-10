@@ -86,7 +86,7 @@ print(mv_a ^ mv_b)
 ## Keras layers
 TFGA also provides [Keras](https://www.tensorflow.org/guide/keras/overview) layers which provide
 layers similar to the existing ones but using multivectors instead. For example the GeometricProductDense
-layer is exactly the same as the [Dense](https://www.tensorflow.org/guide/keras/overview) layer but uses
+layer is exactly the same as the [Dense](https://www.tensorflow.org/api_docs/python/tf/keras/layers/Dense) layer but uses
 multivector-valued weights and biases instead of scalar ones. The exact kind of multivector-type can be
 passed too. Example:
 
@@ -137,6 +137,8 @@ there also exists the `GeometricSandwichProductDense` with an identical API.
 
 ## Notebooks
 [Generic examples](https://github.com/RobinKa/tfga/tree/master/notebooks/tfga.ipynb)
+
+[Using Keras layers to estimate triangle area](https://github.com/RobinKa/tfga/tree/master/notebooks/keras-triangles.ipynb)
 
 [Classical Electromagnetism using Geometric Algebra](https://github.com/RobinKa/tfga/tree/master/notebooks/em.ipynb)
 

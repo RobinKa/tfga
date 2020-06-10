@@ -1,14 +1,17 @@
-import unittest as ut
-import tensorflow as tf
-from tensorflow import keras as ks
-
-from tfga import GeometricAlgebra
-from tfga.blades import BladeKind
 from tfga.layers import (
     GeometricProductDense, GeometricSandwichProductDense,
     GeometricToTensor, GeometricToTensorWithKind,
     TensorToGeometric, TensorWithKindToGeometric
 )
+from tfga.blades import BladeKind
+from tfga import GeometricAlgebra
+from tensorflow import keras as ks
+import unittest as ut
+import tensorflow as tf
+
+# Make tensorflow not take over the entire GPU memory
+for gpu in tf.config.experimental.list_physical_devices('GPU'):
+    tf.config.experimental.set_memory_growth(gpu, True)
 
 
 class TestKerasLayers(ut.TestCase):
