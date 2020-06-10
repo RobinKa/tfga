@@ -95,7 +95,7 @@ import tensorflow as tf
 from tfga import GeometricAlgebra
 from tfga.layers import TensorToGeometric, GeometricToTensor, GeometricProductDense
 
-# 4 basis vectors (e0^2=-1, e1^2=+1, e2^2=+1, e3^2=+1)
+# 4 basis vectors (e0^2=+1, e1^2=-1, e2^2=-1, e3^2=-1)
 sta = GeometricAlgebra([1, -1, -1, -1])
 
 # We want our dense layer to perform a matrix multiply
@@ -105,8 +105,10 @@ vector_blade_indices = sta.get_kind_blade_indices(BladeKind.VECTOR),
 # Create our input of shape [Batch, Units, BladeValues]
 tensor = tf.ones([20, 6, 4])
 
-# The matrix-multiply will perform vector * vector + vector
+# The matrix-multiply will perform vector * vector
 # so our result will be scalar + bivector + vector.
+# Use the resulting blade type for the bias too which is
+# added to the result.
 result_indices = tf.concat([
     sta.get_kind_blade_indices(BladeKind.SCALAR), # 1 index
     sta.get_kind_blade_indices(BladeKind.VECTOR), # 4 indices
@@ -121,8 +123,7 @@ sequence = tf.keras.Sequential([
     GeometricProductDense(
         algebra=sta, units=8, # units is analagous to Keras' Dense layer
         blade_indices_kernel=vector_blade_indices,
-        blade_indices_bias=vector_blade_indices,
-        bias_initializer=tf.keras.initializers.RandomNormal()
+        blade_indices_bias=result_indices
     ),
     # Extract our wanted blade indices (last axis 16 -> 11 (1+4+6))
     GeometricToTensor(sta, blade_indices=result_indices)
