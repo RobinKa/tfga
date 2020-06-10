@@ -10,9 +10,13 @@ class BladeKind(Enum):
     EVEN = "even"
     ODD = "odd"
     SCALAR = "scalar"
-    PSEUDOSCALAR = "pseudoscalar"
     VECTOR = "vector"
+    BIVECTOR = "bivector"
+    TRIVECTOR = "trivector"
+    PSEUDOSCALAR = "pseudoscalar"
     PSEUDOVECTOR = "pseudovector"
+    PSEUDOBIVECTOR = "pseudobivector"
+    PSEUDOTRIVECTOR = "pseudotrivector"
 
 
 def get_blade_repr(blade_name: str) -> str:
@@ -57,13 +61,39 @@ def is_blade_kind(blade_degrees: tf.Tensor, kind: [BladeKind, str], max_degree: 
         return blade_degrees % 2 == 1
     elif kind == BladeKind.SCALAR.value:
         return blade_degrees == 0
-    elif kind == BladeKind.PSEUDOSCALAR.value:
-        return blade_degrees == max_degree
     elif kind == BladeKind.VECTOR.value:
         return blade_degrees == 1
+    elif kind == BladeKind.BIVECTOR.value:
+        return blade_degrees == 2
+    elif kind == BladeKind.TRIVECTOR.value:
+        return blade_degrees == 3
+    elif kind == BladeKind.PSEUDOSCALAR.value:
+        return blade_degrees == max_degree
     elif kind == BladeKind.PSEUDOVECTOR.value:
         return blade_degrees == max_degree - 1
+    elif kind == BladeKind.PSEUDOBIVECTOR.value:
+        return blade_degrees == max_degree - 2
+    elif kind == BladeKind.PSEUDOTRIVECTOR.value:
+        return blade_degrees == max_degree - 3
     raise Exception("Unknown blade kind: %s" % kind)
+
+
+def invert_blade_indices(num_blades: int, blade_indices: tf.Tensor) -> tf.Tensor:
+    """Returns all blade indices except for the given ones.
+
+    Args:
+        num_blades: Total number of blades in the algebra
+        blade_indices: blade indices to exclude
+
+    Returns:
+        All blade indices except for the given ones
+    """
+
+    all_blades = tf.range(num_blades, dtype=blade_indices.dtype)
+    return tf.sparse.to_dense(tf.sets.difference(
+        tf.expand_dims(all_blades, axis=0),
+        tf.expand_dims(blade_indices, axis=0)
+    ))[0]
 
 
 def get_blade_of_kind_indices(blade_degrees: tf.Tensor, kind: BladeKind,
@@ -85,6 +115,8 @@ def get_blade_of_kind_indices(blade_degrees: tf.Tensor, kind: BladeKind,
 
 
 def _normal_swap(x: List[str]) -> List[str]:
+    """Swaps the first unordered blade pair and returns the new list as well
+    as whether a swap was performed."""
     for i in range(len(x) - 1):
         a, b = x[i], x[i + 1]
         if a > b:  # string comparison
