@@ -106,12 +106,11 @@ vector_blade_indices = sta.get_kind_blade_indices(BladeKind.VECTOR),
 tensor = tf.ones([20, 6, 4])
 
 # The matrix-multiply will perform vector * vector
-# so our result will be scalar + bivector + vector.
+# so our result will be scalar + bivector.
 # Use the resulting blade type for the bias too which is
 # added to the result.
 result_indices = tf.concat([
     sta.get_kind_blade_indices(BladeKind.SCALAR), # 1 index
-    sta.get_kind_blade_indices(BladeKind.VECTOR), # 4 indices
     sta.get_kind_blade_indices(BladeKind.BIVECTOR) # 6 indices
 ], axis=0)
 
@@ -125,11 +124,11 @@ sequence = tf.keras.Sequential([
         blade_indices_kernel=vector_blade_indices,
         blade_indices_bias=result_indices
     ),
-    # Extract our wanted blade indices (last axis 16 -> 11 (1+4+6))
+    # Extract our wanted blade indices (last axis 16 -> 7 (1+6))
     GeometricToTensor(sta, blade_indices=result_indices)
 ])
 
-# Result will have shape [20, 8, 11]
+# Result will have shape [20, 8, 7]
 result = sequence(tensor)
 ```
 

@@ -344,7 +344,15 @@ class GeometricAlgebra:
         return mv_grade_automorphism(tensor, self.blade_degrees)
 
     def reversion(self, tensor: tf.Tensor) -> tf.Tensor:
-        """Grade-reversion. See `reversion()`."""
+        """Returns the grade-reversed geometric algebra tensor.
+        See https://en.wikipedia.org/wiki/Paravector#Reversion_conjugation.
+
+        Args:
+            tensor: Geometric algebra tensor to return grade-reversion for
+
+        Returns:
+            Grade-reversed geometric algebra tensor
+        """
         tensor = tf.convert_to_tensor(tensor, dtype_hint=tf.float32)
         return mv_reversion(tensor, self.blade_degrees)
 
