@@ -378,7 +378,15 @@
         <span class="k">return</span> <span class="n">mv_grade_automorphism</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_degrees</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeometricAlgebra.reversion"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.reversion">[docs]</a>    <span class="k">def</span> <span class="nf">reversion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Grade-reversion. See `reversion()`.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Returns the grade-reversed geometric algebra tensor.</span>
+<span class="sd">        See https://en.wikipedia.org/wiki/Paravector#Reversion_conjugation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            tensor: Geometric algebra tensor to return grade-reversion for</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Grade-reversed geometric algebra tensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">mv_reversion</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_degrees</span><span class="p">)</span></div>
 
