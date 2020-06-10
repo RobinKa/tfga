@@ -10,9 +10,13 @@ class BladeKind(Enum):
     EVEN = "even"
     ODD = "odd"
     SCALAR = "scalar"
-    PSEUDOSCALAR = "pseudoscalar"
     VECTOR = "vector"
+    BIVECTOR = "bivector"
+    TRIVECTOR = "trivector"
+    PSEUDOSCALAR = "pseudoscalar"
     PSEUDOVECTOR = "pseudovector"
+    PSEUDOBIVECTOR = "pseudobivector"
+    PSEUDOTRIVECTOR = "pseudotrivector"
 
 
 def get_blade_repr(blade_name: str) -> str:
@@ -57,12 +61,20 @@ def is_blade_kind(blade_degrees: tf.Tensor, kind: [BladeKind, str], max_degree: 
         return blade_degrees % 2 == 1
     elif kind == BladeKind.SCALAR.value:
         return blade_degrees == 0
-    elif kind == BladeKind.PSEUDOSCALAR.value:
-        return blade_degrees == max_degree
     elif kind == BladeKind.VECTOR.value:
         return blade_degrees == 1
+    elif kind == BladeKind.BIVECTOR.value:
+        return blade_degrees == 2
+    elif kind == BladeKind.TRIVECTOR.value:
+        return blade_degrees == 3
+    elif kind == BladeKind.PSEUDOSCALAR.value:
+        return blade_degrees == max_degree
     elif kind == BladeKind.PSEUDOVECTOR.value:
         return blade_degrees == max_degree - 1
+    elif kind == BladeKind.PSEUDOBIVECTOR.value:
+        return blade_degrees == max_degree - 2
+    elif kind == BladeKind.PSEUDOTRIVECTOR.value:
+        return blade_degrees == max_degree - 3
     raise Exception("Unknown blade kind: %s" % kind)
 
 

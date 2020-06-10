@@ -83,6 +83,58 @@ print(mv_a | mv_b)
 print(mv_a ^ mv_b)
 ```
 
+## Keras layers
+TFGA also provides [Keras](https://www.tensorflow.org/guide/keras/overview) layers which provide
+layers similar to the existing ones but using multivectors instead. For example the GeometricProductDense
+layer is exactly the same as the [Dense](https://www.tensorflow.org/guide/keras/overview) layer but uses
+multivector-valued weights and biases instead of scalar ones. The exact kind of multivector-type can be
+passed too. Example:
+
+```python
+import tensorflow as tf
+from tfga import GeometricAlgebra
+from tfga.layers import TensorToGeometric, GeometricToTensor, GeometricProductDense
+
+# 4 basis vectors (e0^2=-1, e1^2=+1, e2^2=+1, e3^2=+1)
+sta = GeometricAlgebra([1, -1, -1, -1])
+
+# We want our dense layer to perform a matrix multiply
+# with a matrix that has vector-valued entries.
+vector_blade_indices = sta.get_kind_blade_indices(BladeKind.VECTOR),
+
+# Create our input of shape [Batch, Units, BladeValues]
+tensor = tf.ones([20, 6, 4])
+
+# The matrix-multiply will perform vector * vector + vector
+# so our result will be scalar + bivector + vector.
+result_indices = tf.concat([
+    sta.get_kind_blade_indices(BladeKind.SCALAR), # 1 index
+    sta.get_kind_blade_indices(BladeKind.VECTOR), # 4 indices
+    sta.get_kind_blade_indices(BladeKind.BIVECTOR) # 6 indices
+], axis=0)
+
+sequence = tf.keras.Sequential([
+    # Converts the last axis to a dense multivector
+    # (so, 4 -> 16 (total number of blades in the algebra))
+    TensorToGeometric(sta, blade_indices=vector_blade_indices),
+    # Perform matrix multiply with vector-valued matrix
+    GeometricProductDense(
+        algebra=sta, units=8, # units is analagous to Keras' Dense layer
+        blade_indices_kernel=vector_blade_indices,
+        blade_indices_bias=vector_blade_indices,
+        bias_initializer=tf.keras.initializers.RandomNormal()
+    ),
+    # Extract our wanted blade indices (last axis 16 -> 11 (1+4+6))
+    GeometricToTensor(sta, blade_indices=result_indices)
+])
+
+# Result will have shape [20, 8, 11]
+result = sequence(tensor)
+```
+
+For performing a geometric sandwich product `R * x * ~R` instead of just the geometric product `R * x`
+there also exists the `GeometricSandwichProductDense` with an identical API.
+
 ## Notebooks
 [Generic examples](https://github.com/RobinKa/tfga/tree/master/notebooks/tfga.ipynb)
 
@@ -91,3 +143,7 @@ print(mv_a ^ mv_b)
 [Quantum Electrodynamics using Geometric Algebra](https://github.com/RobinKa/tfga/tree/master/notebooks/qed.ipynb)
 
 [Projective Geometric Algebra](https://github.com/RobinKa/tfga/tree/master/notebooks/pga.ipynb)
+
+## Tests
+Tests using Python's built-in `unittest` module are available in the `tests` directory. All tests can be run by
+executing `python -m unittest discover tests` from the root directory of the repository.

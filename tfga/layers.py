@@ -98,8 +98,9 @@ class GeometricProductDense(layers.Layer):
         self.units = units
         self.blade_indices_kernel = tf.convert_to_tensor(
             blade_indices_kernel, dtype_hint=tf.int64)
-        self.blade_indices_bias = tf.convert_to_tensor(
-            blade_indices_bias, dtype_hint=tf.int64)
+        if use_bias:
+            self.blade_indices_bias = tf.convert_to_tensor(
+                blade_indices_bias, dtype_hint=tf.int64)
 
         self.activation = activations.get(activation)
         self.use_bias = use_bias
@@ -145,7 +146,8 @@ class GeometricProductDense(layers.Layer):
         return tf.TensorShape([*input_shape[:-2], self.units, self.algebra.num_blades])
 
     def call(self, inputs):
-        w_geom = self.algebra.from_tensor(self.kernel, self.blade_indices_kernel)
+        w_geom = self.algebra.from_tensor(
+            self.kernel, self.blade_indices_kernel)
 
         # Perform a matrix-multiply, but using geometric product instead of
         # standard multiplication. To do this we do the geometric product
@@ -156,7 +158,8 @@ class GeometricProductDense(layers.Layer):
             inputs_expanded, w_geom), axis=-2)
 
         if self.bias is not None:
-            b_geom = self.algebra.from_tensor(self.bias, self.blade_indices_bias)
+            b_geom = self.algebra.from_tensor(
+                self.bias, self.blade_indices_bias)
             result += b_geom
 
         return self.activation(result)
@@ -193,3 +196,51 @@ class GeometricProductDense(layers.Layer):
                 constraints.serialize(self.bias_constraint)
         })
         return config
+
+
+class GeometricSandwichProductDense(GeometricProductDense):
+    def __init__(
+        self, algebra, units, blade_indices_kernel, blade_indices_bias=None,
+        activation=None, use_bias=True, kernel_initializer="glorot_uniform",
+        bias_initializer="zeros", kernel_regularizer=None,
+        bias_regularizer=None, activity_regularizer=None,
+        kernel_constraint=None, bias_constraint=None, **kwargs
+    ):
+        super().__init__(
+            algebra, units,
+            blade_indices_kernel,
+            blade_indices_bias=blade_indices_bias,
+            activation=activation,
+            use_bias=use_bias,
+            kernel_initializer=kernel_initializer,
+            bias_initializer=bias_initializer,
+            kernel_regularizer=kernel_regularizer,
+            bias_regularizer=bias_regularizer,
+            activity_regularizer=activity_regularizer,
+            kernel_constraint=kernel_constraint,
+            bias_constraint=bias_constraint, **kwargs
+        )
+
+    def call(self, inputs):
+        w_geom = self.algebra.from_tensor(
+            self.kernel, self.blade_indices_kernel)
+
+        # Same as GeometricProductDense but using R*x*~R instead of just R*x
+        inputs_expanded = tf.expand_dims(inputs, axis=inputs.shape.ndims - 2)
+        result = tf.reduce_sum(
+            self.algebra.geom_prod(
+                w_geom,
+                self.algebra.geom_prod(
+                    inputs_expanded,
+                    self.algebra.reversion(w_geom)
+                )
+            ),
+            axis=-2
+        )
+
+        if self.bias is not None:
+            b_geom = self.algebra.from_tensor(
+                self.bias, self.blade_indices_bias)
+            result += b_geom
+
+        return self.activation(result)

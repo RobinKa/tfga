@@ -5,7 +5,7 @@ from tensorflow import keras as ks
 from tfga import GeometricAlgebra
 from tfga.blades import BladeKind
 from tfga.layers import (
-    GeometricProductDense,
+    GeometricProductDense, GeometricSandwichProductDense,
     GeometricToTensor, GeometricToTensorWithKind,
     TensorToGeometric, TensorWithKindToGeometric
 )
@@ -88,13 +88,14 @@ class TestKerasLayers(ut.TestCase):
         geom_prod_layer = GeometricProductDense(
             sta, 8,
             blade_indices_kernel=vector_blade_indices,
-            blade_indices_bias=vector_blade_indices
+            blade_indices_bias=vector_blade_indices,
+            bias_initializer=tf.keras.initializers.RandomNormal()
         )
 
         result = geom_prod_layer(geom_tensor)
 
-        # vector * vector + vector -> scalar + bivector
-        expected_result_indices = [0, 5, 6, 7, 8, 9, 10]
+        # vector * vector + vector -> scalar + bivector + vector
+        expected_result_indices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
         self.assertTrue(sta.is_pure(result, expected_result_indices))
 
@@ -129,15 +130,16 @@ class TestKerasLayers(ut.TestCase):
         vector_blade_indices = [1, 2, 3, 4]
         mv_blade_indices = list(range(16))
 
-        # vector * vector + vector -> scalar + bivector
-        scalar_bivector_blade_indices = [0, 5, 6, 7, 8, 9, 10]
+        # vector * vector + vector -> scalar + bivector + vector
+        scalar_bivector_blade_indices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
         sequence = tf.keras.Sequential([
             TensorToGeometric(sta, blade_indices=vector_blade_indices),
             GeometricProductDense(
                 sta, 8,
                 blade_indices_kernel=vector_blade_indices,
-                blade_indices_bias=vector_blade_indices
+                blade_indices_bias=vector_blade_indices,
+                bias_initializer=tf.keras.initializers.RandomNormal()
             ),
             GeometricToTensor(sta, blade_indices=scalar_bivector_blade_indices)
         ])
@@ -145,3 +147,31 @@ class TestKerasLayers(ut.TestCase):
         result = sequence(tensor)
 
         self.assertEqual(result.shape[-1], len(scalar_bivector_blade_indices))
+
+    def test_geometric_sandwich_product_dense_v_v(self):
+        sta = GeometricAlgebra([1, -1, -1, -1])
+
+        geom_tensor = tf.concat(
+            [tf.zeros([32, 6, 1]), tf.ones([32, 6, 4]), tf.zeros([32, 6, 11])],
+            axis=-1
+        )
+
+        vector_blade_indices = [1, 2, 3, 4]
+
+        result_indices = tf.concat([
+            sta.get_kind_blade_indices(BladeKind.VECTOR),
+            sta.get_kind_blade_indices(BladeKind.TRIVECTOR)
+        ], axis=0)
+
+        geom_prod_layer = GeometricSandwichProductDense(
+            sta, 8,
+            blade_indices_kernel=vector_blade_indices,
+            blade_indices_bias=result_indices,
+            bias_initializer=tf.keras.initializers.RandomNormal()
+        )
+
+        result = geom_prod_layer(geom_tensor)
+
+        # vector * vector * ~vector + vector -> vector + trivector
+
+        self.assertTrue(sta.is_pure(result, result_indices))
