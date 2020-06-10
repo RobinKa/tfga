@@ -4,6 +4,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>tfga.blades &#8212; tfga  documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -43,9 +44,13 @@
     <span class="n">EVEN</span> <span class="o">=</span> <span class="s2">&quot;even&quot;</span>
     <span class="n">ODD</span> <span class="o">=</span> <span class="s2">&quot;odd&quot;</span>
     <span class="n">SCALAR</span> <span class="o">=</span> <span class="s2">&quot;scalar&quot;</span>
-    <span class="n">PSEUDOSCALAR</span> <span class="o">=</span> <span class="s2">&quot;pseudoscalar&quot;</span>
     <span class="n">VECTOR</span> <span class="o">=</span> <span class="s2">&quot;vector&quot;</span>
-    <span class="n">PSEUDOVECTOR</span> <span class="o">=</span> <span class="s2">&quot;pseudovector&quot;</span></div>
+    <span class="n">BIVECTOR</span> <span class="o">=</span> <span class="s2">&quot;bivector&quot;</span>
+    <span class="n">TRIVECTOR</span> <span class="o">=</span> <span class="s2">&quot;trivector&quot;</span>
+    <span class="n">PSEUDOSCALAR</span> <span class="o">=</span> <span class="s2">&quot;pseudoscalar&quot;</span>
+    <span class="n">PSEUDOVECTOR</span> <span class="o">=</span> <span class="s2">&quot;pseudovector&quot;</span>
+    <span class="n">PSEUDOBIVECTOR</span> <span class="o">=</span> <span class="s2">&quot;pseudobivector&quot;</span>
+    <span class="n">PSEUDOTRIVECTOR</span> <span class="o">=</span> <span class="s2">&quot;pseudotrivector&quot;</span></div>
 
 
 <div class="viewcode-block" id="get_blade_repr"><a class="viewcode-back" href="../../tfga.html#tfga.blades.get_blade_repr">[docs]</a><span class="k">def</span> <span class="nf">get_blade_repr</span><span class="p">(</span><span class="n">blade_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -90,13 +95,39 @@
         <span class="k">return</span> <span class="n">blade_degrees</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span>
     <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">BladeKind</span><span class="o">.</span><span class="n">SCALAR</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">blade_degrees</span> <span class="o">==</span> <span class="mi">0</span>
-    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">BladeKind</span><span class="o">.</span><span class="n">PSEUDOSCALAR</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">blade_degrees</span> <span class="o">==</span> <span class="n">max_degree</span>
     <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">BladeKind</span><span class="o">.</span><span class="n">VECTOR</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">blade_degrees</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">BladeKind</span><span class="o">.</span><span class="n">BIVECTOR</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">blade_degrees</span> <span class="o">==</span> <span class="mi">2</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">BladeKind</span><span class="o">.</span><span class="n">TRIVECTOR</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">blade_degrees</span> <span class="o">==</span> <span class="mi">3</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">BladeKind</span><span class="o">.</span><span class="n">PSEUDOSCALAR</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">blade_degrees</span> <span class="o">==</span> <span class="n">max_degree</span>
     <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">BladeKind</span><span class="o">.</span><span class="n">PSEUDOVECTOR</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">blade_degrees</span> <span class="o">==</span> <span class="n">max_degree</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">BladeKind</span><span class="o">.</span><span class="n">PSEUDOBIVECTOR</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">blade_degrees</span> <span class="o">==</span> <span class="n">max_degree</span> <span class="o">-</span> <span class="mi">2</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">BladeKind</span><span class="o">.</span><span class="n">PSEUDOTRIVECTOR</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">blade_degrees</span> <span class="o">==</span> <span class="n">max_degree</span> <span class="o">-</span> <span class="mi">3</span>
     <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown blade kind: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">kind</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="invert_blade_indices"><a class="viewcode-back" href="../../tfga.html#tfga.blades.invert_blade_indices">[docs]</a><span class="k">def</span> <span class="nf">invert_blade_indices</span><span class="p">(</span><span class="n">num_blades</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">blade_indices</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns all blade indices except for the given ones.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        num_blades: Total number of blades in the algebra</span>
+<span class="sd">        blade_indices: blade indices to exclude</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        All blade indices except for the given ones</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">all_blades</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">range</span><span class="p">(</span><span class="n">num_blades</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">blade_indices</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">to_dense</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">sets</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span>
+        <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">all_blades</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+        <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">blade_indices</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="p">))[</span><span class="mi">0</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="get_blade_of_kind_indices"><a class="viewcode-back" href="../../tfga.html#tfga.blades.get_blade_of_kind_indices">[docs]</a><span class="k">def</span> <span class="nf">get_blade_of_kind_indices</span><span class="p">(</span><span class="n">blade_degrees</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="n">BladeKind</span><span class="p">,</span>
@@ -118,6 +149,8 @@
 
 
 <span class="k">def</span> <span class="nf">_normal_swap</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Swaps the first unordered blade pair and returns the new list as well</span>
+<span class="sd">    as whether a swap was performed.&quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
         <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">a</span> <span class="o">&gt;</span> <span class="n">b</span><span class="p">:</span>  <span class="c1"># string comparison</span>
@@ -230,7 +263,7 @@
       &copy;2020, Robin 'Tora' Kahlow.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.4</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

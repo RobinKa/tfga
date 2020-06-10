@@ -4,6 +4,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>tfga package &#8212; tfga  documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -41,9 +42,14 @@
 <p>Blade-related definitions and functions used across the library.</p>
 <dl class="py class">
 <dt id="tfga.blades.BladeKind">
-<em class="property">class </em><code class="sig-prename descclassname">tfga.blades.</code><code class="sig-name descname">BladeKind</code><a class="reference internal" href="_modules/tfga/blades.html#BladeKind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.blades.BladeKind" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">tfga.blades.</code><code class="sig-name descname">BladeKind</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/blades.html#BladeKind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.blades.BladeKind" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></p>
 <p>Kind of blade depending on its degree.</p>
+<dl class="py attribute">
+<dt id="tfga.blades.BladeKind.BIVECTOR">
+<code class="sig-name descname">BIVECTOR</code><em class="property"> = 'bivector'</em><a class="headerlink" href="#tfga.blades.BladeKind.BIVECTOR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py attribute">
 <dt id="tfga.blades.BladeKind.EVEN">
 <code class="sig-name descname">EVEN</code><em class="property"> = 'even'</em><a class="headerlink" href="#tfga.blades.BladeKind.EVEN" title="Permalink to this definition">¶</a></dt>
@@ -60,8 +66,18 @@
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt id="tfga.blades.BladeKind.PSEUDOBIVECTOR">
+<code class="sig-name descname">PSEUDOBIVECTOR</code><em class="property"> = 'pseudobivector'</em><a class="headerlink" href="#tfga.blades.BladeKind.PSEUDOBIVECTOR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt id="tfga.blades.BladeKind.PSEUDOSCALAR">
 <code class="sig-name descname">PSEUDOSCALAR</code><em class="property"> = 'pseudoscalar'</em><a class="headerlink" href="#tfga.blades.BladeKind.PSEUDOSCALAR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="tfga.blades.BladeKind.PSEUDOTRIVECTOR">
+<code class="sig-name descname">PSEUDOTRIVECTOR</code><em class="property"> = 'pseudotrivector'</em><a class="headerlink" href="#tfga.blades.BladeKind.PSEUDOTRIVECTOR" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -72,6 +88,11 @@
 <dl class="py attribute">
 <dt id="tfga.blades.BladeKind.SCALAR">
 <code class="sig-name descname">SCALAR</code><em class="property"> = 'scalar'</em><a class="headerlink" href="#tfga.blades.BladeKind.SCALAR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="tfga.blades.BladeKind.TRIVECTOR">
+<code class="sig-name descname">TRIVECTOR</code><em class="property"> = 'trivector'</em><a class="headerlink" href="#tfga.blades.BladeKind.TRIVECTOR" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -144,6 +165,19 @@ blade_name: normalized name of the blade</p>
 </dd></dl>
 
 <dl class="py function">
+<dt id="tfga.blades.invert_blade_indices">
+<code class="sig-prename descclassname">tfga.blades.</code><code class="sig-name descname">invert_blade_indices</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">num_blades</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">blade_indices</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em><span class="sig-paren">)</span> &#x2192; tensorflow.python.framework.ops.Tensor<a class="reference internal" href="_modules/tfga/blades.html#invert_blade_indices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.blades.invert_blade_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns all blade indices except for the given ones.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>num_blades: Total number of blades in the algebra
+blade_indices: blade indices to exclude</p>
+</dd>
+<dt>Returns:</dt><dd><p>All blade indices except for the given ones</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt id="tfga.blades.is_blade_kind">
 <code class="sig-prename descclassname">tfga.blades.</code><code class="sig-name descname">is_blade_kind</code><span class="sig-paren">(</span><em class="sig-param">blade_degrees: tensorflow.python.framework.ops.Tensor, kind: [&lt;enum 'BladeKind'&gt;, &lt;class 'str'&gt;], max_degree: int</em><span class="sig-paren">)</span> &#x2192; tensorflow.python.framework.ops.Tensor<a class="reference internal" href="_modules/tfga/blades.html#is_blade_kind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.blades.is_blade_kind" title="Permalink to this definition">¶</a></dt>
 <dd><p>Finds a boolean mask for whether blade degrees are of a given kind.</p>
@@ -171,6 +205,263 @@ for the geometric product. Used internally.</p>
 <dt id="tfga.cayley.get_cayley_tensor">
 <code class="sig-prename descclassname">tfga.cayley.</code><code class="sig-name descname">get_cayley_tensor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">metric</span></em>, <em class="sig-param"><span class="n">bases</span></em>, <em class="sig-param"><span class="n">blades</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/cayley.html#get_cayley_tensor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.cayley.get_cayley_tensor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+</div>
+<div class="section" id="module-tfga.layers">
+<span id="tfga-layers-module"></span><h2>tfga.layers module<a class="headerlink" href="#module-tfga.layers" title="Permalink to this headline">¶</a></h2>
+<p>Provides Geometric Algebra Keras layers.</p>
+<dl class="py class">
+<dt id="tfga.layers.GeometricProductDense">
+<em class="property">class </em><code class="sig-prename descclassname">tfga.layers.</code><code class="sig-name descname">GeometricProductDense</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricProductDense"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricProductDense" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.base_layer.Layer</span></code></p>
+<p>Analagous to Keras’ Dense layer but using multivector-valued matrices
+instead of scalar ones and geometric multiplication instead of standard
+multiplication.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>algebra: GeometricAlgebra instance to use for the parameters
+blade_indices_kernel: Blade indices to use for the kernel parameter
+blade_indices_bias: Blade indices to use for the bias parameter (if used)</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="tfga.layers.GeometricProductDense.build">
+<code class="sig-name descname">build</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_shape</span><span class="p">:</span> <span class="n">tensorflow.python.framework.tensor_shape.TensorShape</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricProductDense.build"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricProductDense.build" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the variables of the layer (optional, for subclass implementers).</p>
+<p>This is a method that implementers of subclasses of <cite>Layer</cite> or <cite>Model</cite>
+can override if they need a state-creation step in-between
+layer instantiation and layer call.</p>
+<p>This is typically used to create the weights of <cite>Layer</cite> subclasses.</p>
+<dl class="simple">
+<dt>Arguments:</dt><dd><dl class="simple">
+<dt>input_shape: Instance of <cite>TensorShape</cite>, or list of instances of</dt><dd><p><cite>TensorShape</cite> if the layer expects a list of inputs
+(one instance per input).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.layers.GeometricProductDense.call">
+<code class="sig-name descname">call</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricProductDense.call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricProductDense.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is where the layer’s logic lives.</p>
+<dl class="simple">
+<dt>Arguments:</dt><dd><p>inputs: Input tensor, or list/tuple of input tensors.
+<a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs: Additional keyword arguments.</p>
+</dd>
+<dt>Returns:</dt><dd><p>A tensor or list/tuple of tensors.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.layers.GeometricProductDense.compute_output_shape">
+<code class="sig-name descname">compute_output_shape</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_shape</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricProductDense.compute_output_shape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricProductDense.compute_output_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the output shape of the layer.</p>
+<p>If the layer has not been built, this method will call <cite>build</cite> on the
+layer. This assumes that the layer will later be used with inputs that
+match the input shape provided here.</p>
+<dl class="simple">
+<dt>Arguments:</dt><dd><dl class="simple">
+<dt>input_shape: Shape tuple (tuple of integers)</dt><dd><p>or list of shape tuples (one per output tensor of the layer).
+Shape tuples can include None for free dimensions,
+instead of an integer.</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><p>An input shape tuple.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.layers.GeometricProductDense.get_config">
+<code class="sig-name descname">get_config</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricProductDense.get_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricProductDense.get_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the config of the layer.</p>
+<p>A layer config is a Python dictionary (serializable)
+containing the configuration of a layer.
+The same layer can be reinstantiated later
+(without its trained weights) from this configuration.</p>
+<p>The config of a layer does not include connectivity
+information, nor the layer class name. These are handled
+by <cite>Network</cite> (one layer of abstraction above).</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>Python dictionary.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="tfga.layers.GeometricSandwichProductDense">
+<em class="property">class </em><code class="sig-prename descclassname">tfga.layers.</code><code class="sig-name descname">GeometricSandwichProductDense</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricSandwichProductDense"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricSandwichProductDense" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tfga.layers.GeometricProductDense" title="tfga.layers.GeometricProductDense"><code class="xref py py-class docutils literal notranslate"><span class="pre">tfga.layers.GeometricProductDense</span></code></a></p>
+<p>Analagous to Keras’ Dense layer but using multivector-valued matrices
+instead of scalar ones and geometric sandwich multiplication instead of
+standard multiplication.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>algebra: GeometricAlgebra instance to use for the parameters
+blade_indices_kernel: Blade indices to use for the kernel parameter
+blade_indices_bias: Blade indices to use for the bias parameter (if used)</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="tfga.layers.GeometricSandwichProductDense.call">
+<code class="sig-name descname">call</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricSandwichProductDense.call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricSandwichProductDense.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is where the layer’s logic lives.</p>
+<dl class="simple">
+<dt>Arguments:</dt><dd><p>inputs: Input tensor, or list/tuple of input tensors.
+<a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs: Additional keyword arguments.</p>
+</dd>
+<dt>Returns:</dt><dd><p>A tensor or list/tuple of tensors.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="tfga.layers.GeometricToTensor">
+<em class="property">class </em><code class="sig-prename descclassname">tfga.layers.</code><code class="sig-name descname">GeometricToTensor</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricToTensor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricToTensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.base_layer.Layer</span></code></p>
+<p>Layer for extracting given blades from geometric algebra tensors.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>algebra: GeometricAlgebra instance to use
+blade_indices: blade indices to extract</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="tfga.layers.GeometricToTensor.call">
+<code class="sig-name descname">call</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricToTensor.call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricToTensor.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is where the layer’s logic lives.</p>
+<dl class="simple">
+<dt>Arguments:</dt><dd><p>inputs: Input tensor, or list/tuple of input tensors.
+<a href="#id5"><span class="problematic" id="id6">**</span></a>kwargs: Additional keyword arguments.</p>
+</dd>
+<dt>Returns:</dt><dd><p>A tensor or list/tuple of tensors.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.layers.GeometricToTensor.get_config">
+<code class="sig-name descname">get_config</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricToTensor.get_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricToTensor.get_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the config of the layer.</p>
+<p>A layer config is a Python dictionary (serializable)
+containing the configuration of a layer.
+The same layer can be reinstantiated later
+(without its trained weights) from this configuration.</p>
+<p>The config of a layer does not include connectivity
+information, nor the layer class name. These are handled
+by <cite>Network</cite> (one layer of abstraction above).</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>Python dictionary.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="tfga.layers.GeometricToTensorWithKind">
+<em class="property">class </em><code class="sig-prename descclassname">tfga.layers.</code><code class="sig-name descname">GeometricToTensorWithKind</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricToTensorWithKind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricToTensorWithKind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tfga.layers.GeometricToTensor" title="tfga.layers.GeometricToTensor"><code class="xref py py-class docutils literal notranslate"><span class="pre">tfga.layers.GeometricToTensor</span></code></a></p>
+<p>Layer for extracting blades of a kind from geometric algebra tensors.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>algebra: GeometricAlgebra instance to use
+kind: blade indices of kind to extract</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt id="tfga.layers.TensorToGeometric">
+<em class="property">class </em><code class="sig-prename descclassname">tfga.layers.</code><code class="sig-name descname">TensorToGeometric</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#TensorToGeometric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.TensorToGeometric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.base_layer.Layer</span></code></p>
+<p>Layer for converting tensors with given blade indices to
+geometric algebra tensors.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>algebra: GeometricAlgebra instance to use
+blade_indices: blade indices to interpret the last axis of the
+input tensor as</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="tfga.layers.TensorToGeometric.call">
+<code class="sig-name descname">call</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#TensorToGeometric.call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.TensorToGeometric.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is where the layer’s logic lives.</p>
+<dl class="simple">
+<dt>Arguments:</dt><dd><p>inputs: Input tensor, or list/tuple of input tensors.
+<a href="#id7"><span class="problematic" id="id8">**</span></a>kwargs: Additional keyword arguments.</p>
+</dd>
+<dt>Returns:</dt><dd><p>A tensor or list/tuple of tensors.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.layers.TensorToGeometric.get_config">
+<code class="sig-name descname">get_config</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#TensorToGeometric.get_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.TensorToGeometric.get_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the config of the layer.</p>
+<p>A layer config is a Python dictionary (serializable)
+containing the configuration of a layer.
+The same layer can be reinstantiated later
+(without its trained weights) from this configuration.</p>
+<p>The config of a layer does not include connectivity
+information, nor the layer class name. These are handled
+by <cite>Network</cite> (one layer of abstraction above).</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>Python dictionary.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="tfga.layers.TensorWithKindToGeometric">
+<em class="property">class </em><code class="sig-prename descclassname">tfga.layers.</code><code class="sig-name descname">TensorWithKindToGeometric</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#TensorWithKindToGeometric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.TensorWithKindToGeometric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.base_layer.Layer</span></code></p>
+<p>Layer for converting tensors with given blade kind to
+geometric algebra tensors.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>algebra: GeometricAlgebra instance to use
+kind: blade kind indices to interpret the last axis of the
+input tensor as</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="tfga.layers.TensorWithKindToGeometric.call">
+<code class="sig-name descname">call</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#TensorWithKindToGeometric.call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.TensorWithKindToGeometric.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is where the layer’s logic lives.</p>
+<dl class="simple">
+<dt>Arguments:</dt><dd><p>inputs: Input tensor, or list/tuple of input tensors.
+<a href="#id9"><span class="problematic" id="id10">**</span></a>kwargs: Additional keyword arguments.</p>
+</dd>
+<dt>Returns:</dt><dd><p>A tensor or list/tuple of tensors.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.layers.TensorWithKindToGeometric.get_config">
+<code class="sig-name descname">get_config</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#TensorWithKindToGeometric.get_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.TensorWithKindToGeometric.get_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the config of the layer.</p>
+<p>A layer config is a Python dictionary (serializable)
+containing the configuration of a layer.
+The same layer can be reinstantiated later
+(without its trained weights) from this configuration.</p>
+<p>The config of a layer does not include connectivity
+information, nor the layer class name. These are handled
+by <cite>Network</cite> (one layer of abstraction above).</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>Python dictionary.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
 
 </div>
 <div class="section" id="module-tfga.mv">
@@ -569,6 +860,21 @@ it exists.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="tfga.tfga.GeometricAlgebra.is_pure">
+<code class="sig-name descname">is_pure</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tensor</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em>, <em class="sig-param"><span class="n">blade_indices</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em><span class="sig-paren">)</span> &#x2192; bool<a class="reference internal" href="_modules/tfga/tfga.html#GeometricAlgebra.is_pure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.is_pure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns whether the given tensor is purely of the given blades
+and has no non-zero values for blades not in the given blades.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>tensor: tensor to check purity for
+blade_indices: blade indices to check purity for</p>
+</dd>
+<dt>Returns:</dt><dd><p>Whether the tensor is purely of the given blades
+and has no non-zero values for blades not in the given blades</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="tfga.tfga.GeometricAlgebra.is_pure_kind">
 <code class="sig-name descname">is_pure_kind</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tensor</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em>, <em class="sig-param"><span class="n">kind</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#tfga.blades.BladeKind" title="tfga.blades.BladeKind">tfga.blades.BladeKind</a></span></em><span class="sig-paren">)</span> &#x2192; bool<a class="reference internal" href="_modules/tfga/tfga.html#GeometricAlgebra.is_pure_kind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.is_pure_kind" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns whether the given tensor is purely of a given kind
@@ -705,6 +1011,7 @@ blade_names: Blades to keep</p>
 <li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-tfga.blades">tfga.blades module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-tfga.cayley">tfga.cayley module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-tfga.layers">tfga.layers module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-tfga.mv">tfga.mv module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-tfga.mv_ops">tfga.mv_ops module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-tfga.tfga">tfga.tfga module</a></li>
@@ -747,7 +1054,7 @@ blade_names: Blades to keep</p>
       &copy;2020, Robin 'Tora' Kahlow.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.4</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

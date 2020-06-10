@@ -4,6 +4,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>tfga.tfga &#8212; tfga  documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -44,7 +45,10 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">.cayley</span> <span class="kn">import</span> <span class="n">get_cayley_tensor</span><span class="p">,</span> <span class="n">blades_from_bases</span>
-<span class="kn">from</span> <span class="nn">.blades</span> <span class="kn">import</span> <span class="n">BladeKind</span><span class="p">,</span> <span class="n">get_blade_of_kind_indices</span><span class="p">,</span> <span class="n">get_blade_indices_from_names</span><span class="p">,</span> <span class="n">get_blade_repr</span>
+<span class="kn">from</span> <span class="nn">.blades</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BladeKind</span><span class="p">,</span> <span class="n">get_blade_of_kind_indices</span><span class="p">,</span> <span class="n">get_blade_indices_from_names</span><span class="p">,</span>
+    <span class="n">get_blade_repr</span><span class="p">,</span> <span class="n">invert_blade_indices</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">.mv_ops</span> <span class="kn">import</span> <span class="n">mv_multiply</span><span class="p">,</span> <span class="n">mv_reversion</span><span class="p">,</span> <span class="n">mv_grade_automorphism</span>
 <span class="kn">from</span> <span class="nn">.mv</span> <span class="kn">import</span> <span class="n">MultiVector</span>
 
@@ -212,6 +216,31 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_blades</span><span class="p">),</span> <span class="n">tf</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blade_degrees</span> <span class="o">==</span> <span class="n">degree</span><span class="p">)[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span></div>
 
+<div class="viewcode-block" id="GeometricAlgebra.is_pure"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.is_pure">[docs]</a>    <span class="k">def</span> <span class="nf">is_pure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">blade_indices</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns whether the given tensor is purely of the given blades</span>
+<span class="sd">        and has no non-zero values for blades not in the given blades.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            tensor: tensor to check purity for</span>
+<span class="sd">            blade_indices: blade indices to check purity for</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Whether the tensor is purely of the given blades</span>
+<span class="sd">            and has no non-zero values for blades not in the given blades</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">blade_indices</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span>
+            <span class="n">blade_indices</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+
+        <span class="n">inverted_blade_indices</span> <span class="o">=</span> <span class="n">invert_blade_indices</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_blades</span><span class="p">,</span> <span class="n">blade_indices</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_all</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
+            <span class="n">tensor</span><span class="p">,</span>
+            <span class="n">inverted_blade_indices</span><span class="p">,</span>
+            <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
+        <span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="GeometricAlgebra.is_pure_kind"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.is_pure_kind">[docs]</a>    <span class="k">def</span> <span class="nf">is_pure_kind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="n">BladeKind</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Returns whether the given tensor is purely of a given kind</span>
 <span class="sd">        and has no non-zero values for blades not of the kind.</span>
@@ -225,11 +254,11 @@
 <span class="sd">            and has no non-zero values for blades not of the kind</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">inverted_kind_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_kind_blade_indices</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="n">kind_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_kind_blade_indices</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_all</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
             <span class="n">tensor</span><span class="p">,</span>
-            <span class="n">kind_indices</span><span class="p">,</span>
+            <span class="n">inverted_kind_indices</span><span class="p">,</span>
             <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span>
         <span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span></div>
 
@@ -675,7 +704,7 @@
       &copy;2020, Robin 'Tora' Kahlow.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.4</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

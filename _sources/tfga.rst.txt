@@ -20,6 +20,14 @@ tfga.cayley module
    :undoc-members:
    :show-inheritance:
 
+tfga.layers module
+------------------
+
+.. automodule:: tfga.layers
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 tfga.mv module
 --------------
 

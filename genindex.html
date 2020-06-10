@@ -1,10 +1,10 @@
 
-
 <!DOCTYPE html>
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Index &#8212; tfga  documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -83,6 +83,8 @@
 </li>
       <li><a href="tfga.html#tfga.mv.MultiVector.batch_shape">batch_shape() (tfga.mv.MultiVector property)</a>
 </li>
+      <li><a href="tfga.html#tfga.blades.BladeKind.BIVECTOR">BIVECTOR (tfga.blades.BladeKind attribute)</a>
+</li>
       <li><a href="tfga.html#tfga.tfga.GeometricAlgebra.blade_degrees">blade_degrees() (tfga.tfga.GeometricAlgebra property)</a>
 </li>
   </ul></td>
@@ -95,19 +97,35 @@
 </li>
       <li><a href="tfga.html#tfga.cayley.blades_from_bases">blades_from_bases() (in module tfga.cayley)</a>
 </li>
+      <li><a href="tfga.html#tfga.layers.GeometricProductDense.build">build() (tfga.layers.GeometricProductDense method)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="tfga.html#tfga.layers.GeometricProductDense.call">call() (tfga.layers.GeometricProductDense method)</a>
+
+      <ul>
+        <li><a href="tfga.html#tfga.layers.GeometricSandwichProductDense.call">(tfga.layers.GeometricSandwichProductDense method)</a>
+</li>
+        <li><a href="tfga.html#tfga.layers.GeometricToTensor.call">(tfga.layers.GeometricToTensor method)</a>
+</li>
+        <li><a href="tfga.html#tfga.layers.TensorToGeometric.call">(tfga.layers.TensorToGeometric method)</a>
+</li>
+        <li><a href="tfga.html#tfga.layers.TensorWithKindToGeometric.call">(tfga.layers.TensorWithKindToGeometric method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="tfga.html#tfga.tfga.GeometricAlgebra.cayley">cayley() (tfga.tfga.GeometricAlgebra property)</a>
 </li>
       <li><a href="tfga.html#tfga.tfga.GeometricAlgebra.cayley_inner">cayley_inner() (tfga.tfga.GeometricAlgebra property)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="tfga.html#tfga.tfga.GeometricAlgebra.cayley_outer">cayley_outer() (tfga.tfga.GeometricAlgebra property)</a>
+</li>
+      <li><a href="tfga.html#tfga.layers.GeometricProductDense.compute_output_shape">compute_output_shape() (tfga.layers.GeometricProductDense method)</a>
 </li>
       <li><a href="tfga.html#tfga.mv.MultiVector.conjugation">conjugation() (tfga.mv.MultiVector method)</a>
 
@@ -171,6 +189,14 @@
 </li>
       <li><a href="tfga.html#tfga.tfga.GeometricAlgebra">GeometricAlgebra (class in tfga.tfga)</a>
 </li>
+      <li><a href="tfga.html#tfga.layers.GeometricProductDense">GeometricProductDense (class in tfga.layers)</a>
+</li>
+      <li><a href="tfga.html#tfga.layers.GeometricSandwichProductDense">GeometricSandwichProductDense (class in tfga.layers)</a>
+</li>
+      <li><a href="tfga.html#tfga.layers.GeometricToTensor">GeometricToTensor (class in tfga.layers)</a>
+</li>
+      <li><a href="tfga.html#tfga.layers.GeometricToTensorWithKind">GeometricToTensorWithKind (class in tfga.layers)</a>
+</li>
       <li><a href="tfga.html#tfga.blades.get_blade_indices_from_names">get_blade_indices_from_names() (in module tfga.blades)</a>
 </li>
       <li><a href="tfga.html#tfga.tfga.GeometricAlgebra.get_blade_indices_of_degree">get_blade_indices_of_degree() (tfga.tfga.GeometricAlgebra method)</a>
@@ -183,6 +209,16 @@
 </li>
       <li><a href="tfga.html#tfga.cayley.get_cayley_tensor">get_cayley_tensor() (in module tfga.cayley)</a>
 </li>
+      <li><a href="tfga.html#tfga.layers.GeometricProductDense.get_config">get_config() (tfga.layers.GeometricProductDense method)</a>
+
+      <ul>
+        <li><a href="tfga.html#tfga.layers.GeometricToTensor.get_config">(tfga.layers.GeometricToTensor method)</a>
+</li>
+        <li><a href="tfga.html#tfga.layers.TensorToGeometric.get_config">(tfga.layers.TensorToGeometric method)</a>
+</li>
+        <li><a href="tfga.html#tfga.layers.TensorWithKindToGeometric.get_config">(tfga.layers.TensorWithKindToGeometric method)</a>
+</li>
+      </ul></li>
       <li><a href="tfga.html#tfga.tfga.GeometricAlgebra.get_kind_blade_indices">get_kind_blade_indices() (tfga.tfga.GeometricAlgebra method)</a>
 </li>
       <li><a href="tfga.html#tfga.blades.get_normal_ordered">get_normal_ordered() (in module tfga.blades)</a>
@@ -211,7 +247,11 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="tfga.html#tfga.blades.invert_blade_indices">invert_blade_indices() (in module tfga.blades)</a>
+</li>
       <li><a href="tfga.html#tfga.blades.is_blade_kind">is_blade_kind() (in module tfga.blades)</a>
+</li>
+      <li><a href="tfga.html#tfga.tfga.GeometricAlgebra.is_pure">is_pure() (tfga.tfga.GeometricAlgebra method)</a>
 </li>
       <li><a href="tfga.html#tfga.mv.MultiVector.is_pure_kind">is_pure_kind() (tfga.mv.MultiVector method)</a>
 
@@ -246,6 +286,8 @@
         <li><a href="tfga.html#module-tfga.blades">tfga.blades</a>
 </li>
         <li><a href="tfga.html#module-tfga.cayley">tfga.cayley</a>
+</li>
+        <li><a href="tfga.html#module-tfga.layers">tfga.layers</a>
 </li>
         <li><a href="tfga.html#module-tfga.mv">tfga.mv</a>
 </li>
@@ -292,9 +334,13 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="tfga.html#tfga.tfga.GeometricAlgebra.print">print() (tfga.tfga.GeometricAlgebra method)</a>
 </li>
+      <li><a href="tfga.html#tfga.blades.BladeKind.PSEUDOBIVECTOR">PSEUDOBIVECTOR (tfga.blades.BladeKind attribute)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="tfga.html#tfga.blades.BladeKind.PSEUDOSCALAR">PSEUDOSCALAR (tfga.blades.BladeKind attribute)</a>
+</li>
+      <li><a href="tfga.html#tfga.blades.BladeKind.PSEUDOTRIVECTOR">PSEUDOTRIVECTOR (tfga.blades.BladeKind attribute)</a>
 </li>
       <li><a href="tfga.html#tfga.blades.BladeKind.PSEUDOVECTOR">PSEUDOVECTOR (tfga.blades.BladeKind attribute)</a>
 </li>
@@ -330,6 +376,10 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="tfga.html#tfga.mv.MultiVector.tensor">tensor() (tfga.mv.MultiVector property)</a>
 </li>
+      <li><a href="tfga.html#tfga.layers.TensorToGeometric">TensorToGeometric (class in tfga.layers)</a>
+</li>
+      <li><a href="tfga.html#tfga.layers.TensorWithKindToGeometric">TensorWithKindToGeometric (class in tfga.layers)</a>
+</li>
       <li>
     tfga
 
@@ -354,6 +404,13 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li>
+    tfga.layers
+
+      <ul>
+        <li><a href="tfga.html#module-tfga.layers">module</a>
+</li>
+      </ul></li>
+      <li>
     tfga.mv
 
       <ul>
@@ -374,6 +431,8 @@
         <li><a href="tfga.html#module-tfga.tfga">module</a>
 </li>
       </ul></li>
+      <li><a href="tfga.html#tfga.blades.BladeKind.TRIVECTOR">TRIVECTOR (tfga.blades.BladeKind attribute)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -441,7 +500,7 @@
       &copy;2020, Robin 'Tora' Kahlow.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.4</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
