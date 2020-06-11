@@ -242,6 +242,10 @@ class GeometricAlgebra:
         Returns:
             Geometric algebra tf.Tensor from tensor and blade indices
         """
+        blade_indices = tf.cast(
+            tf.convert_to_tensor(blade_indices, dtype_hint=tf.int64),
+            dtype=tf.int64
+        )
         tensor = tf.convert_to_tensor(tensor, dtype_hint=tf.float32)
 
         # Put last axis on first axis so scatter_nd becomes easier.
@@ -252,8 +256,16 @@ class GeometricAlgebra:
 
         tensor = tf.transpose(tensor, t)
 
-        tensor = tf.scatter_nd(tf.expand_dims(blade_indices, axis=-1), tensor,
-                               [self.num_blades] + tensor.shape[1:])
+        shape = tf.concat([
+            tf.convert_to_tensor([self.num_blades], dtype=tf.int64),
+            tf.shape(tensor, tf.int64)[1:]
+        ], axis=0)
+
+        tensor = tf.scatter_nd(
+            tf.expand_dims(blade_indices, axis=-1),
+            tensor,
+            shape
+        )
 
         return tf.transpose(tensor, t_inv)
 
