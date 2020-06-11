@@ -26,6 +26,9 @@ class TensorToGeometric(layers.Layer):
         self._algebra = algebra
         self._blade_indices = blade_indices
 
+    def compute_output_shape(self, input_shape):
+        return tf.TensorShape([*input_shape[:-1], self.algebra.num_blades])
+
     def call(self, inputs):
         return self._algebra.from_tensor(inputs, blade_indices=self._blade_indices)
 
@@ -54,6 +57,9 @@ class TensorWithKindToGeometric(layers.Layer):
         self._algebra = algebra
         self._kind = kind
 
+    def compute_output_shape(self, input_shape):
+        return tf.TensorShape([*input_shape[:-1], self._algebra.get_kind_blade_indices(self._kind).shape[0]])
+
     def call(self, inputs):
         return self._algebra.from_tensor_with_kind(inputs, kind=self._kind)
 
@@ -79,6 +85,9 @@ class GeometricToTensor(layers.Layer):
 
         self._algebra = algebra
         self._blade_indices = blade_indices
+
+    def compute_output_shape(self, input_shape):
+        return tf.TensorShape([*input_shape[:-1], self._blade_indices.shape[0]])
 
     def call(self, inputs):
         return tf.gather(inputs, self._blade_indices, axis=-1)
