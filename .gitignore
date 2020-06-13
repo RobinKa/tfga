@@ -142,3 +142,5 @@ cython_debug/
 
 # Sphinx documentation (auto-generated)
 sphinx-docs/
+
+benchmarks/results/
