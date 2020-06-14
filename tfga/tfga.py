@@ -15,7 +15,7 @@ from .blades import (
     BladeKind, get_blade_of_kind_indices, get_blade_indices_from_names,
     get_blade_repr, invert_blade_indices
 )
-from .mv_ops import mv_multiply, mv_reversion, mv_grade_automorphism
+from .mv_ops import mv_multiply, mv_reversion, mv_grade_automorphism, mv_conv1d
 from .mv import MultiVector
 
 
@@ -476,6 +476,12 @@ class GeometricAlgebra:
         b = tf.convert_to_tensor(b, dtype_hint=tf.float32)
 
         return mv_multiply(a, b, self._cayley_inner)
+
+    def geom_conv1d(self, a: tf.Tensor, k: tf.Tensor, stride: tf.Tensor, padding: str) -> tf.Tensor:
+        a = tf.convert_to_tensor(a, dtype_hint=tf.float32)
+        k = tf.convert_to_tensor(k, dtype_hint=tf.float32)
+
+        return mv_conv1d(a, k, self._cayley, stride=stride, padding=padding)
 
     def mv_repr(self, a: tf.Tensor) -> str:
         """Returns a string representation for the given
