@@ -377,8 +377,7 @@ class GeometricConv1D(layers.Layer):
             trainable=True
         )
         if self.use_bias:
-            # TODO
-            shape_bias = [self.units, self.blade_indices_bias.shape[0]]
+            shape_bias = [self.channels, self.blade_indices_bias.shape[0]]
             self.bias = self.add_weight(
                 "bias",
                 shape=shape_bias,

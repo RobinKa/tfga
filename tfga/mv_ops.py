@@ -49,15 +49,12 @@ def mv_conv1d(a_blade_values: tf.Tensor, k_blade_values: tf.Tensor, cayley: tf.T
     )
 
     # [..., P, K, CI, BI]
-    out_shape = tf.concat(
-        [
-            a_batch_shape,
-            tf.shape(a_slices)[-3:-2],
-            tf.shape(k_blade_values)[:1],
-            tf.shape(a_blade_values)[-2:]
-        ],
-        axis=0
-    )
+    out_shape = tf.concat([
+        a_batch_shape,
+        tf.shape(a_slices)[-3:-2],
+        tf.shape(k_blade_values)[:1],
+        tf.shape(a_blade_values)[-2:]
+    ], axis=0)
 
     a_slices = tf.reshape(a_slices, out_shape)
 
