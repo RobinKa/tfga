@@ -25,7 +25,6 @@ class MultiVector:
 
         self._blade_values = blade_values
         self._algebra = algebra
-        self._n = -1  # used for iteration (__iter__, __next__)
 
     @property
     def tensor(self):
@@ -49,27 +48,18 @@ class MultiVector:
         tensor."""
         return self._blade_values.shape[0]
 
-    def __iter__(self) -> self:
-
-        self._n = 0
-        return self
-
-    def __next__(self) -> self:
-        n = self._n
-        if n <= self._blade_values.shape[0]:
-            self._n += 1
-
+    def __iter__(self):
+        for n in range(self._blade_values.shape[0]):
             # If we only have one axis left, return the
             # actual numbers, otherwise return a new
             # multivector.
             if self._blade_values.shape.ndims == 1:
-                return self._blade_values[n]
+                yield self._blade_values[n]
             else:
-                return MultiVector(
+                yield MultiVector(
                     self._blade_values[n],
                     self._algebra
                 )
-        raise StopIteration
 
     def __xor__(self, other: self) -> self:
         """Exterior product. See `GeometricAlgebra.ext_prod()`"""
