@@ -39,6 +39,11 @@
 <span class="kn">from</span> <span class="nn">tensorflow.keras</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">initializers</span><span class="p">,</span> <span class="n">activations</span><span class="p">,</span> <span class="n">regularizers</span><span class="p">,</span> <span class="n">constraints</span>
 <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.framework</span> <span class="kn">import</span> <span class="n">tensor_shape</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.keras.utils</span> <span class="kn">import</span> <span class="n">conv_utils</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.keras.engine.input_spec</span> <span class="kn">import</span> <span class="n">InputSpec</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="kn">import</span> <span class="n">nn</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.ops</span> <span class="kn">import</span> <span class="n">nn_ops</span>
 <span class="kn">from</span> <span class="nn">.blades</span> <span class="kn">import</span> <span class="n">BladeKind</span>
 <span class="kn">from</span> <span class="nn">.tfga</span> <span class="kn">import</span> <span class="n">GeometricAlgebra</span>
 
@@ -331,6 +336,120 @@
                 <span class="p">)</span>
             <span class="p">),</span>
             <span class="n">axis</span><span class="o">=-</span><span class="mi">2</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bias</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">b_geom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">from_tensor</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">bias</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices_bias</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="n">b_geom</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="GeometricProductConv1D"><a class="viewcode-back" href="../../tfga.html#tfga.layers.GeometricProductConv1D">[docs]</a><span class="k">class</span> <span class="nc">GeometricProductConv1D</span><span class="p">(</span><span class="n">layers</span><span class="o">.</span><span class="n">Layer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Analagous to Keras&#39; Conv1D layer but using multivector-valued kernels</span>
+<span class="sd">    instead of scalar ones and geometric product instead of</span>
+<span class="sd">    standard multiplication.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        algebra: GeometricAlgebra instance to use for the parameters</span>
+<span class="sd">        channels: How many channels the output will have</span>
+<span class="sd">        kernel_size: Size for the convolution kernel</span>
+<span class="sd">        stride: Stride to use for the convolution</span>
+<span class="sd">        padding: &quot;SAME&quot; (zero-pad input length so output</span>
+<span class="sd">            length == input length / stride) or &quot;VALID&quot; (no padding)</span>
+<span class="sd">        blade_indices_kernel: Blade indices to use for the kernel parameter</span>
+<span class="sd">        blade_indices_bias: Blade indices to use for the bias parameter (if used)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">algebra</span><span class="p">:</span> <span class="n">GeometricAlgebra</span><span class="p">,</span>
+        <span class="n">channels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">kernel_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">stride</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">padding</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">blade_indices_kernel</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+        <span class="n">blade_indices_bias</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">dilations</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">activation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">kernel_initializer</span><span class="o">=</span><span class="s2">&quot;glorot_uniform&quot;</span><span class="p">,</span>
+        <span class="n">bias_initializer</span><span class="o">=</span><span class="s2">&quot;zeros&quot;</span><span class="p">,</span>
+        <span class="n">kernel_regularizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">bias_regularizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">activity_regularizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kernel_constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">bias_constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">activity_regularizer</span><span class="o">=</span><span class="n">activity_regularizer</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span> <span class="o">=</span> <span class="n">algebra</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">channels</span> <span class="o">=</span> <span class="n">channels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span> <span class="o">=</span> <span class="n">kernel_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stride</span> <span class="o">=</span> <span class="n">stride</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">padding</span> <span class="o">=</span> <span class="n">padding</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dilations</span> <span class="o">=</span> <span class="n">dilations</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices_kernel</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span>
+            <span class="n">blade_indices_kernel</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">use_bias</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices_bias</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span>
+                <span class="n">blade_indices_bias</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">activation</span> <span class="o">=</span> <span class="n">activations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">activation</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_bias</span> <span class="o">=</span> <span class="n">use_bias</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel_initializer</span> <span class="o">=</span> <span class="n">initializers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">kernel_initializer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bias_initializer</span> <span class="o">=</span> <span class="n">initializers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">bias_initializer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel_regularizer</span> <span class="o">=</span> <span class="n">regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">kernel_regularizer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bias_regularizer</span> <span class="o">=</span> <span class="n">regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">bias_regularizer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel_constraint</span> <span class="o">=</span> <span class="n">constraints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">kernel_constraint</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bias_constraint</span> <span class="o">=</span> <span class="n">constraints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">bias_constraint</span><span class="p">)</span>
+
+<div class="viewcode-block" id="GeometricProductConv1D.build"><a class="viewcode-back" href="../../tfga.html#tfga.layers.GeometricProductConv1D.build">[docs]</a>    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">):</span>
+        <span class="c1"># I: [..., S, C, B]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_input_channels</span> <span class="o">=</span> <span class="n">input_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="c1"># K: [K, IC, OC, B]</span>
+        <span class="n">shape_kernel</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_input_channels</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices_kernel</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span>
+            <span class="s2">&quot;kernel&quot;</span><span class="p">,</span>
+            <span class="n">shape</span><span class="o">=</span><span class="n">shape_kernel</span><span class="p">,</span>
+            <span class="n">initializer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel_initializer</span><span class="p">,</span>
+            <span class="n">regularizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel_regularizer</span><span class="p">,</span>
+            <span class="n">constraint</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel_constraint</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
+            <span class="n">trainable</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_bias</span><span class="p">:</span>
+            <span class="n">shape_bias</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices_bias</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bias</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span>
+                <span class="s2">&quot;bias&quot;</span><span class="p">,</span>
+                <span class="n">shape</span><span class="o">=</span><span class="n">shape_bias</span><span class="p">,</span>
+                <span class="n">initializer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bias_initializer</span><span class="p">,</span>
+                <span class="n">regularizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bias_regularizer</span><span class="p">,</span>
+                <span class="n">constraint</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bias_constraint</span><span class="p">,</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
+                <span class="n">trainable</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bias</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">built</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="GeometricProductConv1D.call"><a class="viewcode-back" href="../../tfga.html#tfga.layers.GeometricProductConv1D.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="n">k_geom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">from_tensor</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices_kernel</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">geom_conv1d</span><span class="p">(</span>
+            <span class="n">inputs</span><span class="p">,</span> <span class="n">k_geom</span><span class="p">,</span>
+            <span class="n">stride</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stride</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">,</span>
+            <span class="n">dilations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dilations</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bias</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

@@ -49,7 +49,7 @@
     <span class="n">BladeKind</span><span class="p">,</span> <span class="n">get_blade_of_kind_indices</span><span class="p">,</span> <span class="n">get_blade_indices_from_names</span><span class="p">,</span>
     <span class="n">get_blade_repr</span><span class="p">,</span> <span class="n">invert_blade_indices</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.mv_ops</span> <span class="kn">import</span> <span class="n">mv_multiply</span><span class="p">,</span> <span class="n">mv_reversion</span><span class="p">,</span> <span class="n">mv_grade_automorphism</span>
+<span class="kn">from</span> <span class="nn">.mv_ops</span> <span class="kn">import</span> <span class="n">mv_multiply</span><span class="p">,</span> <span class="n">mv_reversion</span><span class="p">,</span> <span class="n">mv_grade_automorphism</span><span class="p">,</span> <span class="n">mv_conv1d</span>
 <span class="kn">from</span> <span class="nn">.mv</span> <span class="kn">import</span> <span class="n">MultiVector</span>
 
 
@@ -510,6 +510,31 @@
         <span class="n">b</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">mv_multiply</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cayley_inner</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GeometricAlgebra.geom_conv1d"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.geom_conv1d">[docs]</a>    <span class="k">def</span> <span class="nf">geom_conv1d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+                    <span class="n">stride</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">padding</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                    <span class="n">dilations</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns the 1D convolution of a sequence with a geometric algebra</span>
+<span class="sd">        tensor kernel. The convolution is performed using the geometric</span>
+<span class="sd">        product.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            a: Input geometric algebra tensor of shape</span>
+<span class="sd">                [..., Length, ChannelsIn, Blades]</span>
+<span class="sd">            k: Geometric algebra tensor for the convolution kernel of shape</span>
+<span class="sd">                [ChannelsIn, ChannelsOut, KernelSize, Blades]</span>
+<span class="sd">            stride: Stride to use for the convolution</span>
+<span class="sd">            padding: &quot;SAME&quot; (zero-pad input length so output</span>
+<span class="sd">                length == input length / stride) or &quot;VALID&quot; (no padding)</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Geometric algbra tensor of shape</span>
+<span class="sd">            [..., OutputLength, ChannelsOut, Blades]</span>
+<span class="sd">            representing `a` convolved with `k`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">mv_conv1d</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cayley</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="n">stride</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="n">padding</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeometricAlgebra.mv_repr"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.mv_repr">[docs]</a>    <span class="k">def</span> <span class="nf">mv_repr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Returns a string representation for the given</span>

@@ -211,6 +211,59 @@ for the geometric product. Used internally.</p>
 <span id="tfga-layers-module"></span><h2>tfga.layers module<a class="headerlink" href="#module-tfga.layers" title="Permalink to this headline">¶</a></h2>
 <p>Provides Geometric Algebra Keras layers.</p>
 <dl class="py class">
+<dt id="tfga.layers.GeometricProductConv1D">
+<em class="property">class </em><code class="sig-prename descclassname">tfga.layers.</code><code class="sig-name descname">GeometricProductConv1D</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricProductConv1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricProductConv1D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.base_layer.Layer</span></code></p>
+<p>Analagous to Keras’ Conv1D layer but using multivector-valued kernels
+instead of scalar ones and geometric product instead of
+standard multiplication.</p>
+<dl>
+<dt>Args:</dt><dd><p>algebra: GeometricAlgebra instance to use for the parameters
+channels: How many channels the output will have
+kernel_size: Size for the convolution kernel
+stride: Stride to use for the convolution
+padding: “SAME” (zero-pad input length so output</p>
+<blockquote>
+<div><p>length == input length / stride) or “VALID” (no padding)</p>
+</div></blockquote>
+<p>blade_indices_kernel: Blade indices to use for the kernel parameter
+blade_indices_bias: Blade indices to use for the bias parameter (if used)</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="tfga.layers.GeometricProductConv1D.build">
+<code class="sig-name descname">build</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_shape</span><span class="p">:</span> <span class="n">tensorflow.python.framework.tensor_shape.TensorShape</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricProductConv1D.build"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricProductConv1D.build" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the variables of the layer (optional, for subclass implementers).</p>
+<p>This is a method that implementers of subclasses of <cite>Layer</cite> or <cite>Model</cite>
+can override if they need a state-creation step in-between
+layer instantiation and layer call.</p>
+<p>This is typically used to create the weights of <cite>Layer</cite> subclasses.</p>
+<dl class="simple">
+<dt>Arguments:</dt><dd><dl class="simple">
+<dt>input_shape: Instance of <cite>TensorShape</cite>, or list of instances of</dt><dd><p><cite>TensorShape</cite> if the layer expects a list of inputs
+(one instance per input).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.layers.GeometricProductConv1D.call">
+<code class="sig-name descname">call</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricProductConv1D.call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricProductConv1D.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is where the layer’s logic lives.</p>
+<dl class="simple">
+<dt>Arguments:</dt><dd><p>inputs: Input tensor, or list/tuple of input tensors.
+<a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs: Additional keyword arguments.</p>
+</dd>
+<dt>Returns:</dt><dd><p>A tensor or list/tuple of tensors.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt id="tfga.layers.GeometricProductDense">
 <em class="property">class </em><code class="sig-prename descclassname">tfga.layers.</code><code class="sig-name descname">GeometricProductDense</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricProductDense"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricProductDense" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.base_layer.Layer</span></code></p>
@@ -247,7 +300,7 @@ layer instantiation and layer call.</p>
 <dd><p>This is where the layer’s logic lives.</p>
 <dl class="simple">
 <dt>Arguments:</dt><dd><p>inputs: Input tensor, or list/tuple of input tensors.
-<a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs: Additional keyword arguments.</p>
+<a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs: Additional keyword arguments.</p>
 </dd>
 <dt>Returns:</dt><dd><p>A tensor or list/tuple of tensors.</p>
 </dd>
@@ -312,7 +365,7 @@ blade_indices_bias: Blade indices to use for the bias parameter (if used)</p>
 <dd><p>This is where the layer’s logic lives.</p>
 <dl class="simple">
 <dt>Arguments:</dt><dd><p>inputs: Input tensor, or list/tuple of input tensors.
-<a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs: Additional keyword arguments.</p>
+<a href="#id5"><span class="problematic" id="id6">**</span></a>kwargs: Additional keyword arguments.</p>
 </dd>
 <dt>Returns:</dt><dd><p>A tensor or list/tuple of tensors.</p>
 </dd>
@@ -337,7 +390,7 @@ blade_indices: blade indices to extract</p>
 <dd><p>This is where the layer’s logic lives.</p>
 <dl class="simple">
 <dt>Arguments:</dt><dd><p>inputs: Input tensor, or list/tuple of input tensors.
-<a href="#id5"><span class="problematic" id="id6">**</span></a>kwargs: Additional keyword arguments.</p>
+<a href="#id7"><span class="problematic" id="id8">**</span></a>kwargs: Additional keyword arguments.</p>
 </dd>
 <dt>Returns:</dt><dd><p>A tensor or list/tuple of tensors.</p>
 </dd>
@@ -413,7 +466,7 @@ input tensor as</p>
 <dd><p>This is where the layer’s logic lives.</p>
 <dl class="simple">
 <dt>Arguments:</dt><dd><p>inputs: Input tensor, or list/tuple of input tensors.
-<a href="#id7"><span class="problematic" id="id8">**</span></a>kwargs: Additional keyword arguments.</p>
+<a href="#id9"><span class="problematic" id="id10">**</span></a>kwargs: Additional keyword arguments.</p>
 </dd>
 <dt>Returns:</dt><dd><p>A tensor or list/tuple of tensors.</p>
 </dd>
@@ -477,7 +530,7 @@ input tensor as</p>
 <dd><p>This is where the layer’s logic lives.</p>
 <dl class="simple">
 <dt>Arguments:</dt><dd><p>inputs: Input tensor, or list/tuple of input tensors.
-<a href="#id9"><span class="problematic" id="id10">**</span></a>kwargs: Additional keyword arguments.</p>
+<a href="#id11"><span class="problematic" id="id12">**</span></a>kwargs: Additional keyword arguments.</p>
 </dd>
 <dt>Returns:</dt><dd><p>A tensor or list/tuple of tensors.</p>
 </dd>
@@ -601,6 +654,11 @@ for the last one in the geometric algebra tensor).</p>
 <div class="section" id="module-tfga.mv_ops">
 <span id="tfga-mv-ops-module"></span><h2>tfga.mv_ops module<a class="headerlink" href="#module-tfga.mv_ops" title="Permalink to this headline">¶</a></h2>
 <p>Operations on geometric algebra tensors used internally.</p>
+<dl class="py function">
+<dt id="tfga.mv_ops.mv_conv1d">
+<code class="sig-prename descclassname">tfga.mv_ops.</code><code class="sig-name descname">mv_conv1d</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a_blade_values</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em>, <em class="sig-param"><span class="n">k_blade_values</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em>, <em class="sig-param"><span class="n">cayley</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em>, <em class="sig-param"><span class="n">stride</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">padding</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">dilations</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; tensorflow.python.framework.ops.Tensor<a class="reference internal" href="_modules/tfga/mv_ops.html#mv_conv1d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.mv_ops.mv_conv1d" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py function">
 <dt id="tfga.mv_ops.mv_grade_automorphism">
 <code class="sig-prename descclassname">tfga.mv_ops.</code><code class="sig-name descname">mv_grade_automorphism</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a_blade_values</span></em>, <em class="sig-param"><span class="n">algebra_blade_degrees</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/mv_ops.html#mv_grade_automorphism"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.mv_ops.mv_grade_automorphism" title="Permalink to this definition">¶</a></dt>
@@ -817,6 +875,32 @@ tensor.</p>
 kind: Kind corresponding to the tensor</p>
 </dd>
 <dt>Returns:</dt><dd><p>Geometric algebra tf.Tensor from tensor and kind</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.tfga.GeometricAlgebra.geom_conv1d">
+<code class="sig-name descname">geom_conv1d</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em>, <em class="sig-param"><span class="n">k</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em>, <em class="sig-param"><span class="n">stride</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">padding</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">dilations</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; tensorflow.python.framework.ops.Tensor<a class="reference internal" href="_modules/tfga/tfga.html#GeometricAlgebra.geom_conv1d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.geom_conv1d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the 1D convolution of a sequence with a geometric algebra
+tensor kernel. The convolution is performed using the geometric
+product.</p>
+<dl>
+<dt>Args:</dt><dd><dl class="simple">
+<dt>a: Input geometric algebra tensor of shape</dt><dd><p>[…, Length, ChannelsIn, Blades]</p>
+</dd>
+<dt>k: Geometric algebra tensor for the convolution kernel of shape</dt><dd><p>[ChannelsIn, ChannelsOut, KernelSize, Blades]</p>
+</dd>
+</dl>
+<p>stride: Stride to use for the convolution
+padding: “SAME” (zero-pad input length so output</p>
+<blockquote>
+<div><p>length == input length / stride) or “VALID” (no padding)</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p>Geometric algbra tensor of shape
+[…, OutputLength, ChannelsOut, Blades]
+representing <cite>a</cite> convolved with <cite>k</cite></p>
 </dd>
 </dl>
 </dd></dl>
