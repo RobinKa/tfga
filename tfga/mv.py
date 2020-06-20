@@ -196,7 +196,7 @@ class MultiVector:
         """Whether the `MultiVector` is of a pure kind."""
         return self._algebra.is_pure_kind(self._blade_values, kind=kind)
 
-    def geom_conv1d(self, kernel: MultiVector,
+    def geom_conv1d(self, kernel: self,
                     stride: int, padding: str,
                     dilations: Union[int, None] = None) -> self:
         """1D convolution. See `GeometricAlgebra.geom_conv1d().`"""
