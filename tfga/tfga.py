@@ -488,7 +488,7 @@ class GeometricAlgebra:
             a: Input geometric algebra tensor of shape
                 [..., Length, ChannelsIn, Blades]
             k: Geometric algebra tensor for the convolution kernel of shape
-                [ChannelsIn, ChannelsOut, KernelSize, Blades]
+                [KernelSize, ChannelsIn, ChannelsOut, Blades]
             stride: Stride to use for the convolution
             padding: "SAME" (zero-pad input length so output
                 length == input length / stride) or "VALID" (no padding)
