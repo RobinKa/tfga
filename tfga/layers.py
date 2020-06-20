@@ -312,7 +312,22 @@ class GeometricSandwichProductDense(GeometricProductDense):
         return self.activation(result)
 
 
-class GeometricConv1D(layers.Layer):
+class GeometricProductConv1D(layers.Layer):
+    """Analagous to Keras' Conv1D layer but using multivector-valued kernels
+    instead of scalar ones and geometric product instead of
+    standard multiplication.
+
+    Args:
+        algebra: GeometricAlgebra instance to use for the parameters
+        channels: How many channels the output will have
+        kernel_size: Size for the convolution kernel
+        stride: Stride to use for the convolution
+        padding: "SAME" (zero-pad input length so output
+            length == input length / stride) or "VALID" (no padding)
+        blade_indices_kernel: Blade indices to use for the kernel parameter
+        blade_indices_bias: Blade indices to use for the bias parameter (if used)
+    """
+
     def __init__(
         self,
         algebra: GeometricAlgebra,
@@ -322,6 +337,7 @@ class GeometricConv1D(layers.Layer):
         padding: str,
         blade_indices_kernel: List[int],
         blade_indices_bias: Union[None, List[int]] = None,
+        dilations: Union[None, int] = None,
         activation=None,
         use_bias=True,
         kernel_initializer="glorot_uniform",
@@ -340,6 +356,7 @@ class GeometricConv1D(layers.Layer):
         self.kernel_size = kernel_size
         self.stride = stride
         self.padding = padding
+        self.dilations = dilations
 
         self.blade_indices_kernel = tf.convert_to_tensor(
             blade_indices_kernel, dtype_hint=tf.int64)
@@ -395,7 +412,11 @@ class GeometricConv1D(layers.Layer):
         k_geom = self.algebra.from_tensor(
             self.kernel, self.blade_indices_kernel)
 
-        result = self.algebra.geom_conv1d(inputs, k_geom, stride=self.stride, padding=self.padding)
+        result = self.algebra.geom_conv1d(
+            inputs, k_geom,
+            stride=self.stride, padding=self.padding,
+            dilations=self.dilations
+        )
 
         if self.bias is not None:
             b_geom = self.algebra.from_tensor(

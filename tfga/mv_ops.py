@@ -1,4 +1,5 @@
 """Operations on geometric algebra tensors used internally."""
+from typing import Union
 import tensorflow as tf
 
 
@@ -17,7 +18,8 @@ def mv_multiply(a_blade_values: tf.Tensor, b_blade_values: tf.Tensor,
 
 
 def mv_conv1d(a_blade_values: tf.Tensor, k_blade_values: tf.Tensor, cayley: tf.Tensor,
-              stride, padding, data_format="NWC", dilations=None) -> tf.Tensor:
+              stride: int, padding: str,
+              dilations: Union[int, None] = None) -> tf.Tensor:
     # Winograd convolution
 
     # A: [..., S, CI, BI]
@@ -58,6 +60,7 @@ def mv_conv1d(a_blade_values: tf.Tensor, k_blade_values: tf.Tensor, cayley: tf.T
 
     a_slices = tf.reshape(a_slices, out_shape)
 
+    # TODO: Optimize this to not use einsum (since it's slow with ellipses)
     # a_...p,k,ci,bi; k_k,ci,co,bk; c_bi,bk,bo -> y_...p,co,bo
     #   ...a b c  d ,   e c  f  g ,   d  g  h  ->   ...a f  h
     x = tf.einsum("...abcd,bcfg,dgh->...afh", a_slices, k_blade_values, cayley)
