@@ -62,9 +62,9 @@ ga.print(ga.select_blades(quaternion, "10"))
 ga.print(ga.keep_blades(quaternion, "10"))
 ```
 
-Alternatively we can convert the geometric algebra `tf.Tensor` instance to `MultiVector`
+Alternatively we can convert the geometric algebra `tf.Tensor` instance to [`MultiVector`](https://tfga.warlock.ai/tfga.html#tfga.mv.MultiVector)
 instances which wrap the operations and provide operator overrides for convenience.
-This can be done by using the `__call__` operator of the `GeometricAlgebra` instance.
+This can be done by using the `__call__` operator of the [`GeometricAlgebra`](https://tfga.warlock.ai/tfga.html#tfga.tfga.GeometricAlgebra) instance.
 ```python
 # Create geometric algebra tf.Tensor instances
 a = ga.e123
