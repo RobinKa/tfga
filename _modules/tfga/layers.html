@@ -365,6 +365,183 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div></div>
 
 
+<div class="viewcode-block" id="GeometricProductElementwise"><a class="viewcode-back" href="../../tfga.html#tfga.layers.GeometricProductElementwise">[docs]</a><span class="nd">@register_keras_serializable</span><span class="p">(</span><span class="n">package</span><span class="o">=</span><span class="s2">&quot;TFGA&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">GeometricProductElementwise</span><span class="p">(</span><span class="n">GeometricAlgebraLayer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Performs the elementwise geometric product with a list of multivectors</span>
+<span class="sd">    with as many elements as there are input units.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        algebra: GeometricAlgebra instance to use for the parameters</span>
+<span class="sd">        blade_indices_kernel: Blade indices to use for the kernel parameter</span>
+<span class="sd">        blade_indices_bias: Blade indices to use for the bias parameter (if used)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">algebra</span><span class="p">:</span> <span class="n">GeometricAlgebra</span><span class="p">,</span>
+        <span class="n">blade_indices_kernel</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+        <span class="n">blade_indices_bias</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">activation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">kernel_initializer</span><span class="o">=</span><span class="s2">&quot;glorot_uniform&quot;</span><span class="p">,</span>
+        <span class="n">bias_initializer</span><span class="o">=</span><span class="s2">&quot;zeros&quot;</span><span class="p">,</span>
+        <span class="n">kernel_regularizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">bias_regularizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">activity_regularizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kernel_constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">bias_constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">algebra</span><span class="o">=</span><span class="n">algebra</span><span class="p">,</span> <span class="n">activity_regularizer</span><span class="o">=</span><span class="n">activity_regularizer</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices_kernel</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span>
+            <span class="n">blade_indices_kernel</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">use_bias</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices_bias</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span>
+                <span class="n">blade_indices_bias</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">activation</span> <span class="o">=</span> <span class="n">activations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">activation</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_bias</span> <span class="o">=</span> <span class="n">use_bias</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel_initializer</span> <span class="o">=</span> <span class="n">initializers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">kernel_initializer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bias_initializer</span> <span class="o">=</span> <span class="n">initializers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">bias_initializer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel_regularizer</span> <span class="o">=</span> <span class="n">regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">kernel_regularizer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bias_regularizer</span> <span class="o">=</span> <span class="n">regularizers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">bias_regularizer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel_constraint</span> <span class="o">=</span> <span class="n">constraints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">kernel_constraint</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bias_constraint</span> <span class="o">=</span> <span class="n">constraints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">bias_constraint</span><span class="p">)</span>
+
+<div class="viewcode-block" id="GeometricProductElementwise.build"><a class="viewcode-back" href="../../tfga.html#tfga.layers.GeometricProductElementwise.build">[docs]</a>    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_input_units</span> <span class="o">=</span> <span class="n">input_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">shape_kernel</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_input_units</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices_kernel</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span>
+            <span class="s2">&quot;kernel&quot;</span><span class="p">,</span>
+            <span class="n">shape</span><span class="o">=</span><span class="n">shape_kernel</span><span class="p">,</span>
+            <span class="n">initializer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel_initializer</span><span class="p">,</span>
+            <span class="n">regularizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel_regularizer</span><span class="p">,</span>
+            <span class="n">constraint</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel_constraint</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
+            <span class="n">trainable</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_bias</span><span class="p">:</span>
+            <span class="n">shape_bias</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_input_units</span><span class="p">,</span>
+                          <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices_bias</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bias</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_weight</span><span class="p">(</span>
+                <span class="s2">&quot;bias&quot;</span><span class="p">,</span>
+                <span class="n">shape</span><span class="o">=</span><span class="n">shape_bias</span><span class="p">,</span>
+                <span class="n">initializer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bias_initializer</span><span class="p">,</span>
+                <span class="n">regularizer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bias_regularizer</span><span class="p">,</span>
+                <span class="n">constraint</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bias_constraint</span><span class="p">,</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
+                <span class="n">trainable</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bias</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">built</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="GeometricProductElementwise.compute_output_shape"><a class="viewcode-back" href="../../tfga.html#tfga.layers.GeometricProductElementwise.compute_output_shape">[docs]</a>    <span class="k">def</span> <span class="nf">compute_output_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="o">*</span><span class="n">input_shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">num_blades</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="GeometricProductElementwise.call"><a class="viewcode-back" href="../../tfga.html#tfga.layers.GeometricProductElementwise.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="n">w_geom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">from_tensor</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices_kernel</span><span class="p">)</span>
+
+        <span class="c1"># Elementwise multiplication for each unit with a multivector.</span>
+        <span class="c1"># [..., U, X] * [U, X] -&gt; [..., U, X]</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">geom_prod</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">w_geom</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bias</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">b_geom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">from_tensor</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">bias</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices_bias</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="n">b_geom</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GeometricProductElementwise.get_config"><a class="viewcode-back" href="../../tfga.html#tfga.layers.GeometricProductElementwise.get_config">[docs]</a>    <span class="k">def</span> <span class="nf">get_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_config</span><span class="p">()</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+            <span class="s2">&quot;blade_indices_kernel&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices_kernel</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span>
+            <span class="s2">&quot;blade_indices_bias&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices_bias</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span>
+            <span class="s2">&quot;activation&quot;</span><span class="p">:</span>
+                <span class="n">activations</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">),</span>
+            <span class="s2">&quot;use_bias&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">use_bias</span><span class="p">,</span>
+            <span class="s2">&quot;kernel_initializer&quot;</span><span class="p">:</span>
+                <span class="n">initializers</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel_initializer</span><span class="p">),</span>
+            <span class="s2">&quot;bias_initializer&quot;</span><span class="p">:</span>
+                <span class="n">initializers</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bias_initializer</span><span class="p">),</span>
+            <span class="s2">&quot;kernel_regularizer&quot;</span><span class="p">:</span>
+                <span class="n">regularizers</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel_regularizer</span><span class="p">),</span>
+            <span class="s2">&quot;bias_regularizer&quot;</span><span class="p">:</span>
+                <span class="n">regularizers</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bias_regularizer</span><span class="p">),</span>
+            <span class="s2">&quot;activity_regularizer&quot;</span><span class="p">:</span>
+                <span class="n">regularizers</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">activity_regularizer</span><span class="p">),</span>
+            <span class="s2">&quot;kernel_constraint&quot;</span><span class="p">:</span>
+                <span class="n">constraints</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel_constraint</span><span class="p">),</span>
+            <span class="s2">&quot;bias_constraint&quot;</span><span class="p">:</span>
+                <span class="n">constraints</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bias_constraint</span><span class="p">)</span>
+        <span class="p">})</span>
+        <span class="k">return</span> <span class="n">config</span></div></div>
+
+
+<div class="viewcode-block" id="GeometricSandwichProductElementwise"><a class="viewcode-back" href="../../tfga.html#tfga.layers.GeometricSandwichProductElementwise">[docs]</a><span class="nd">@register_keras_serializable</span><span class="p">(</span><span class="n">package</span><span class="o">=</span><span class="s2">&quot;TFGA&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">GeometricSandwichProductElementwise</span><span class="p">(</span><span class="n">GeometricProductElementwise</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Performs the elementwise geometric sandwich product with a list of</span>
+<span class="sd">    multivectors with as many elements as there are input units.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        algebra: GeometricAlgebra instance to use for the parameters</span>
+<span class="sd">        blade_indices_kernel: Blade indices to use for the kernel parameter</span>
+<span class="sd">        blade_indices_bias: Blade indices to use for the bias parameter (if used)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">algebra</span><span class="p">,</span> <span class="n">blade_indices_kernel</span><span class="p">,</span> <span class="n">blade_indices_bias</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">activation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">use_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">kernel_initializer</span><span class="o">=</span><span class="s2">&quot;glorot_uniform&quot;</span><span class="p">,</span>
+        <span class="n">bias_initializer</span><span class="o">=</span><span class="s2">&quot;zeros&quot;</span><span class="p">,</span> <span class="n">kernel_regularizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">bias_regularizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">activity_regularizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kernel_constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bias_constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">algebra</span><span class="p">,</span>
+            <span class="n">blade_indices_kernel</span><span class="p">,</span>
+            <span class="n">blade_indices_bias</span><span class="o">=</span><span class="n">blade_indices_bias</span><span class="p">,</span>
+            <span class="n">activation</span><span class="o">=</span><span class="n">activation</span><span class="p">,</span>
+            <span class="n">use_bias</span><span class="o">=</span><span class="n">use_bias</span><span class="p">,</span>
+            <span class="n">kernel_initializer</span><span class="o">=</span><span class="n">kernel_initializer</span><span class="p">,</span>
+            <span class="n">bias_initializer</span><span class="o">=</span><span class="n">bias_initializer</span><span class="p">,</span>
+            <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">kernel_regularizer</span><span class="p">,</span>
+            <span class="n">bias_regularizer</span><span class="o">=</span><span class="n">bias_regularizer</span><span class="p">,</span>
+            <span class="n">activity_regularizer</span><span class="o">=</span><span class="n">activity_regularizer</span><span class="p">,</span>
+            <span class="n">kernel_constraint</span><span class="o">=</span><span class="n">kernel_constraint</span><span class="p">,</span>
+            <span class="n">bias_constraint</span><span class="o">=</span><span class="n">bias_constraint</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="GeometricSandwichProductElementwise.call"><a class="viewcode-back" href="../../tfga.html#tfga.layers.GeometricSandwichProductElementwise.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="n">w_geom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">from_tensor</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices_kernel</span><span class="p">)</span>
+
+        <span class="c1"># Elementwise multiplication Rx~R for each unit with a multivector.</span>
+        <span class="c1"># [..., U, X] * [U, X] -&gt; [..., U, X]</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">geom_prod</span><span class="p">(</span>
+            <span class="n">w_geom</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">geom_prod</span><span class="p">(</span>
+                <span class="n">inputs</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">reversion</span><span class="p">(</span><span class="n">w_geom</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bias</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">b_geom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algebra</span><span class="o">.</span><span class="n">from_tensor</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">bias</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blade_indices_bias</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="n">b_geom</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div></div>
+
+
 <div class="viewcode-block" id="GeometricProductConv1D"><a class="viewcode-back" href="../../tfga.html#tfga.layers.GeometricProductConv1D">[docs]</a><span class="nd">@register_keras_serializable</span><span class="p">(</span><span class="n">package</span><span class="o">=</span><span class="s2">&quot;TFGA&quot;</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">GeometricProductConv1D</span><span class="p">(</span><span class="n">GeometricAlgebraLayer</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Analagous to Keras&#39; Conv1D layer but using multivector-valued kernels</span>

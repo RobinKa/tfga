@@ -406,6 +406,88 @@ by <cite>Network</cite> (one layer of abstraction above).</p>
 </dd></dl>
 
 <dl class="py class">
+<dt id="tfga.layers.GeometricProductElementwise">
+<em class="property">class </em><code class="sig-prename descclassname">tfga.layers.</code><code class="sig-name descname">GeometricProductElementwise</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricProductElementwise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricProductElementwise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tfga.layers.GeometricAlgebraLayer" title="tfga.layers.GeometricAlgebraLayer"><code class="xref py py-class docutils literal notranslate"><span class="pre">tfga.layers.GeometricAlgebraLayer</span></code></a></p>
+<p>Performs the elementwise geometric product with a list of multivectors
+with as many elements as there are input units.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>algebra: GeometricAlgebra instance to use for the parameters
+blade_indices_kernel: Blade indices to use for the kernel parameter
+blade_indices_bias: Blade indices to use for the bias parameter (if used)</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="tfga.layers.GeometricProductElementwise.build">
+<code class="sig-name descname">build</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_shape</span><span class="p">:</span> <span class="n">tensorflow.python.framework.tensor_shape.TensorShape</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricProductElementwise.build"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricProductElementwise.build" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the variables of the layer (optional, for subclass implementers).</p>
+<p>This is a method that implementers of subclasses of <cite>Layer</cite> or <cite>Model</cite>
+can override if they need a state-creation step in-between
+layer instantiation and layer call.</p>
+<p>This is typically used to create the weights of <cite>Layer</cite> subclasses.</p>
+<dl class="simple">
+<dt>Arguments:</dt><dd><dl class="simple">
+<dt>input_shape: Instance of <cite>TensorShape</cite>, or list of instances of</dt><dd><p><cite>TensorShape</cite> if the layer expects a list of inputs
+(one instance per input).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.layers.GeometricProductElementwise.call">
+<code class="sig-name descname">call</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricProductElementwise.call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricProductElementwise.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is where the layer’s logic lives.</p>
+<dl class="simple">
+<dt>Arguments:</dt><dd><p>inputs: Input tensor, or list/tuple of input tensors.
+<a href="#id5"><span class="problematic" id="id6">**</span></a>kwargs: Additional keyword arguments.</p>
+</dd>
+<dt>Returns:</dt><dd><p>A tensor or list/tuple of tensors.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.layers.GeometricProductElementwise.compute_output_shape">
+<code class="sig-name descname">compute_output_shape</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_shape</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricProductElementwise.compute_output_shape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricProductElementwise.compute_output_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the output shape of the layer.</p>
+<p>If the layer has not been built, this method will call <cite>build</cite> on the
+layer. This assumes that the layer will later be used with inputs that
+match the input shape provided here.</p>
+<dl class="simple">
+<dt>Arguments:</dt><dd><dl class="simple">
+<dt>input_shape: Shape tuple (tuple of integers)</dt><dd><p>or list of shape tuples (one per output tensor of the layer).
+Shape tuples can include None for free dimensions,
+instead of an integer.</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><p>An input shape tuple.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.layers.GeometricProductElementwise.get_config">
+<code class="sig-name descname">get_config</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricProductElementwise.get_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricProductElementwise.get_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the config of the layer.</p>
+<p>A layer config is a Python dictionary (serializable)
+containing the configuration of a layer.
+The same layer can be reinstantiated later
+(without its trained weights) from this configuration.</p>
+<p>The config of a layer does not include connectivity
+information, nor the layer class name. These are handled
+by <cite>Network</cite> (one layer of abstraction above).</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>Python dictionary.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt id="tfga.layers.GeometricSandwichProductDense">
 <em class="property">class </em><code class="sig-prename descclassname">tfga.layers.</code><code class="sig-name descname">GeometricSandwichProductDense</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricSandwichProductDense"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricSandwichProductDense" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#tfga.layers.GeometricProductDense" title="tfga.layers.GeometricProductDense"><code class="xref py py-class docutils literal notranslate"><span class="pre">tfga.layers.GeometricProductDense</span></code></a></p>
@@ -424,7 +506,34 @@ blade_indices_bias: Blade indices to use for the bias parameter (if used)</p>
 <dd><p>This is where the layer’s logic lives.</p>
 <dl class="simple">
 <dt>Arguments:</dt><dd><p>inputs: Input tensor, or list/tuple of input tensors.
-<a href="#id5"><span class="problematic" id="id6">**</span></a>kwargs: Additional keyword arguments.</p>
+<a href="#id7"><span class="problematic" id="id8">**</span></a>kwargs: Additional keyword arguments.</p>
+</dd>
+<dt>Returns:</dt><dd><p>A tensor or list/tuple of tensors.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="tfga.layers.GeometricSandwichProductElementwise">
+<em class="property">class </em><code class="sig-prename descclassname">tfga.layers.</code><code class="sig-name descname">GeometricSandwichProductElementwise</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricSandwichProductElementwise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricSandwichProductElementwise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tfga.layers.GeometricProductElementwise" title="tfga.layers.GeometricProductElementwise"><code class="xref py py-class docutils literal notranslate"><span class="pre">tfga.layers.GeometricProductElementwise</span></code></a></p>
+<p>Performs the elementwise geometric sandwich product with a list of
+multivectors with as many elements as there are input units.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>algebra: GeometricAlgebra instance to use for the parameters
+blade_indices_kernel: Blade indices to use for the kernel parameter
+blade_indices_bias: Blade indices to use for the bias parameter (if used)</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="tfga.layers.GeometricSandwichProductElementwise.call">
+<code class="sig-name descname">call</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricSandwichProductElementwise.call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricSandwichProductElementwise.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is where the layer’s logic lives.</p>
+<dl class="simple">
+<dt>Arguments:</dt><dd><p>inputs: Input tensor, or list/tuple of input tensors.
+<a href="#id9"><span class="problematic" id="id10">**</span></a>kwargs: Additional keyword arguments.</p>
 </dd>
 <dt>Returns:</dt><dd><p>A tensor or list/tuple of tensors.</p>
 </dd>
@@ -449,7 +558,7 @@ blade_indices: blade indices to extract</p>
 <dd><p>This is where the layer’s logic lives.</p>
 <dl class="simple">
 <dt>Arguments:</dt><dd><p>inputs: Input tensor, or list/tuple of input tensors.
-<a href="#id7"><span class="problematic" id="id8">**</span></a>kwargs: Additional keyword arguments.</p>
+<a href="#id11"><span class="problematic" id="id12">**</span></a>kwargs: Additional keyword arguments.</p>
 </dd>
 <dt>Returns:</dt><dd><p>A tensor or list/tuple of tensors.</p>
 </dd>
@@ -525,7 +634,7 @@ input tensor as</p>
 <dd><p>This is where the layer’s logic lives.</p>
 <dl class="simple">
 <dt>Arguments:</dt><dd><p>inputs: Input tensor, or list/tuple of input tensors.
-<a href="#id9"><span class="problematic" id="id10">**</span></a>kwargs: Additional keyword arguments.</p>
+<a href="#id13"><span class="problematic" id="id14">**</span></a>kwargs: Additional keyword arguments.</p>
 </dd>
 <dt>Returns:</dt><dd><p>A tensor or list/tuple of tensors.</p>
 </dd>
@@ -589,7 +698,7 @@ input tensor as</p>
 <dd><p>This is where the layer’s logic lives.</p>
 <dl class="simple">
 <dt>Arguments:</dt><dd><p>inputs: Input tensor, or list/tuple of input tensors.
-<a href="#id11"><span class="problematic" id="id12">**</span></a>kwargs: Additional keyword arguments.</p>
+<a href="#id15"><span class="problematic" id="id16">**</span></a>kwargs: Additional keyword arguments.</p>
 </dd>
 <dt>Returns:</dt><dd><p>A tensor or list/tuple of tensors.</p>
 </dd>
@@ -811,7 +920,7 @@ empty string <cite>“”</cite>.</p>
 <dt id="tfga.tfga.GeometricAlgebra.cayley">
 <em class="property">property </em><code class="sig-name descname">cayley</code><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.cayley" title="Permalink to this definition">¶</a></dt>
 <dd><p><cite>MxMxM</cite> tensor where <cite>M</cite> is the number of basis
-vectors in the algebra. Used for calculating the
+blades in the algebra. Used for calculating the
 geometric product:</p>
 <p><cite>a_i, b_j, cayley_ijk -&gt; c_k</cite></p>
 </dd></dl>
