@@ -166,11 +166,9 @@ executing `python -m unittest discover tests` from the root directory of the rep
 See our [Zenodo](https://doi.org/10.5281/zenodo.3902405) page. For citing all versions the following BibTex can be used
 
 ```
-@software{kahlow_robin_2020_3902405,
+@software{python_tfga,
   author       = {Kahlow, Robin},
   title        = {TensorFlow Geometric Algebra},
-  month        = jun,
-  year         = 2020,
   publisher    = {Zenodo},
   doi          = {10.5281/zenodo.3902405},
   url          = {https://doi.org/10.5281/zenodo.3902405}
