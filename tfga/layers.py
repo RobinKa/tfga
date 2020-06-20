@@ -5,11 +5,6 @@ from tensorflow.keras import layers
 from tensorflow.keras import (
     initializers, activations, regularizers, constraints
 )
-from tensorflow.python.framework import tensor_shape
-from tensorflow.python.keras.utils import conv_utils
-from tensorflow.python.keras.engine.input_spec import InputSpec
-from tensorflow.python.ops import nn
-from tensorflow.python.ops import nn_ops
 from .blades import BladeKind
 from .tfga import GeometricAlgebra
 

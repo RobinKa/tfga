@@ -84,7 +84,7 @@ print(mv_a ^ mv_b)
 ```
 
 ## Keras layers
-TFGA also provides [Keras](https://www.tensorflow.org/guide/keras/overview) layers which provide
+TFGA also provides [Keras](https://www.tensorflow.org/guide/keras/sequential_model) layers which provide
 layers similar to the existing ones but using multivectors instead. For example the GeometricProductDense
 layer is exactly the same as the [Dense](https://www.tensorflow.org/api_docs/python/tf/keras/layers/Dense) layer but uses
 multivector-valued weights and biases instead of scalar ones. The exact kind of multivector-type can be
@@ -133,7 +133,9 @@ result = sequence(tensor)
 ```
 
 For performing a geometric sandwich product `R * x * ~R` instead of just the geometric product `R * x`
-there also exists the `GeometricSandwichProductDense` with an identical API.
+there also exists the `GeometricSandwichProductDense` with an identical API. Finally we have the
+`GeometricProductConv1D` layer which is analagous to Keras' [Conv1D](https://www.tensorflow.org/api_docs/python/tf/keras/layers/Conv1D) layer
+with Multivector-valued input and kernel.
 
 ## Notebooks
 [Generic examples](https://github.com/RobinKa/tfga/tree/master/notebooks/tfga.ipynb)
