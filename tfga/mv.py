@@ -178,20 +178,32 @@ class MultiVector:
             self._algebra
         )
 
-    def approx_exp(self) -> self:
+    def approx_exp(self, order: int = 50) -> self:
         """Approximate exponential. See `GeometricAlgebra.approx_exp()`."""
         return MultiVector(
-            self._algebra.approx_exp(self._blade_values),
+            self._algebra.approx_exp(self._blade_values, order=order),
             self._algebra
         )
 
-    def approx_log(self) -> self:
+    def approx_log(self, order: int = 50) -> self:
         """Approximate logarithm. See `GeometricAlgebra.approx_log()`."""
         return MultiVector(
-            self._algebra.approx_log(self._blade_values),
+            self._algebra.approx_log(self._blade_values, order=order),
             self._algebra
         )
 
     def is_pure_kind(self, kind: BladeKind) -> bool:
         """Whether the `MultiVector` is of a pure kind."""
         return self._algebra.is_pure_kind(self._blade_values, kind=kind)
+
+    def geom_conv1d(self, kernel: MultiVector,
+                    stride: int, padding: str,
+                    dilations: Union[int, None] = None) -> self:
+        """1D convolution. See `GeometricAlgebra.geom_conv1d().`"""
+        return MultiVector(
+            self._algebra.geom_conv1d(
+                self._blade_values, kernel._blade_values,
+                stride=stride, padding=padding, dilations=dilations
+            ),
+            self._algebra
+        )

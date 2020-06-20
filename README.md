@@ -163,7 +163,7 @@ Tests using Python's built-in [`unittest`](https://docs.python.org/3/library/uni
 executing `python -m unittest discover tests` from the root directory of the repository.
 
 ## Citing
-See our [Zenodo](https://doi.org/10.5281/zenodo.3902404) page. For citing all versions the following BibTex can be used
+See our [Zenodo](https://doi.org/10.5281/zenodo.3902404) page. For citing all versions the following BibTeX can be used
 
 ```
 @software{python_tfga,
