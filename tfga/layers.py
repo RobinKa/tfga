@@ -5,11 +5,38 @@ from tensorflow.keras import layers
 from tensorflow.keras import (
     initializers, activations, regularizers, constraints
 )
+from tensorflow.keras.utils import register_keras_serializable
 from .blades import BladeKind
 from .tfga import GeometricAlgebra
 
 
-class TensorToGeometric(layers.Layer):
+class GeometricAlgebraLayer(layers.Layer):
+    def __init__(self, algebra: GeometricAlgebra, **kwargs):
+        self.algebra = algebra
+        super().__init__(**kwargs)
+
+    @classmethod
+    def from_config(cls, config):
+        # Create algebra if necessary (should only occur once, assumes that
+        # config is actually mutable).
+        if "algebra" not in config:
+            assert "metric" in config
+            config["algebra"] = GeometricAlgebra(config["metric"])
+            del config["metric"]
+        return cls(**config)
+
+    def get_config(self):
+        # Store metric of the algebra. In from_config() we will recreate the
+        # algebra from the metric.
+        config = super().get_config()
+        config.update({
+            "metric": self.algebra.metric.numpy()
+        })
+        return config
+
+
+@register_keras_serializable(package="TFGA")
+class TensorToGeometric(GeometricAlgebraLayer):
     """Layer for converting tensors with given blade indices to
     geometric algebra tensors.
 
@@ -21,26 +48,26 @@ class TensorToGeometric(layers.Layer):
 
     def __init__(self, algebra: GeometricAlgebra, blade_indices: List[int],
                  **kwargs):
-        super().__init__(**kwargs)
-
-        self._algebra = algebra
-        self._blade_indices = blade_indices
+        super().__init__(algebra=algebra, **kwargs)
+        self.blade_indices = tf.convert_to_tensor(
+            blade_indices, dtype=tf.int64)
 
     def compute_output_shape(self, input_shape):
         return tf.TensorShape([*input_shape[:-1], self.algebra.num_blades])
 
     def call(self, inputs):
-        return self._algebra.from_tensor(inputs, blade_indices=self._blade_indices)
+        return self.algebra.from_tensor(inputs, blade_indices=self.blade_indices)
 
     def get_config(self):
         config = super().get_config()
         config.update({
-            "blade_indices": self._blade_indices
+            "blade_indices": self.blade_indices.numpy()
         })
         return config
 
 
-class TensorWithKindToGeometric(layers.Layer):
+@register_keras_serializable(package="TFGA")
+class TensorWithKindToGeometric(GeometricAlgebraLayer):
     """Layer for converting tensors with given blade kind to
     geometric algebra tensors.
 
@@ -52,26 +79,25 @@ class TensorWithKindToGeometric(layers.Layer):
 
     def __init__(self, algebra: GeometricAlgebra, kind: BladeKind,
                  **kwargs):
-        super().__init__(**kwargs)
-
-        self._algebra = algebra
-        self._kind = kind
+        super().__init__(algebra=algebra, **kwargs)
+        self.kind = kind
 
     def compute_output_shape(self, input_shape):
-        return tf.TensorShape([*input_shape[:-1], self._algebra.get_kind_blade_indices(self._kind).shape[0]])
+        return tf.TensorShape([*input_shape[:-1], self.algebra.get_kind_blade_indices(self.kind).shape[0]])
 
     def call(self, inputs):
-        return self._algebra.from_tensor_with_kind(inputs, kind=self._kind)
+        return self.algebra.from_tensor_with_kind(inputs, kind=self.kind)
 
     def get_config(self):
         config = super().get_config()
         config.update({
-            "kind": self._kind
+            "kind": self.kind
         })
         return config
 
 
-class GeometricToTensor(layers.Layer):
+@register_keras_serializable(package="TFGA")
+class GeometricToTensor(GeometricAlgebraLayer):
     """Layer for extracting given blades from geometric algebra tensors.
 
     Args:
@@ -81,25 +107,25 @@ class GeometricToTensor(layers.Layer):
 
     def __init__(self, algebra: GeometricAlgebra, blade_indices: List[int],
                  **kwargs):
-        super().__init__(**kwargs)
-
-        self._algebra = algebra
-        self._blade_indices = blade_indices
+        super().__init__(algebra=algebra, **kwargs)
+        self.blade_indices = tf.convert_to_tensor(
+            blade_indices, dtype=tf.int64)
 
     def compute_output_shape(self, input_shape):
-        return tf.TensorShape([*input_shape[:-1], self._blade_indices.shape[0]])
+        return tf.TensorShape([*input_shape[:-1], self.blade_indices.shape[0]])
 
     def call(self, inputs):
-        return tf.gather(inputs, self._blade_indices, axis=-1)
+        return tf.gather(inputs, self.blade_indices, axis=-1)
 
     def get_config(self):
         config = super().get_config()
         config.update({
-            "blade_indices": self._blade_indices
+            "blade_indices": self.blade_indices.numpy()
         })
         return config
 
 
+@register_keras_serializable(package="TFGA")
 class GeometricToTensorWithKind(GeometricToTensor):
     """Layer for extracting blades of a kind from geometric algebra tensors.
 
@@ -115,7 +141,8 @@ class GeometricToTensorWithKind(GeometricToTensor):
                          **kwargs)
 
 
-class GeometricProductDense(layers.Layer):
+@register_keras_serializable(package="TFGA")
+class GeometricProductDense(GeometricAlgebraLayer):
     """Analagous to Keras' Dense layer but using multivector-valued matrices
     instead of scalar ones and geometric multiplication instead of standard
     multiplication.
@@ -143,9 +170,8 @@ class GeometricProductDense(layers.Layer):
         bias_constraint=None,
         **kwargs
     ):
-        super().__init__(activity_regularizer=activity_regularizer, **kwargs)
+        super().__init__(algebra=algebra, activity_regularizer=activity_regularizer, **kwargs)
 
-        self.algebra = algebra
         self.units = units
         self.blade_indices_kernel = tf.convert_to_tensor(
             blade_indices_kernel, dtype_hint=tf.int64)
@@ -216,15 +242,12 @@ class GeometricProductDense(layers.Layer):
         return self.activation(result)
 
     def get_config(self):
-        layers.Dense
         config = super().get_config()
         config.update({
-            "algebra":
-                self.algebra,  # TODO: Probably isn't right.
             "blade_indices_kernel":
-                self.blade_indices_kernel,
+                self.blade_indices_kernel.numpy(),
             "blade_indices_bias":
-                self.blade_indices_bias,
+                self.blade_indices_bias.numpy(),
             "units":
                 self.units,
             "activation":
@@ -249,6 +272,7 @@ class GeometricProductDense(layers.Layer):
         return config
 
 
+@register_keras_serializable(package="TFGA")
 class GeometricSandwichProductDense(GeometricProductDense):
     """Analagous to Keras' Dense layer but using multivector-valued matrices
     instead of scalar ones and geometric sandwich multiplication instead of
@@ -307,7 +331,8 @@ class GeometricSandwichProductDense(GeometricProductDense):
         return self.activation(result)
 
 
-class GeometricProductConv1D(layers.Layer):
+@register_keras_serializable(package="TFGA")
+class GeometricProductConv1D(GeometricAlgebraLayer):
     """Analagous to Keras' Conv1D layer but using multivector-valued kernels
     instead of scalar ones and geometric product instead of
     standard multiplication.
@@ -344,9 +369,12 @@ class GeometricProductConv1D(layers.Layer):
         bias_constraint=None,
         **kwargs
     ):
-        super().__init__(activity_regularizer=activity_regularizer, **kwargs)
+        super().__init__(
+            algebra=algebra,
+            activity_regularizer=activity_regularizer,
+            **kwargs
+        )
 
-        self.algebra = algebra
         self.channels = channels
         self.kernel_size = kernel_size
         self.stride = stride
@@ -419,3 +447,45 @@ class GeometricProductConv1D(layers.Layer):
             result += b_geom
 
         return self.activation(result)
+
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            "channels":
+                self.channels,
+            "kernel_size":
+                self.kernel_size,
+            "stride":
+                self.stride,
+            "padding":
+                self.padding,
+            "dilations":
+                self.dilations,
+            "blade_indices_kernel":
+                self.blade_indices_kernel.numpy(),
+            "blade_indices_bias":
+                self.blade_indices_bias.numpy(),
+            "units":
+                self.units,
+            "activation":
+                activations.serialize(self.activation),
+            "use_bias":
+                self.use_bias,
+            "kernel_initializer":
+                initializers.serialize(self.kernel_initializer),
+            "bias_initializer":
+                initializers.serialize(self.bias_initializer),
+            "kernel_regularizer":
+                regularizers.serialize(self.kernel_regularizer),
+            "bias_regularizer":
+                regularizers.serialize(self.bias_regularizer),
+            "activity_regularizer":
+                regularizers.serialize(self.activity_regularizer),
+            "kernel_constraint":
+                constraints.serialize(self.kernel_constraint),
+            "bias_constraint":
+                constraints.serialize(self.bias_constraint)
+
+        })
+
+        return config
