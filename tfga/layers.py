@@ -339,7 +339,7 @@ class GeometricProductConv1D(GeometricAlgebraLayer):
 
     Args:
         algebra: GeometricAlgebra instance to use for the parameters
-        channels: How many channels the output will have
+        filters: How many channels the output will have
         kernel_size: Size for the convolution kernel
         stride: Stride to use for the convolution
         padding: "SAME" (zero-pad input length so output
@@ -351,7 +351,7 @@ class GeometricProductConv1D(GeometricAlgebraLayer):
     def __init__(
         self,
         algebra: GeometricAlgebra,
-        channels: int,
+        filters: int,
         kernel_size: int,
         stride: int,
         padding: str,
@@ -375,7 +375,7 @@ class GeometricProductConv1D(GeometricAlgebraLayer):
             **kwargs
         )
 
-        self.channels = channels
+        self.filters = filters
         self.kernel_size = kernel_size
         self.stride = stride
         self.padding = padding
@@ -398,13 +398,13 @@ class GeometricProductConv1D(GeometricAlgebraLayer):
 
     def build(self, input_shape: tf.TensorShape):
         # I: [..., S, C, B]
-        self.num_input_channels = input_shape[-2]
+        self.num_input_filters = input_shape[-2]
 
         # K: [K, IC, OC, B]
         shape_kernel = [
             self.kernel_size,
-            self.num_input_channels,
-            self.channels,
+            self.num_input_filters,
+            self.filters,
             self.blade_indices_kernel.shape[0]
         ]
         self.kernel = self.add_weight(
@@ -417,7 +417,7 @@ class GeometricProductConv1D(GeometricAlgebraLayer):
             trainable=True
         )
         if self.use_bias:
-            shape_bias = [self.channels, self.blade_indices_bias.shape[0]]
+            shape_bias = [self.filters, self.blade_indices_bias.shape[0]]
             self.bias = self.add_weight(
                 "bias",
                 shape=shape_bias,
@@ -451,8 +451,8 @@ class GeometricProductConv1D(GeometricAlgebraLayer):
     def get_config(self):
         config = super().get_config()
         config.update({
-            "channels":
-                self.channels,
+            "filters":
+                self.filters,
             "kernel_size":
                 self.kernel_size,
             "stride":
@@ -465,8 +465,6 @@ class GeometricProductConv1D(GeometricAlgebraLayer):
                 self.blade_indices_kernel.numpy(),
             "blade_indices_bias":
                 self.blade_indices_bias.numpy(),
-            "units":
-                self.units,
             "activation":
                 activations.serialize(self.activation),
             "use_bias":
