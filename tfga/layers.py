@@ -5,6 +5,11 @@ from tensorflow.keras import layers
 from tensorflow.keras import (
     initializers, activations, regularizers, constraints
 )
+from tensorflow.python.framework import tensor_shape
+from tensorflow.python.keras.utils import conv_utils
+from tensorflow.python.keras.engine.input_spec import InputSpec
+from tensorflow.python.ops import nn
+from tensorflow.python.ops import nn_ops
 from .blades import BladeKind
 from .tfga import GeometricAlgebra
 
@@ -297,6 +302,120 @@ class GeometricSandwichProductDense(GeometricProductDense):
                 )
             ),
             axis=-2
+        )
+
+        if self.bias is not None:
+            b_geom = self.algebra.from_tensor(
+                self.bias, self.blade_indices_bias)
+            result += b_geom
+
+        return self.activation(result)
+
+
+class GeometricProductConv1D(layers.Layer):
+    """Analagous to Keras' Conv1D layer but using multivector-valued kernels
+    instead of scalar ones and geometric product instead of
+    standard multiplication.
+
+    Args:
+        algebra: GeometricAlgebra instance to use for the parameters
+        channels: How many channels the output will have
+        kernel_size: Size for the convolution kernel
+        stride: Stride to use for the convolution
+        padding: "SAME" (zero-pad input length so output
+            length == input length / stride) or "VALID" (no padding)
+        blade_indices_kernel: Blade indices to use for the kernel parameter
+        blade_indices_bias: Blade indices to use for the bias parameter (if used)
+    """
+
+    def __init__(
+        self,
+        algebra: GeometricAlgebra,
+        channels: int,
+        kernel_size: int,
+        stride: int,
+        padding: str,
+        blade_indices_kernel: List[int],
+        blade_indices_bias: Union[None, List[int]] = None,
+        dilations: Union[None, int] = None,
+        activation=None,
+        use_bias=True,
+        kernel_initializer="glorot_uniform",
+        bias_initializer="zeros",
+        kernel_regularizer=None,
+        bias_regularizer=None,
+        activity_regularizer=None,
+        kernel_constraint=None,
+        bias_constraint=None,
+        **kwargs
+    ):
+        super().__init__(activity_regularizer=activity_regularizer, **kwargs)
+
+        self.algebra = algebra
+        self.channels = channels
+        self.kernel_size = kernel_size
+        self.stride = stride
+        self.padding = padding
+        self.dilations = dilations
+
+        self.blade_indices_kernel = tf.convert_to_tensor(
+            blade_indices_kernel, dtype_hint=tf.int64)
+        if use_bias:
+            self.blade_indices_bias = tf.convert_to_tensor(
+                blade_indices_bias, dtype_hint=tf.int64)
+
+        self.activation = activations.get(activation)
+        self.use_bias = use_bias
+        self.kernel_initializer = initializers.get(kernel_initializer)
+        self.bias_initializer = initializers.get(bias_initializer)
+        self.kernel_regularizer = regularizers.get(kernel_regularizer)
+        self.bias_regularizer = regularizers.get(bias_regularizer)
+        self.kernel_constraint = constraints.get(kernel_constraint)
+        self.bias_constraint = constraints.get(bias_constraint)
+
+    def build(self, input_shape: tf.TensorShape):
+        # I: [..., S, C, B]
+        self.num_input_channels = input_shape[-2]
+
+        # K: [K, IC, OC, B]
+        shape_kernel = [
+            self.kernel_size,
+            self.num_input_channels,
+            self.channels,
+            self.blade_indices_kernel.shape[0]
+        ]
+        self.kernel = self.add_weight(
+            "kernel",
+            shape=shape_kernel,
+            initializer=self.kernel_initializer,
+            regularizer=self.kernel_regularizer,
+            constraint=self.kernel_constraint,
+            dtype=self.dtype,
+            trainable=True
+        )
+        if self.use_bias:
+            shape_bias = [self.channels, self.blade_indices_bias.shape[0]]
+            self.bias = self.add_weight(
+                "bias",
+                shape=shape_bias,
+                initializer=self.bias_initializer,
+                regularizer=self.bias_regularizer,
+                constraint=self.bias_constraint,
+                dtype=self.dtype,
+                trainable=True
+            )
+        else:
+            self.bias = None
+        self.built = True
+
+    def call(self, inputs):
+        k_geom = self.algebra.from_tensor(
+            self.kernel, self.blade_indices_kernel)
+
+        result = self.algebra.geom_conv1d(
+            inputs, k_geom,
+            stride=self.stride, padding=self.padding,
+            dilations=self.dilations
         )
 
         if self.bias is not None:

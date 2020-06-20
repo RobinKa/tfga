@@ -146,6 +146,8 @@ there also exists the `GeometricSandwichProductDense` with an identical API.
 
 [Projective Geometric Algebra](https://github.com/RobinKa/tfga/tree/master/notebooks/pga.ipynb)
 
+[1D Multivector-valued Convolution Example](https://github.com/RobinKa/tfga/tree/master/notebooks/conv.ipynb)
+
 ## Tests
 Tests using Python's built-in `unittest` module are available in the `tests` directory. All tests can be run by
 executing `python -m unittest discover tests` from the root directory of the repository.
