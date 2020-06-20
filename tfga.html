@@ -211,15 +211,57 @@ for the geometric product. Used internally.</p>
 <span id="tfga-layers-module"></span><h2>tfga.layers module<a class="headerlink" href="#module-tfga.layers" title="Permalink to this headline">¶</a></h2>
 <p>Provides Geometric Algebra Keras layers.</p>
 <dl class="py class">
+<dt id="tfga.layers.GeometricAlgebraLayer">
+<em class="property">class </em><code class="sig-prename descclassname">tfga.layers.</code><code class="sig-name descname">GeometricAlgebraLayer</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricAlgebraLayer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricAlgebraLayer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.base_layer.Layer</span></code></p>
+<dl class="py method">
+<dt id="tfga.layers.GeometricAlgebraLayer.from_config">
+<em class="property">classmethod </em><code class="sig-name descname">from_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricAlgebraLayer.from_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricAlgebraLayer.from_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a layer from its config.</p>
+<p>This method is the reverse of <cite>get_config</cite>,
+capable of instantiating the same layer from the config
+dictionary. It does not handle layer connectivity
+(handled by Network), nor weights (handled by <cite>set_weights</cite>).</p>
+<dl class="simple">
+<dt>Arguments:</dt><dd><dl class="simple">
+<dt>config: A Python dictionary, typically the</dt><dd><p>output of get_config.</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><p>A layer instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.layers.GeometricAlgebraLayer.get_config">
+<code class="sig-name descname">get_config</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricAlgebraLayer.get_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricAlgebraLayer.get_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the config of the layer.</p>
+<p>A layer config is a Python dictionary (serializable)
+containing the configuration of a layer.
+The same layer can be reinstantiated later
+(without its trained weights) from this configuration.</p>
+<p>The config of a layer does not include connectivity
+information, nor the layer class name. These are handled
+by <cite>Network</cite> (one layer of abstraction above).</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>Python dictionary.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt id="tfga.layers.GeometricProductConv1D">
 <em class="property">class </em><code class="sig-prename descclassname">tfga.layers.</code><code class="sig-name descname">GeometricProductConv1D</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricProductConv1D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricProductConv1D" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.base_layer.Layer</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="#tfga.layers.GeometricAlgebraLayer" title="tfga.layers.GeometricAlgebraLayer"><code class="xref py py-class docutils literal notranslate"><span class="pre">tfga.layers.GeometricAlgebraLayer</span></code></a></p>
 <p>Analagous to Keras’ Conv1D layer but using multivector-valued kernels
 instead of scalar ones and geometric product instead of
 standard multiplication.</p>
 <dl>
 <dt>Args:</dt><dd><p>algebra: GeometricAlgebra instance to use for the parameters
-channels: How many channels the output will have
+filters: How many channels the output will have
 kernel_size: Size for the convolution kernel
 stride: Stride to use for the convolution
 padding: “SAME” (zero-pad input length so output</p>
@@ -261,12 +303,29 @@ layer instantiation and layer call.</p>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt id="tfga.layers.GeometricProductConv1D.get_config">
+<code class="sig-name descname">get_config</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricProductConv1D.get_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricProductConv1D.get_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the config of the layer.</p>
+<p>A layer config is a Python dictionary (serializable)
+containing the configuration of a layer.
+The same layer can be reinstantiated later
+(without its trained weights) from this configuration.</p>
+<p>The config of a layer does not include connectivity
+information, nor the layer class name. These are handled
+by <cite>Network</cite> (one layer of abstraction above).</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>Python dictionary.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
 <dt id="tfga.layers.GeometricProductDense">
 <em class="property">class </em><code class="sig-prename descclassname">tfga.layers.</code><code class="sig-name descname">GeometricProductDense</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricProductDense"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricProductDense" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.base_layer.Layer</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="#tfga.layers.GeometricAlgebraLayer" title="tfga.layers.GeometricAlgebraLayer"><code class="xref py py-class docutils literal notranslate"><span class="pre">tfga.layers.GeometricAlgebraLayer</span></code></a></p>
 <p>Analagous to Keras’ Dense layer but using multivector-valued matrices
 instead of scalar ones and geometric multiplication instead of standard
 multiplication.</p>
@@ -377,7 +436,7 @@ blade_indices_bias: Blade indices to use for the bias parameter (if used)</p>
 <dl class="py class">
 <dt id="tfga.layers.GeometricToTensor">
 <em class="property">class </em><code class="sig-prename descclassname">tfga.layers.</code><code class="sig-name descname">GeometricToTensor</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricToTensor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricToTensor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.base_layer.Layer</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="#tfga.layers.GeometricAlgebraLayer" title="tfga.layers.GeometricAlgebraLayer"><code class="xref py py-class docutils literal notranslate"><span class="pre">tfga.layers.GeometricAlgebraLayer</span></code></a></p>
 <p>Layer for extracting given blades from geometric algebra tensors.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>algebra: GeometricAlgebra instance to use
@@ -451,7 +510,7 @@ kind: blade indices of kind to extract</p>
 <dl class="py class">
 <dt id="tfga.layers.TensorToGeometric">
 <em class="property">class </em><code class="sig-prename descclassname">tfga.layers.</code><code class="sig-name descname">TensorToGeometric</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#TensorToGeometric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.TensorToGeometric" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.base_layer.Layer</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="#tfga.layers.GeometricAlgebraLayer" title="tfga.layers.GeometricAlgebraLayer"><code class="xref py py-class docutils literal notranslate"><span class="pre">tfga.layers.GeometricAlgebraLayer</span></code></a></p>
 <p>Layer for converting tensors with given blade indices to
 geometric algebra tensors.</p>
 <dl class="simple">
@@ -515,7 +574,7 @@ by <cite>Network</cite> (one layer of abstraction above).</p>
 <dl class="py class">
 <dt id="tfga.layers.TensorWithKindToGeometric">
 <em class="property">class </em><code class="sig-prename descclassname">tfga.layers.</code><code class="sig-name descname">TensorWithKindToGeometric</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#TensorWithKindToGeometric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.TensorWithKindToGeometric" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.base_layer.Layer</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="#tfga.layers.GeometricAlgebraLayer" title="tfga.layers.GeometricAlgebraLayer"><code class="xref py py-class docutils literal notranslate"><span class="pre">tfga.layers.GeometricAlgebraLayer</span></code></a></p>
 <p>Layer for converting tensors with given blade kind to
 geometric algebra tensors.</p>
 <dl class="simple">
