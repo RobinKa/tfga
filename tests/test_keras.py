@@ -2,6 +2,7 @@ import unittest as ut
 from io import BytesIO
 from tfga.layers import (
     GeometricProductDense, GeometricSandwichProductDense,
+    GeometricProductElementwise, GeometricSandwichProductElementwise,
     GeometricProductConv1D,
     GeometricToTensor, GeometricToTensorWithKind,
     TensorToGeometric, TensorWithKindToGeometric,
@@ -238,6 +239,32 @@ class TestKerasLayersSerializable(ut.TestCase):
         # Create model
         self._test_layer_serializable(GeometricSandwichProductDense(
             sta, units=8,
+            blade_indices_kernel=mv_blade_indices,
+            blade_indices_bias=vector_blade_indices
+        ), tf.random.normal([3, 6, sta.num_blades], seed=0))
+
+    def test_geom_elementwise_serializable(self):
+        # Create algebra
+        sta = GeometricAlgebra([1, -1, -1, -1])
+        vector_blade_indices = [1, 2, 3, 4]
+        mv_blade_indices = list(range(16))
+
+        # Create model
+        self._test_layer_serializable(GeometricProductElementwise(
+            sta,
+            blade_indices_kernel=mv_blade_indices,
+            blade_indices_bias=vector_blade_indices
+        ), tf.random.normal([3, 6, sta.num_blades], seed=0))
+
+    def test_sandwich_elementwise_serializable(self):
+        # Create algebra
+        sta = GeometricAlgebra([1, -1, -1, -1])
+        vector_blade_indices = [1, 2, 3, 4]
+        mv_blade_indices = list(range(16))
+
+        # Create model
+        self._test_layer_serializable(GeometricSandwichProductElementwise(
+            sta,
             blade_indices_kernel=mv_blade_indices,
             blade_indices_bias=vector_blade_indices
         ), tf.random.normal([3, 6, sta.num_blades], seed=0))

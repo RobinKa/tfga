@@ -332,6 +332,183 @@ class GeometricSandwichProductDense(GeometricProductDense):
 
 
 @register_keras_serializable(package="TFGA")
+class GeometricProductElementwise(GeometricAlgebraLayer):
+    """Performs the elementwise geometric product with a list of multivectors
+    with as many elements as there are input units.
+
+    Args:
+        algebra: GeometricAlgebra instance to use for the parameters
+        blade_indices_kernel: Blade indices to use for the kernel parameter
+        blade_indices_bias: Blade indices to use for the bias parameter (if used)
+    """
+
+    def __init__(
+        self,
+        algebra: GeometricAlgebra,
+        blade_indices_kernel: List[int],
+        blade_indices_bias: Union[None, List[int]] = None,
+        activation=None,
+        use_bias=True,
+        kernel_initializer="glorot_uniform",
+        bias_initializer="zeros",
+        kernel_regularizer=None,
+        bias_regularizer=None,
+        activity_regularizer=None,
+        kernel_constraint=None,
+        bias_constraint=None,
+        **kwargs
+    ):
+        super().__init__(algebra=algebra, activity_regularizer=activity_regularizer, **kwargs)
+
+        self.blade_indices_kernel = tf.convert_to_tensor(
+            blade_indices_kernel, dtype_hint=tf.int64)
+        if use_bias:
+            self.blade_indices_bias = tf.convert_to_tensor(
+                blade_indices_bias, dtype_hint=tf.int64)
+
+        self.activation = activations.get(activation)
+        self.use_bias = use_bias
+        self.kernel_initializer = initializers.get(kernel_initializer)
+        self.bias_initializer = initializers.get(bias_initializer)
+        self.kernel_regularizer = regularizers.get(kernel_regularizer)
+        self.bias_regularizer = regularizers.get(bias_regularizer)
+        self.kernel_constraint = constraints.get(kernel_constraint)
+        self.bias_constraint = constraints.get(bias_constraint)
+
+    def build(self, input_shape: tf.TensorShape):
+        self.num_input_units = input_shape[-2]
+        shape_kernel = [
+            self.num_input_units,
+            self.blade_indices_kernel.shape[0]
+        ]
+        self.kernel = self.add_weight(
+            "kernel",
+            shape=shape_kernel,
+            initializer=self.kernel_initializer,
+            regularizer=self.kernel_regularizer,
+            constraint=self.kernel_constraint,
+            dtype=self.dtype,
+            trainable=True
+        )
+        if self.use_bias:
+            shape_bias = [self.num_input_units,
+                          self.blade_indices_bias.shape[0]]
+            self.bias = self.add_weight(
+                "bias",
+                shape=shape_bias,
+                initializer=self.bias_initializer,
+                regularizer=self.bias_regularizer,
+                constraint=self.bias_constraint,
+                dtype=self.dtype,
+                trainable=True
+            )
+        else:
+            self.bias = None
+        self.built = True
+
+    def compute_output_shape(self, input_shape):
+        return tf.TensorShape([*input_shape[:-1], self.algebra.num_blades])
+
+    def call(self, inputs):
+        w_geom = self.algebra.from_tensor(
+            self.kernel, self.blade_indices_kernel)
+
+        # Elementwise multiplication for each unit with a multivector.
+        # [..., U, X] * [U, X] -> [..., U, X]
+        result = self.algebra.geom_prod(inputs, w_geom)
+
+        if self.bias is not None:
+            b_geom = self.algebra.from_tensor(
+                self.bias, self.blade_indices_bias)
+            result += b_geom
+
+        return self.activation(result)
+
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            "blade_indices_kernel":
+                self.blade_indices_kernel.numpy(),
+            "blade_indices_bias":
+                self.blade_indices_bias.numpy(),
+            "activation":
+                activations.serialize(self.activation),
+            "use_bias":
+                self.use_bias,
+            "kernel_initializer":
+                initializers.serialize(self.kernel_initializer),
+            "bias_initializer":
+                initializers.serialize(self.bias_initializer),
+            "kernel_regularizer":
+                regularizers.serialize(self.kernel_regularizer),
+            "bias_regularizer":
+                regularizers.serialize(self.bias_regularizer),
+            "activity_regularizer":
+                regularizers.serialize(self.activity_regularizer),
+            "kernel_constraint":
+                constraints.serialize(self.kernel_constraint),
+            "bias_constraint":
+                constraints.serialize(self.bias_constraint)
+        })
+        return config
+
+
+@register_keras_serializable(package="TFGA")
+class GeometricSandwichProductElementwise(GeometricProductElementwise):
+    """Performs the elementwise geometric sandwich product with a list of
+    multivectors with as many elements as there are input units.
+
+    Args:
+        algebra: GeometricAlgebra instance to use for the parameters
+        blade_indices_kernel: Blade indices to use for the kernel parameter
+        blade_indices_bias: Blade indices to use for the bias parameter (if used)
+    """
+
+    def __init__(
+        self, algebra, blade_indices_kernel, blade_indices_bias=None,
+        activation=None, use_bias=True, kernel_initializer="glorot_uniform",
+        bias_initializer="zeros", kernel_regularizer=None,
+        bias_regularizer=None, activity_regularizer=None,
+        kernel_constraint=None, bias_constraint=None, **kwargs
+    ):
+        super().__init__(
+            algebra,
+            blade_indices_kernel,
+            blade_indices_bias=blade_indices_bias,
+            activation=activation,
+            use_bias=use_bias,
+            kernel_initializer=kernel_initializer,
+            bias_initializer=bias_initializer,
+            kernel_regularizer=kernel_regularizer,
+            bias_regularizer=bias_regularizer,
+            activity_regularizer=activity_regularizer,
+            kernel_constraint=kernel_constraint,
+            bias_constraint=bias_constraint, **kwargs
+        )
+
+    def call(self, inputs):
+        w_geom = self.algebra.from_tensor(
+            self.kernel, self.blade_indices_kernel)
+
+        # Elementwise multiplication Rx~R for each unit with a multivector.
+        # [..., U, X] * [U, X] -> [..., U, X]
+        result = self.algebra.geom_prod(
+            w_geom,
+            self.algebra.geom_prod(
+                inputs,
+                self.algebra.reversion(w_geom)
+            )
+        )
+
+        if self.bias is not None:
+            b_geom = self.algebra.from_tensor(
+                self.bias, self.blade_indices_bias)
+            result += b_geom
+
+        return self.activation(result)
+
+
+@register_keras_serializable(package="TFGA")
 class GeometricProductConv1D(GeometricAlgebraLayer):
     """Analagous to Keras' Conv1D layer but using multivector-valued kernels
     instead of scalar ones and geometric product instead of

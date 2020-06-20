@@ -18,8 +18,8 @@ Requirements:
 - numpy
 
 ## Basic usage
-There are two ways to use this library. In both ways we first create a `GeometricAlgebra` instance given a metric.
-Then we can either work on `tf.Tensor` instances directly where the last axis is assumed to correspond to
+There are two ways to use this library. In both ways we first create a [`GeometricAlgebra`](https://tfga.warlock.ai/tfga.html#tfga.tfga.GeometricAlgebra) instance given a metric.
+Then we can either work on [`tf.Tensor`](https://www.tensorflow.org/api_docs/python/tf/Tensor) instances directly where the last axis is assumed to correspond to
 the algebra's blades.
 ```python
 import tensorflow as tf
@@ -85,8 +85,8 @@ print(mv_a ^ mv_b)
 
 ## Keras layers
 TFGA also provides [Keras](https://www.tensorflow.org/guide/keras/sequential_model) layers which provide
-layers similar to the existing ones but using multivectors instead. For example the GeometricProductDense
-layer is exactly the same as the [Dense](https://www.tensorflow.org/api_docs/python/tf/keras/layers/Dense) layer but uses
+layers similar to the existing ones but using multivectors instead. For example the [`GeometricProductDense`](https://tfga.warlock.ai/tfga.html#tfga.layers.GeometricProductDense)
+layer is exactly the same as the [`Dense`](https://www.tensorflow.org/api_docs/python/tf/keras/layers/Dense) layer but uses
 multivector-valued weights and biases instead of scalar ones. The exact kind of multivector-type can be
 passed too. Example:
 
@@ -131,6 +131,19 @@ sequence = tf.keras.Sequential([
 # Result will have shape [20, 8, 7]
 result = sequence(tensor)
 ```
+
+### Available layers
+| Class | Description |
+|--|--|
+| [`GeometricProductDense`](https://tfga.warlock.ai/tfga.html#tfga.layers.GeometricProductDense) | Analagous to Keras' [Dense](https://www.tensorflow.org/api_docs/python/tf/keras/layers/Dense) with multivector-valued weights and biases. Each term in the matrix multiplication does the geometric product `x * w`. |
+| [`GeometricSandwichProductDense`](https://tfga.warlock.ai/tfga.html#tfga.layers.GeometricSandwichProductDense) | Analagous to Keras' [Dense](https://www.tensorflow.org/api_docs/python/tf/keras/layers/Dense) with multivector-valued weights and biases. Each term in the matrix multiplication does the geometric product `w *x * ~w`. |
+| [`GeometricProductElementwise`](https://tfga.warlock.ai/tfga.html#tfga.layers.GeometricProductElementwise) | Performs multivector-valued elementwise geometric product of the input units with a different weight for each unit. |
+| [`GeometricSandwichProductElementwise`](https://tfga.warlock.ai/tfga.html#tfga.layers.GeometricSandwichProductElementwise) | Performs multivector-valued elementwise geometric sandwich product of the input units with a different weight for each unit. |
+| [`GeometricProductConv1D`](https://tfga.warlock.ai/tfga.html#tfga.layers.GeometricProductConv1D) | Analagous to Keras' [Conv1D](https://www.tensorflow.org/api_docs/python/tf/keras/layers/Conv1D) with multivector-valued kernels and biases. Each term in the kernel multiplication does the geometric product `x * k`. |
+| [`TensorToGeometric`](https://tfga.warlock.ai/tfga.html#tfga.layers.TensorToGeometric) | Converts from a `tf.Tensor` to the geometric algebra `tf.Tensor` with as many blades on the last axis as basis blades in the algebra where blade indices determine which basis blades the input's values belong to. |
+| [`GeometricToTensor`](https://tfga.warlock.ai/tfga.html#tfga.layers.GeometricToTensor) | Converts from a geometric algebra `tf.Tensor` with as many blades on the last axis as basis blades in the algebra to a `tf.Tensor` where blade indices determine which basis blades we extract for the output. |
+| [`TensorWithKindToGeometric`](https://tfga.warlock.ai/tfga.html#tfga.layers.TensorWithKindToGeometric) | Same as `TensorToGeometric` but using [`BladeKind`](https://tfga.warlock.ai/tfga.html#tfga.blades.BladeKind) (eg. `"bivector"`, `"even"`) instead of blade indices. |
+| [`GeometricToTensorWithKind`](https://tfga.warlock.ai/tfga.html#tfga.layers.GeometricToTensorWithKind) | Same as `GeometricToTensor` but using [`BladeKind`](https://tfga.warlock.ai/tfga.html#tfga.blades.BladeKind) (eg. `"bivector"`, `"even"`) instead of blade indices. |
 
 For performing a geometric sandwich product `R * x * ~R` instead of just the geometric product `R * x`
 there also exists the `GeometricSandwichProductDense` with an identical API. Finally we have the

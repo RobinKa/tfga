@@ -92,7 +92,7 @@ class GeometricAlgebra:
     @property
     def cayley(self) -> tf.Tensor:
         """`MxMxM` tensor where `M` is the number of basis
-        vectors in the algebra. Used for calculating the
+        blades in the algebra. Used for calculating the
         geometric product:
 
         `a_i, b_j, cayley_ijk -> c_k`
