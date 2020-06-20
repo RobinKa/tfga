@@ -1,5 +1,5 @@
 # TFGA - TensorFlow Geometric Algebra
-[![Build status](https://github.com/RobinKa/tfga/workflows/Build%20Test%20Publish/badge.svg)](https://github.com/RobinKa/tfga/actions) [![PyPI](https://badge.fury.io/py/tfga.svg)](https://badge.fury.io/py/tfga) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3902405.svg)](https://doi.org/10.5281/zenodo.3902405)
+[![Build status](https://github.com/RobinKa/tfga/workflows/Build%20Test%20Publish/badge.svg)](https://github.com/RobinKa/tfga/actions) [![PyPI](https://badge.fury.io/py/tfga.svg)](https://badge.fury.io/py/tfga) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3902404.svg)](https://doi.org/10.5281/zenodo.3902404)
 
 [GitHub](https://github.com/RobinKa/tfga) | [Docs](https://tfga.warlock.ai) | [Benchmarks](https://github.com/RobinKa/tfga/tree/master/benchmarks) | [Slides](https://tfgap.warlock.ai)
 
@@ -163,15 +163,15 @@ Tests using Python's built-in [`unittest`](https://docs.python.org/3/library/uni
 executing `python -m unittest discover tests` from the root directory of the repository.
 
 ## Citing
-See our [Zenodo](https://doi.org/10.5281/zenodo.3902405) page. For citing all versions the following BibTex can be used
+See our [Zenodo](https://doi.org/10.5281/zenodo.3902404) page. For citing all versions the following BibTex can be used
 
 ```
 @software{python_tfga,
   author       = {Kahlow, Robin},
   title        = {TensorFlow Geometric Algebra},
   publisher    = {Zenodo},
-  doi          = {10.5281/zenodo.3902405},
-  url          = {https://doi.org/10.5281/zenodo.3902405}
+  doi          = {10.5281/zenodo.3902404},
+  url          = {https://doi.org/10.5281/zenodo.3902404}
 }
 ```
 
