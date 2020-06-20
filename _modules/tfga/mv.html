@@ -212,23 +212,35 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="MultiVector.approx_exp"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.approx_exp">[docs]</a>    <span class="k">def</span> <span class="nf">approx_exp</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">self</span><span class="p">:</span>
+<div class="viewcode-block" id="MultiVector.approx_exp"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.approx_exp">[docs]</a>    <span class="k">def</span> <span class="nf">approx_exp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">self</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Approximate exponential. See `GeometricAlgebra.approx_exp()`.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">MultiVector</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">approx_exp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">approx_exp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">),</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="MultiVector.approx_log"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.approx_log">[docs]</a>    <span class="k">def</span> <span class="nf">approx_log</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">self</span><span class="p">:</span>
+<div class="viewcode-block" id="MultiVector.approx_log"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.approx_log">[docs]</a>    <span class="k">def</span> <span class="nf">approx_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">self</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Approximate logarithm. See `GeometricAlgebra.approx_log()`.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">MultiVector</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">approx_log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">approx_log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">),</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span>
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="MultiVector.is_pure_kind"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.is_pure_kind">[docs]</a>    <span class="k">def</span> <span class="nf">is_pure_kind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="n">BladeKind</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Whether the `MultiVector` is of a pure kind.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">is_pure_kind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">is_pure_kind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MultiVector.geom_conv1d"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.geom_conv1d">[docs]</a>    <span class="k">def</span> <span class="nf">geom_conv1d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kernel</span><span class="p">:</span> <span class="n">MultiVector</span><span class="p">,</span>
+                    <span class="n">stride</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">padding</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                    <span class="n">dilations</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">self</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;1D convolution. See `GeometricAlgebra.geom_conv1d().`&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">MultiVector</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">geom_conv1d</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">,</span> <span class="n">kernel</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">,</span>
+                <span class="n">stride</span><span class="o">=</span><span class="n">stride</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="n">padding</span><span class="p">,</span> <span class="n">dilations</span><span class="o">=</span><span class="n">dilations</span>
+            <span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span>
+        <span class="p">)</span></div></div>
 </pre></div>
 
           </div>
