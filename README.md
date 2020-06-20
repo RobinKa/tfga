@@ -1,5 +1,5 @@
 # TFGA - TensorFlow Geometric Algebra
-[![Build status](https://github.com/RobinKa/tfga/workflows/Build%20Test%20Publish/badge.svg)](https://github.com/RobinKa/tfga/actions) [![PyPI](https://badge.fury.io/py/tfga.svg)](https://badge.fury.io/py/tfga)
+[![Build status](https://github.com/RobinKa/tfga/workflows/Build%20Test%20Publish/badge.svg)](https://github.com/RobinKa/tfga/actions) [![PyPI](https://badge.fury.io/py/tfga.svg)](https://badge.fury.io/py/tfga) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3902405.svg)](https://doi.org/10.5281/zenodo.3902405)
 
 [GitHub](https://github.com/RobinKa/tfga) | [Docs](https://tfga.warlock.ai) | [Benchmarks](https://github.com/RobinKa/tfga/tree/master/benchmarks) | [Slides](https://tfgap.warlock.ai)
 
@@ -161,3 +161,21 @@ result = sequence(tensor)
 ## Tests
 Tests using Python's built-in [`unittest`](https://docs.python.org/3/library/unittest.html) module are available in the `tests` directory. All tests can be run by
 executing `python -m unittest discover tests` from the root directory of the repository.
+
+## Citing
+See our [Zenodo](https://doi.org/10.5281/zenodo.3902405) page. For citing all versions the following BibTex can be used
+
+```
+@software{kahlow_robin_2020_3902405,
+  author       = {Kahlow, Robin},
+  title        = {TensorFlow Geometric Algebra},
+  month        = jun,
+  year         = 2020,
+  publisher    = {Zenodo},
+  doi          = {10.5281/zenodo.3902405},
+  url          = {https://doi.org/10.5281/zenodo.3902405}
+}
+```
+
+## Disclaimer
+TensorFlow, the TensorFlow logo and any related marks are trademarks of Google Inc.
