@@ -1,12 +1,15 @@
+import unittest as ut
+from io import BytesIO
 from tfga.layers import (
     GeometricProductDense, GeometricSandwichProductDense,
+    GeometricProductConv1D,
     GeometricToTensor, GeometricToTensorWithKind,
-    TensorToGeometric, TensorWithKindToGeometric
+    TensorToGeometric, TensorWithKindToGeometric,
 )
 from tfga.blades import BladeKind
 from tfga import GeometricAlgebra
 from tensorflow import keras as ks
-import unittest as ut
+import h5py
 import tensorflow as tf
 
 # Make tensorflow not take over the entire GPU memory
@@ -178,3 +181,99 @@ class TestKerasLayers(ut.TestCase):
         # vector * vector * ~vector + vector -> vector + trivector
 
         self.assertTrue(sta.is_pure(result, result_indices))
+
+
+class TestKerasLayersSerializable(ut.TestCase):
+    def assertTensorsEqual(self, a, b):
+        self.assertTrue(tf.reduce_all(a == b), "%s not equal to %s" % (a, b))
+
+    def _test_layer_serializable(self, layer, inputs):
+        # Create algebra
+        algebra = layer.algebra
+
+        # Create model
+        model = tf.keras.Sequential([layer])
+
+        # Predict on inputs to compare later
+        model_output = model(inputs)
+
+        # Serialize model to virtual file
+        model_file = h5py.File(BytesIO(), mode="w")
+        model.save(model_file)
+
+        # Load model from stream
+        loaded_model = tf.keras.models.load_model(model_file)
+
+        # Predict on same inputs as before
+        loaded_output = loaded_model(inputs)
+
+        # Check same output for original and loaded model
+        self.assertTensorsEqual(model_output, loaded_output)
+
+        # Check same recreated algebra
+        self.assertTensorsEqual(
+            algebra.metric, loaded_model.layers[0].algebra.metric)
+        self.assertTensorsEqual(
+            algebra.cayley, loaded_model.layers[0].algebra.cayley)
+
+    def test_geom_dense_serializable(self):
+        # Create algebra
+        sta = GeometricAlgebra([1, -1, -1, -1])
+        vector_blade_indices = [1, 2, 3, 4]
+        mv_blade_indices = list(range(16))
+
+        # Create model
+        self._test_layer_serializable(GeometricProductDense(
+            sta, units=8,
+            blade_indices_kernel=mv_blade_indices,
+            blade_indices_bias=vector_blade_indices
+        ), tf.random.normal([3, 6, sta.num_blades], seed=0))
+
+    def test_sandwich_dense_serializable(self):
+        # Create algebra
+        sta = GeometricAlgebra([1, -1, -1, -1])
+        vector_blade_indices = [1, 2, 3, 4]
+        mv_blade_indices = list(range(16))
+
+        # Create model
+        self._test_layer_serializable(GeometricSandwichProductDense(
+            sta, units=8,
+            blade_indices_kernel=mv_blade_indices,
+            blade_indices_bias=vector_blade_indices
+        ), tf.random.normal([3, 6, sta.num_blades], seed=0))
+
+    def test_geom_prod_conv1d_serializable(self):
+        # Create algebra
+        sta = GeometricAlgebra([1, -1, -1, -1])
+        vector_blade_indices = [1, 2, 3, 4]
+        mv_blade_indices = list(range(16))
+
+        # Create model
+        self._test_layer_serializable(GeometricProductConv1D(
+            sta, filters=8, kernel_size=3,
+            padding="SAME", stride=2,
+            blade_indices_kernel=mv_blade_indices,
+            blade_indices_bias=vector_blade_indices
+        ), tf.random.normal([3, 8, 4, sta.num_blades], seed=0))
+
+    def test_tensor_to_geom_serializable(self):
+        # Create algebra
+        sta = GeometricAlgebra([1, -1, -1, -1])
+        vector_blade_indices = [1, 2, 3, 4]
+        mv_blade_indices = list(range(16))
+
+        # Create model
+        self._test_layer_serializable(TensorToGeometric(
+            sta, blade_indices=vector_blade_indices
+        ), tf.random.normal([1, 2, 3, len(vector_blade_indices)], seed=0))
+
+    def test_geom_to_tensor_serializable(self):
+        # Create algebra
+        sta = GeometricAlgebra([1, -1, -1, -1])
+        vector_blade_indices = [1, 2, 3, 4]
+        mv_blade_indices = list(range(16))
+
+        # Create model
+        self._test_layer_serializable(GeometricToTensor(
+            sta, blade_indices=vector_blade_indices
+        ), tf.random.normal([1, 2, 3, sta.num_blades], seed=0))
