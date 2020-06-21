@@ -171,15 +171,15 @@
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="bp">self</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;`MultiVector` with only passed blades as non-zeros.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;`MultiVector` with only passed blade names as non-zeros.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">MultiVector</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">keep_blades</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">,</span> <span class="n">key</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">keep_blades_with_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">,</span> <span class="n">key</span><span class="p">),</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span>
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]):</span>
-        <span class="sd">&quot;&quot;&quot;`tf.Tensor` with passed blades on last axis.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">select_blades</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;`tf.Tensor` with passed blade names on last axis.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">select_blades_with_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">mv_repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">)</span>

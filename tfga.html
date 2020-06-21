@@ -1298,14 +1298,28 @@ and has no non-zero values for blades not of the kind</p>
 
 <dl class="py method">
 <dt id="tfga.tfga.GeometricAlgebra.keep_blades">
-<code class="sig-name descname">keep_blades</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em>, <em class="sig-param"><span class="n">blade_names</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>List<span class="p">[</span>str<span class="p">]</span><span class="p">, </span>str<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; tensorflow.python.framework.ops.Tensor<a class="reference internal" href="_modules/tfga/tfga.html#GeometricAlgebra.keep_blades"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.keep_blades" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">keep_blades</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em>, <em class="sig-param"><span class="n">blade_indices</span><span class="p">:</span> <span class="n">List<span class="p">[</span>int<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; tensorflow.python.framework.ops.Tensor<a class="reference internal" href="_modules/tfga/tfga.html#GeometricAlgebra.keep_blades"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.keep_blades" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a geometric algebra tensor and returns it with only the given
+blade_indices as non-zeros.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>a: Geometric algebra tensor to copy
+blade_indices: Indices for blades to keep</p>
+</dd>
+<dt>Returns:</dt><dd><p><cite>a</cite> with only <cite>blade_indices</cite> components as non-zeros</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.tfga.GeometricAlgebra.keep_blades_with_name">
+<code class="sig-name descname">keep_blades_with_name</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em>, <em class="sig-param"><span class="n">blade_names</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>List<span class="p">[</span>str<span class="p">]</span><span class="p">, </span>str<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; tensorflow.python.framework.ops.Tensor<a class="reference internal" href="_modules/tfga/tfga.html#GeometricAlgebra.keep_blades_with_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.keep_blades_with_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes a geometric algebra tensor and returns it with only the given
 blades as non-zeros.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>a: Geometric algebra tensor to copy
 blade_names: Blades to keep</p>
 </dd>
-<dt>Returns:</dt><dd><p><cite>a</cite> with only <cite>blade_names</cite> elements as non-zeros</p>
+<dt>Returns:</dt><dd><p><cite>a</cite> with only <cite>blade_names</cite> components as non-zeros</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1382,7 +1396,21 @@ See <a class="reference external" href="https://en.wikipedia.org/wiki/Paravector
 
 <dl class="py method">
 <dt id="tfga.tfga.GeometricAlgebra.select_blades">
-<code class="sig-name descname">select_blades</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em>, <em class="sig-param"><span class="n">blade_names</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>List<span class="p">[</span>str<span class="p">]</span><span class="p">, </span>str<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; tensorflow.python.framework.ops.Tensor<a class="reference internal" href="_modules/tfga/tfga.html#GeometricAlgebra.select_blades"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.select_blades" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">select_blades</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em>, <em class="sig-param"><span class="n">blade_indices</span><span class="p">:</span> <span class="n">List<span class="p">[</span>int<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; tensorflow.python.framework.ops.Tensor<a class="reference internal" href="_modules/tfga/tfga.html#GeometricAlgebra.select_blades"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.select_blades" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a geometric algebra tensor and returns a <cite>tf.Tensor</cite> with the
+blades in blade_indices on the last axis.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>a: Geometric algebra tensor to copy
+blade_indices: Indices for blades to select</p>
+</dd>
+<dt>Returns:</dt><dd><p><cite>tf.Tensor</cite> based on <cite>a</cite> with <cite>blade_indices</cite> on last axis.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.tfga.GeometricAlgebra.select_blades_with_name">
+<code class="sig-name descname">select_blades_with_name</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em>, <em class="sig-param"><span class="n">blade_names</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>List<span class="p">[</span>str<span class="p">]</span><span class="p">, </span>str<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; tensorflow.python.framework.ops.Tensor<a class="reference internal" href="_modules/tfga/tfga.html#GeometricAlgebra.select_blades_with_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.select_blades_with_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes a geometric algebra tensor and returns a <cite>tf.Tensor</cite> with the
 blades in blade_names on the last axis.</p>
 <dl class="simple">
