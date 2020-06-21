@@ -11,7 +11,7 @@ pga_signature = [0, 1, 1, 1]
 
 
 class TestDualGeometricAlgebraMultiply(ut.TestCase):
-    def assertTensorsApproxEqual(self, a, b, tolerance=1e-5):
+    def assertTensorsApproxEqual(self, a, b, tolerance=1e-4):
         self.assertTrue(tf.reduce_all(tf.abs(a - b) < tolerance),
                         "%s not equal to %s" % (a, b))
 
@@ -29,9 +29,6 @@ class TestDualGeometricAlgebraMultiply(ut.TestCase):
 
         # a = 3e12 + 5e23
         a = 3 * pga.e12 + 5 * pga.e23
-
-        approx_exp_a = pga.approx_exp(a)
-        exp_a = pga.exp(a)
 
         # exp(a) ~= 0.90 - 0.22e12 -0.37e23
         self.assertTensorsApproxEqual(pga.approx_exp(a), pga.exp(a))
