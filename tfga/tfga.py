@@ -544,6 +544,46 @@ class GeometricAlgebra:
             result += v / i_factorial
         return result
 
+    def exp(self, a: tf.Tensor, validate_square_scalar: bool = True) -> tf.Tensor:
+        """Returns the exponential of the passed geometric algebra tensor.
+        Only works for multivectors that square to scalars.
+
+        Args:
+            a: Geometric algebra tensor to return exponential for
+            validate_square_scalar: Whether to validate that `a` squares to
+                a scalar
+
+        Returns:
+            `exp(a)`
+        """
+        # See https://www.euclideanspace.com/maths/algebra/clifford/algebra/functions/exponent/index.htm
+        # for an explanation of how to exponentiate multivectors.
+
+        self_sq = self.geom_prod(a, a)
+
+        if validate_square_scalar:
+            assert tf.reduce_all(self_sq[..., 1:] == 0)
+
+        scalar_self_sq = self_sq[..., :1]
+
+        # "Complex" square root (argument can be negative)
+        s_sqrt = tf.sign(scalar_self_sq) * tf.sqrt(tf.abs(scalar_self_sq))
+
+        # Square to +1: cosh(sqrt(||a||)) + a / sqrt(||a||) sinh(sqrt(||a||))
+        # Square to -1: cos(sqrt(||a||)) + a / sqrt(||a||) sin(sqrt(||a||))
+        # TODO: Does this work for values other than 1 too? eg. square to +0.5?
+        # TODO: Find a solution that doesnt require calculating all possibilities
+        #       first.
+        non_zero_result = tf.where(
+            scalar_self_sq < 0,
+            (self.from_tensor(tf.cos(s_sqrt), [0]) +
+                a / s_sqrt * tf.sin(s_sqrt)),
+            (self.from_tensor(tf.cosh(s_sqrt), [0]) +
+                a / s_sqrt * tf.sinh(s_sqrt))
+        )
+
+        return tf.where(scalar_self_sq == 0, self.from_scalar(1.0) + a, non_zero_result)
+
     def approx_log(self, a: tf.Tensor, order: int = 50) -> tf.Tensor:
         """Returns an approximation of the natural logarithm using a centered
         taylor series. Only converges for multivectors where `||mv - 1|| < 1`.
