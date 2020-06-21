@@ -1,13 +1,10 @@
+import unittest as ut
 import tensorflow as tf
+from tfga import GeometricAlgebra
 
 # Make tensorflow not take over the entire GPU memory
 for gpu in tf.config.experimental.list_physical_devices('GPU'):
     tf.config.experimental.set_memory_growth(gpu, True)
-
-from tfga import GeometricAlgebra
-import unittest as ut
-import numpy as np
-import tensorflow as tf
 
 dual_metric = [0]
 dual_bases = ["0"]

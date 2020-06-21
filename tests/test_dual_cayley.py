@@ -1,12 +1,4 @@
-import tensorflow as tf
-
-# Make tensorflow not take over the entire GPU memory
-for gpu in tf.config.experimental.list_physical_devices('GPU'):
-    tf.config.experimental.set_memory_growth(gpu, True)
-    
 import unittest as ut
-import numpy as np
-
 from tfga.cayley import blades_from_bases, get_cayley_tensor
 
 dual_metric = [0]
@@ -24,7 +16,8 @@ class TestDualCayleyTensor(ut.TestCase):
             self.assertEqual(blade_degrees[blade_index], blade_degree)
 
     def test_cayley_tensor_correct(self):
-        cayley, cayley_inner, cayley_outer = get_cayley_tensor(dual_metric, dual_bases, dual_blades)
+        cayley, cayley_inner, cayley_outer = get_cayley_tensor(
+            dual_metric, dual_bases, dual_blades)
 
         self.assertSequenceEqual(cayley.shape, [2, 2, 2])
 
