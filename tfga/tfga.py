@@ -544,14 +544,14 @@ class GeometricAlgebra:
             result += v / i_factorial
         return result
 
-    def exp(self, a: tf.Tensor, validate_square_scalar: bool = True) -> tf.Tensor:
+    def exp(self, a: tf.Tensor, square_scalar_tolerance: Union[float, None] = 1e-4) -> tf.Tensor:
         """Returns the exponential of the passed geometric algebra tensor.
         Only works for multivectors that square to scalars.
 
         Args:
             a: Geometric algebra tensor to return exponential for
-            validate_square_scalar: Whether to validate that `a` squares to
-                a scalar
+            square_scalar_tolerance: Tolerance to use for the square scalar check
+                or None if the check should be skipped
 
         Returns:
             `exp(a)`
@@ -561,8 +561,9 @@ class GeometricAlgebra:
 
         self_sq = self.geom_prod(a, a)
 
-        if validate_square_scalar:
-            assert tf.reduce_all(self_sq[..., 1:] == 0)
+        if square_scalar_tolerance is not None:
+            assert tf.reduce_all(tf.abs(self_sq[..., 1:]) < square_scalar_tolerance), \
+                "Input to exp must square to a scalar"
 
         scalar_self_sq = self_sq[..., :1]
 

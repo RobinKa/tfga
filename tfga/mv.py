@@ -185,12 +185,12 @@ class MultiVector:
             self._algebra
         )
 
-    def exp(self, validate_square_scalar: bool = True) -> self:
+    def exp(self, square_scalar_tolerance: Union[float, None] = 1e-4) -> self:
         """Exponential. See `GeometricAlgebra.exp()`."""
         return MultiVector(
             self._algebra.exp(
                 self._blade_values,
-                validate_square_scalar=validate_square_scalar
+                square_scalar_tolerance=square_scalar_tolerance
             ),
             self._algebra
         )
