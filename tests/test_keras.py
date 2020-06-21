@@ -4,6 +4,7 @@ from tfga.layers import (
     GeometricProductDense, GeometricSandwichProductDense,
     GeometricProductElementwise, GeometricSandwichProductElementwise,
     GeometricProductConv1D,
+    GeometricAlgebraExp,
     GeometricToTensor, GeometricToTensorWithKind,
     TensorToGeometric, TensorWithKindToGeometric,
 )
@@ -287,7 +288,6 @@ class TestKerasLayersSerializable(ut.TestCase):
         # Create algebra
         sta = GeometricAlgebra([1, -1, -1, -1])
         vector_blade_indices = [1, 2, 3, 4]
-        mv_blade_indices = list(range(16))
 
         # Create model
         self._test_layer_serializable(TensorToGeometric(
@@ -298,9 +298,21 @@ class TestKerasLayersSerializable(ut.TestCase):
         # Create algebra
         sta = GeometricAlgebra([1, -1, -1, -1])
         vector_blade_indices = [1, 2, 3, 4]
-        mv_blade_indices = list(range(16))
 
         # Create model
         self._test_layer_serializable(GeometricToTensor(
             sta, blade_indices=vector_blade_indices
         ), tf.random.normal([1, 2, 3, sta.num_blades], seed=0))
+
+    def test_geom_exp_serializable(self):
+        # Create algebra
+        ga = GeometricAlgebra([1, 1, 1])
+
+        inputs = ga.from_tensor_with_kind(
+            tf.random.normal([3], seed=0), BladeKind.BIVECTOR
+        )
+
+        # Create model
+        self._test_layer_serializable(GeometricAlgebraExp(
+            ga
+        ), inputs)

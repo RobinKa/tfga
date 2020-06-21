@@ -314,7 +314,10 @@ class GeometricAlgebra:
         blade_indices = tf.convert_to_tensor(blade_indices)
 
         # Don't allow duplicate indices
-        assert blade_indices.shape[0] == tf.unique(blade_indices)[0].shape[0]
+        tf.Assert(
+            blade_indices.shape[0] == tf.unique(blade_indices)[0].shape[0],
+            [blades]
+        )
 
         x = (
             tf.expand_dims(blade_signs, axis=-1) *
@@ -543,6 +546,48 @@ class GeometricAlgebra:
             i_factorial = tf.exp(tf.math.lgamma(i + 1.0))
             result += v / i_factorial
         return result
+
+    def exp(self, a: tf.Tensor, square_scalar_tolerance: Union[float, None] = 1e-4) -> tf.Tensor:
+        """Returns the exponential of the passed geometric algebra tensor.
+        Only works for multivectors that square to scalars.
+
+        Args:
+            a: Geometric algebra tensor to return exponential for
+            square_scalar_tolerance: Tolerance to use for the square scalar check
+                or None if the check should be skipped
+
+        Returns:
+            `exp(a)`
+        """
+        # See https://www.euclideanspace.com/maths/algebra/clifford/algebra/functions/exponent/index.htm
+        # for an explanation of how to exponentiate multivectors.
+
+        self_sq = self.geom_prod(a, a)
+
+        if square_scalar_tolerance is not None:
+            tf.Assert(tf.reduce_all(
+                tf.abs(self_sq[..., 1:]) < square_scalar_tolerance
+            ), [self_sq])
+
+        scalar_self_sq = self_sq[..., :1]
+
+        # "Complex" square root (argument can be negative)
+        s_sqrt = tf.sign(scalar_self_sq) * tf.sqrt(tf.abs(scalar_self_sq))
+
+        # Square to +1: cosh(sqrt(||a||)) + a / sqrt(||a||) sinh(sqrt(||a||))
+        # Square to -1: cos(sqrt(||a||)) + a / sqrt(||a||) sin(sqrt(||a||))
+        # TODO: Does this work for values other than 1 too? eg. square to +0.5?
+        # TODO: Find a solution that doesnt require calculating all possibilities
+        #       first.
+        non_zero_result = tf.where(
+            scalar_self_sq < 0,
+            (self.from_tensor(tf.cos(s_sqrt), [0]) +
+                a / s_sqrt * tf.sin(s_sqrt)),
+            (self.from_tensor(tf.cosh(s_sqrt), [0]) +
+                a / s_sqrt * tf.sinh(s_sqrt))
+        )
+
+        return tf.where(scalar_self_sq == 0, self.from_scalar(1.0) + a, non_zero_result)
 
     def approx_log(self, a: tf.Tensor, order: int = 50) -> tf.Tensor:
         """Returns an approximation of the natural logarithm using a centered

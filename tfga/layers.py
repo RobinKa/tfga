@@ -664,3 +664,39 @@ class GeometricProductConv1D(GeometricAlgebraLayer):
         })
 
         return config
+
+
+@register_keras_serializable(package="TFGA")
+class GeometricAlgebraExp(GeometricAlgebraLayer):
+    """Calculates the exponential function of the input. Input must square to
+    a scalar.
+
+    Args:
+        algebra: GeometricAlgebra instance to use
+        square_scalar_tolerance: Tolerance to use for the square scalar check
+            or None if the check should be skipped
+    """
+
+    def __init__(
+        self,
+        algebra: GeometricAlgebra,
+        square_scalar_tolerance: Union[float, None] = 1e-4,
+        **kwargs
+    ):
+        super().__init__(algebra=algebra, **kwargs)
+        self.square_scalar_tolerance = square_scalar_tolerance
+
+    def compute_output_shape(self, input_shape):
+        return tf.TensorShape([*input_shape[:-1], self.algebra.num_blades])
+
+    def call(self, inputs):
+        return self.algebra.exp(
+            inputs, square_scalar_tolerance=self.square_scalar_tolerance
+        )
+
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            "square_scalar_tolerance": self.square_scalar_tolerance
+        })
+        return config

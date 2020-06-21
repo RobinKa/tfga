@@ -144,6 +144,7 @@ result = sequence(tensor)
 | [`GeometricToTensor`](https://tfga.warlock.ai/tfga.html#tfga.layers.GeometricToTensor) | Converts from a geometric algebra [`tf.Tensor`](https://www.tensorflow.org/api_docs/python/tf/Tensor) with as many blades on the last axis as basis blades in the algebra to a [`tf.Tensor`](https://www.tensorflow.org/api_docs/python/tf/Tensor) where blade indices determine which basis blades we extract for the output. |
 | [`TensorWithKindToGeometric`](https://tfga.warlock.ai/tfga.html#tfga.layers.TensorWithKindToGeometric) | Same as [`TensorToGeometric`](https://tfga.warlock.ai/tfga.html#tfga.layers.TensorToGeometric) but using [`BladeKind`](https://tfga.warlock.ai/tfga.html#tfga.blades.BladeKind) (eg. `"bivector"`, `"even"`) instead of blade indices. |
 | [`GeometricToTensorWithKind`](https://tfga.warlock.ai/tfga.html#tfga.layers.GeometricToTensorWithKind) | Same as [`GeometricToTensor`](https://tfga.warlock.ai/tfga.html#tfga.layers.GeometricToTensor) but using [`BladeKind`](https://tfga.warlock.ai/tfga.html#tfga.blades.BladeKind) (eg. `"bivector"`, `"even"`) instead of blade indices. |
+| [`GeometricAlgebraExp`](https://tfga.warlock.ai/tfga.html#tfga.layers.GeometricAlgebraExp) | Calculates the exponential function of the input. Input must square to a scalar. |
 
 ## Notebooks
 [Generic examples](https://github.com/RobinKa/tfga/tree/master/notebooks/tfga.ipynb)
