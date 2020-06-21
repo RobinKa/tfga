@@ -185,6 +185,16 @@ class MultiVector:
             self._algebra
         )
 
+    def exp(self, validate_square_scalar: bool = True) -> self:
+        """Exponential. See `GeometricAlgebra.exp()`."""
+        return MultiVector(
+            self._algebra.exp(
+                self._blade_values,
+                validate_square_scalar=validate_square_scalar
+            ),
+            self._algebra
+        )
+
     def approx_log(self, order: int = 50) -> self:
         """Approximate logarithm. See `GeometricAlgebra.approx_log()`."""
         return MultiVector(
