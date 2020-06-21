@@ -219,6 +219,16 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span>
         <span class="p">)</span></div>
 
+<div class="viewcode-block" id="MultiVector.exp"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.exp">[docs]</a>    <span class="k">def</span> <span class="nf">exp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">square_scalar_tolerance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e-4</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">self</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Exponential. See `GeometricAlgebra.exp()`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">MultiVector</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_blade_values</span><span class="p">,</span>
+                <span class="n">square_scalar_tolerance</span><span class="o">=</span><span class="n">square_scalar_tolerance</span>
+            <span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_algebra</span>
+        <span class="p">)</span></div>
+
 <div class="viewcode-block" id="MultiVector.approx_log"><a class="viewcode-back" href="../../tfga.html#tfga.mv.MultiVector.approx_log">[docs]</a>    <span class="k">def</span> <span class="nf">approx_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">self</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Approximate logarithm. See `GeometricAlgebra.approx_log()`.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">MultiVector</span><span class="p">(</span>

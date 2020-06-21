@@ -348,7 +348,10 @@
         <span class="n">blade_indices</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">blade_indices</span><span class="p">)</span>
 
         <span class="c1"># Don&#39;t allow duplicate indices</span>
-        <span class="k">assert</span> <span class="n">blade_indices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">blade_indices</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">tf</span><span class="o">.</span><span class="n">Assert</span><span class="p">(</span>
+            <span class="n">blade_indices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">tf</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">blade_indices</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="p">[</span><span class="n">blades</span><span class="p">]</span>
+        <span class="p">)</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">blade_signs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span>
@@ -577,6 +580,48 @@
             <span class="n">i_factorial</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">lgamma</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">))</span>
             <span class="n">result</span> <span class="o">+=</span> <span class="n">v</span> <span class="o">/</span> <span class="n">i_factorial</span>
         <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="GeometricAlgebra.exp"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.exp">[docs]</a>    <span class="k">def</span> <span class="nf">exp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">square_scalar_tolerance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e-4</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns the exponential of the passed geometric algebra tensor.</span>
+<span class="sd">        Only works for multivectors that square to scalars.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            a: Geometric algebra tensor to return exponential for</span>
+<span class="sd">            square_scalar_tolerance: Tolerance to use for the square scalar check</span>
+<span class="sd">                or None if the check should be skipped</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            `exp(a)`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># See https://www.euclideanspace.com/maths/algebra/clifford/algebra/functions/exponent/index.htm</span>
+        <span class="c1"># for an explanation of how to exponentiate multivectors.</span>
+
+        <span class="n">self_sq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geom_prod</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">square_scalar_tolerance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">Assert</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">reduce_all</span><span class="p">(</span>
+                <span class="n">tf</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">self_sq</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">:])</span> <span class="o">&lt;</span> <span class="n">square_scalar_tolerance</span>
+            <span class="p">),</span> <span class="p">[</span><span class="n">self_sq</span><span class="p">])</span>
+
+        <span class="n">scalar_self_sq</span> <span class="o">=</span> <span class="n">self_sq</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># &quot;Complex&quot; square root (argument can be negative)</span>
+        <span class="n">s_sqrt</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">scalar_self_sq</span><span class="p">)</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">scalar_self_sq</span><span class="p">))</span>
+
+        <span class="c1"># Square to +1: cosh(sqrt(||a||)) + a / sqrt(||a||) sinh(sqrt(||a||))</span>
+        <span class="c1"># Square to -1: cos(sqrt(||a||)) + a / sqrt(||a||) sin(sqrt(||a||))</span>
+        <span class="c1"># TODO: Does this work for values other than 1 too? eg. square to +0.5?</span>
+        <span class="c1"># TODO: Find a solution that doesnt require calculating all possibilities</span>
+        <span class="c1">#       first.</span>
+        <span class="n">non_zero_result</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="n">scalar_self_sq</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">from_tensor</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">s_sqrt</span><span class="p">),</span> <span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span>
+                <span class="n">a</span> <span class="o">/</span> <span class="n">s_sqrt</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">s_sqrt</span><span class="p">)),</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">from_tensor</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">cosh</span><span class="p">(</span><span class="n">s_sqrt</span><span class="p">),</span> <span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span>
+                <span class="n">a</span> <span class="o">/</span> <span class="n">s_sqrt</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">sinh</span><span class="p">(</span><span class="n">s_sqrt</span><span class="p">))</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">scalar_self_sq</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">from_scalar</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span> <span class="o">+</span> <span class="n">a</span><span class="p">,</span> <span class="n">non_zero_result</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeometricAlgebra.approx_log"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.approx_log">[docs]</a>    <span class="k">def</span> <span class="nf">approx_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Returns an approximation of the natural logarithm using a centered</span>

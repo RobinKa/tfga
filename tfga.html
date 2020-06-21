@@ -211,6 +211,72 @@ for the geometric product. Used internally.</p>
 <span id="tfga-layers-module"></span><h2>tfga.layers module<a class="headerlink" href="#module-tfga.layers" title="Permalink to this headline">¶</a></h2>
 <p>Provides Geometric Algebra Keras layers.</p>
 <dl class="py class">
+<dt id="tfga.layers.GeometricAlgebraExp">
+<em class="property">class </em><code class="sig-prename descclassname">tfga.layers.</code><code class="sig-name descname">GeometricAlgebraExp</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricAlgebraExp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricAlgebraExp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tfga.layers.GeometricAlgebraLayer" title="tfga.layers.GeometricAlgebraLayer"><code class="xref py py-class docutils literal notranslate"><span class="pre">tfga.layers.GeometricAlgebraLayer</span></code></a></p>
+<p>Calculates the exponential function of the input. Input must square to
+a scalar.</p>
+<dl>
+<dt>Args:</dt><dd><p>algebra: GeometricAlgebra instance to use
+square_scalar_tolerance: Tolerance to use for the square scalar check</p>
+<blockquote>
+<div><p>or None if the check should be skipped</p>
+</div></blockquote>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="tfga.layers.GeometricAlgebraExp.call">
+<code class="sig-name descname">call</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inputs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricAlgebraExp.call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricAlgebraExp.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is where the layer’s logic lives.</p>
+<dl class="simple">
+<dt>Arguments:</dt><dd><p>inputs: Input tensor, or list/tuple of input tensors.
+<a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs: Additional keyword arguments.</p>
+</dd>
+<dt>Returns:</dt><dd><p>A tensor or list/tuple of tensors.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.layers.GeometricAlgebraExp.compute_output_shape">
+<code class="sig-name descname">compute_output_shape</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_shape</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricAlgebraExp.compute_output_shape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricAlgebraExp.compute_output_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the output shape of the layer.</p>
+<p>If the layer has not been built, this method will call <cite>build</cite> on the
+layer. This assumes that the layer will later be used with inputs that
+match the input shape provided here.</p>
+<dl class="simple">
+<dt>Arguments:</dt><dd><dl class="simple">
+<dt>input_shape: Shape tuple (tuple of integers)</dt><dd><p>or list of shape tuples (one per output tensor of the layer).
+Shape tuples can include None for free dimensions,
+instead of an integer.</p>
+</dd>
+</dl>
+</dd>
+<dt>Returns:</dt><dd><p>An input shape tuple.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.layers.GeometricAlgebraExp.get_config">
+<code class="sig-name descname">get_config</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricAlgebraExp.get_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricAlgebraExp.get_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the config of the layer.</p>
+<p>A layer config is a Python dictionary (serializable)
+containing the configuration of a layer.
+The same layer can be reinstantiated later
+(without its trained weights) from this configuration.</p>
+<p>The config of a layer does not include connectivity
+information, nor the layer class name. These are handled
+by <cite>Network</cite> (one layer of abstraction above).</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>Python dictionary.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt id="tfga.layers.GeometricAlgebraLayer">
 <em class="property">class </em><code class="sig-prename descclassname">tfga.layers.</code><code class="sig-name descname">GeometricAlgebraLayer</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tfga/layers.html#GeometricAlgebraLayer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.layers.GeometricAlgebraLayer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.python.keras.engine.base_layer.Layer</span></code></p>
@@ -296,7 +362,7 @@ layer instantiation and layer call.</p>
 <dd><p>This is where the layer’s logic lives.</p>
 <dl class="simple">
 <dt>Arguments:</dt><dd><p>inputs: Input tensor, or list/tuple of input tensors.
-<a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs: Additional keyword arguments.</p>
+<a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs: Additional keyword arguments.</p>
 </dd>
 <dt>Returns:</dt><dd><p>A tensor or list/tuple of tensors.</p>
 </dd>
@@ -359,7 +425,7 @@ layer instantiation and layer call.</p>
 <dd><p>This is where the layer’s logic lives.</p>
 <dl class="simple">
 <dt>Arguments:</dt><dd><p>inputs: Input tensor, or list/tuple of input tensors.
-<a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs: Additional keyword arguments.</p>
+<a href="#id5"><span class="problematic" id="id6">**</span></a>kwargs: Additional keyword arguments.</p>
 </dd>
 <dt>Returns:</dt><dd><p>A tensor or list/tuple of tensors.</p>
 </dd>
@@ -441,7 +507,7 @@ layer instantiation and layer call.</p>
 <dd><p>This is where the layer’s logic lives.</p>
 <dl class="simple">
 <dt>Arguments:</dt><dd><p>inputs: Input tensor, or list/tuple of input tensors.
-<a href="#id5"><span class="problematic" id="id6">**</span></a>kwargs: Additional keyword arguments.</p>
+<a href="#id7"><span class="problematic" id="id8">**</span></a>kwargs: Additional keyword arguments.</p>
 </dd>
 <dt>Returns:</dt><dd><p>A tensor or list/tuple of tensors.</p>
 </dd>
@@ -506,7 +572,7 @@ blade_indices_bias: Blade indices to use for the bias parameter (if used)</p>
 <dd><p>This is where the layer’s logic lives.</p>
 <dl class="simple">
 <dt>Arguments:</dt><dd><p>inputs: Input tensor, or list/tuple of input tensors.
-<a href="#id7"><span class="problematic" id="id8">**</span></a>kwargs: Additional keyword arguments.</p>
+<a href="#id9"><span class="problematic" id="id10">**</span></a>kwargs: Additional keyword arguments.</p>
 </dd>
 <dt>Returns:</dt><dd><p>A tensor or list/tuple of tensors.</p>
 </dd>
@@ -533,7 +599,7 @@ blade_indices_bias: Blade indices to use for the bias parameter (if used)</p>
 <dd><p>This is where the layer’s logic lives.</p>
 <dl class="simple">
 <dt>Arguments:</dt><dd><p>inputs: Input tensor, or list/tuple of input tensors.
-<a href="#id9"><span class="problematic" id="id10">**</span></a>kwargs: Additional keyword arguments.</p>
+<a href="#id11"><span class="problematic" id="id12">**</span></a>kwargs: Additional keyword arguments.</p>
 </dd>
 <dt>Returns:</dt><dd><p>A tensor or list/tuple of tensors.</p>
 </dd>
@@ -558,7 +624,7 @@ blade_indices: blade indices to extract</p>
 <dd><p>This is where the layer’s logic lives.</p>
 <dl class="simple">
 <dt>Arguments:</dt><dd><p>inputs: Input tensor, or list/tuple of input tensors.
-<a href="#id11"><span class="problematic" id="id12">**</span></a>kwargs: Additional keyword arguments.</p>
+<a href="#id13"><span class="problematic" id="id14">**</span></a>kwargs: Additional keyword arguments.</p>
 </dd>
 <dt>Returns:</dt><dd><p>A tensor or list/tuple of tensors.</p>
 </dd>
@@ -634,7 +700,7 @@ input tensor as</p>
 <dd><p>This is where the layer’s logic lives.</p>
 <dl class="simple">
 <dt>Arguments:</dt><dd><p>inputs: Input tensor, or list/tuple of input tensors.
-<a href="#id13"><span class="problematic" id="id14">**</span></a>kwargs: Additional keyword arguments.</p>
+<a href="#id15"><span class="problematic" id="id16">**</span></a>kwargs: Additional keyword arguments.</p>
 </dd>
 <dt>Returns:</dt><dd><p>A tensor or list/tuple of tensors.</p>
 </dd>
@@ -698,7 +764,7 @@ input tensor as</p>
 <dd><p>This is where the layer’s logic lives.</p>
 <dl class="simple">
 <dt>Arguments:</dt><dd><p>inputs: Input tensor, or list/tuple of input tensors.
-<a href="#id15"><span class="problematic" id="id16">**</span></a>kwargs: Additional keyword arguments.</p>
+<a href="#id17"><span class="problematic" id="id18">**</span></a>kwargs: Additional keyword arguments.</p>
 </dd>
 <dt>Returns:</dt><dd><p>A tensor or list/tuple of tensors.</p>
 </dd>
@@ -790,6 +856,12 @@ for the last one in the geometric algebra tensor).</p>
 <dt id="tfga.mv.MultiVector.dual">
 <code class="sig-name descname">dual</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; self<a class="reference internal" href="_modules/tfga/mv.html#MultiVector.dual"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.mv.MultiVector.dual" title="Permalink to this definition">¶</a></dt>
 <dd><p>Dual. See <cite>GeometricAlgebra.dual()</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.mv.MultiVector.exp">
+<code class="sig-name descname">exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">square_scalar_tolerance</span><span class="p">:</span> <span class="n">Union[float, None]</span> <span class="o">=</span> <span class="default_value">0.0001</span></em><span class="sig-paren">)</span> &#x2192; self<a class="reference internal" href="_modules/tfga/mv.html#MultiVector.exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.mv.MultiVector.exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exponential. See <cite>GeometricAlgebra.exp()</cite>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -989,6 +1061,23 @@ to 1.</p>
 <dt>Args:</dt><dd><p>blades: list of blade names, can be unnormalized</p>
 </dd>
 <dt>Returns:</dt><dd><p>tf.Tensor with blades set to 1</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tfga.tfga.GeometricAlgebra.exp">
+<code class="sig-name descname">exp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span><span class="p">:</span> <span class="n">tensorflow.python.framework.ops.Tensor</span></em>, <em class="sig-param"><span class="n">square_scalar_tolerance</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>float<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">0.0001</span></em><span class="sig-paren">)</span> &#x2192; tensorflow.python.framework.ops.Tensor<a class="reference internal" href="_modules/tfga/tfga.html#GeometricAlgebra.exp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tfga.tfga.GeometricAlgebra.exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the exponential of the passed geometric algebra tensor.
+Only works for multivectors that square to scalars.</p>
+<dl>
+<dt>Args:</dt><dd><p>a: Geometric algebra tensor to return exponential for
+square_scalar_tolerance: Tolerance to use for the square scalar check</p>
+<blockquote>
+<div><p>or None if the check should be skipped</p>
+</div></blockquote>
+</dd>
+<dt>Returns:</dt><dd><p><cite>exp(a)</cite></p>
 </dd>
 </dl>
 </dd></dl>
