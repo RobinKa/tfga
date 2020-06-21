@@ -314,7 +314,10 @@ class GeometricAlgebra:
         blade_indices = tf.convert_to_tensor(blade_indices)
 
         # Don't allow duplicate indices
-        assert blade_indices.shape[0] == tf.unique(blade_indices)[0].shape[0]
+        tf.Assert(
+            blade_indices.shape[0] == tf.unique(blade_indices)[0].shape[0],
+            [blades]
+        )
 
         x = (
             tf.expand_dims(blade_signs, axis=-1) *
@@ -562,8 +565,9 @@ class GeometricAlgebra:
         self_sq = self.geom_prod(a, a)
 
         if square_scalar_tolerance is not None:
-            assert tf.reduce_all(tf.abs(self_sq[..., 1:]) < square_scalar_tolerance), \
-                "Input to exp must square to a scalar"
+            tf.Assert(tf.reduce_all(
+                tf.abs(self_sq[..., 1:]) < square_scalar_tolerance
+            ), [self_sq])
 
         scalar_self_sq = self_sq[..., :1]
 
