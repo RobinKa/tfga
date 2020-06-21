@@ -137,15 +137,15 @@ class MultiVector:
         )
 
     def __getitem__(self, key: Union[str, List[str]]) -> self:
-        """`MultiVector` with only passed blades as non-zeros."""
+        """`MultiVector` with only passed blade names as non-zeros."""
         return MultiVector(
-            self._algebra.keep_blades(self._blade_values, key),
+            self._algebra.keep_blades_with_name(self._blade_values, key),
             self._algebra
         )
 
     def __call__(self, key: Union[str, List[str]]):
-        """`tf.Tensor` with passed blades on last axis."""
-        return self._algebra.select_blades(self._blade_values, key)
+        """`tf.Tensor` with passed blade names on last axis."""
+        return self._algebra.select_blades_with_name(self._blade_values, key)
 
     def __repr__(self) -> str:
         return self._algebra.mv_repr(self._blade_values)

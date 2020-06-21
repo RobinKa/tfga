@@ -97,15 +97,15 @@ class TestDualGeometricAlgebraMisc(ut.TestCase):
 
         # f(1) = 1^2 = 1, f'(1) = 2
         x_squared = ga.geom_prod(x, x)
-        self.assertTensorsEqual(ga.select_blades(x_squared, ""), 1.0)
-        self.assertTensorsEqual(ga.select_blades(x_squared, "0"), 2.0)
+        self.assertTensorsEqual(ga.select_blades_with_name(x_squared, ""), 1.0)
+        self.assertTensorsEqual(ga.select_blades_with_name(x_squared, "0"), 2.0)
 
         y = five + eps
 
         # f(5) = 5^2 = 25, f'(5) = 10
         y_squared = ga.geom_prod(y, y)
-        self.assertTensorsEqual(ga.select_blades(y_squared, ""), 25.0)
-        self.assertTensorsEqual(ga.select_blades(y_squared, "0"), 10.0)
+        self.assertTensorsEqual(ga.select_blades_with_name(y_squared, ""), 25.0)
+        self.assertTensorsEqual(ga.select_blades_with_name(y_squared, "0"), 10.0)
 
     def test_batched_auto_diff_square(self):
         """Test automatic differentiation using
@@ -124,15 +124,15 @@ class TestDualGeometricAlgebraMisc(ut.TestCase):
 
         # f(1) = 1^2 = 1, f'(1) = 2
         x_squared = ga.geom_prod(x, x)
-        self.assertTensorsEqual(ga.select_blades(x_squared, ""), 1.0)
-        self.assertTensorsEqual(ga.select_blades(x_squared, "0"), 2.0)
+        self.assertTensorsEqual(ga.select_blades_with_name(x_squared, ""), 1.0)
+        self.assertTensorsEqual(ga.select_blades_with_name(x_squared, "0"), 2.0)
 
         y = five + eps
 
         # f(5) = 5^2 = 25, f'(5) = 10
         y_squared = ga.geom_prod(y, y)
-        self.assertTensorsEqual(ga.select_blades(y_squared, ""), 25.0)
-        self.assertTensorsEqual(ga.select_blades(y_squared, "0"), 10.0)
+        self.assertTensorsEqual(ga.select_blades_with_name(y_squared, ""), 25.0)
+        self.assertTensorsEqual(ga.select_blades_with_name(y_squared, "0"), 10.0)
 
     def test_mul_inverse(self):
         ga = GeometricAlgebra(metric=dual_metric)
@@ -149,7 +149,7 @@ class TestDualGeometricAlgebraMisc(ut.TestCase):
 
         # a^-1 = 1 / 2
         a_inv = ga.inverse(a)
-        self.assertTensorsEqual(ga.select_blades(a_inv, ""), 0.5)
+        self.assertTensorsEqual(ga.select_blades_with_name(a_inv, ""), 0.5)
 
         # c = a * b
         # => a_inv * c = b

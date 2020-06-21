@@ -5,7 +5,7 @@ The `GeometricAlgebra` class is used to construct the algebra given a metric.
 It exposes methods for operating on `tf.Tensor` instances where their last
 axis is interpreted as blades of the algebra.
 """
-from typing import List, Any, Union
+from typing import List, Any, Union, Optional
 import numbers
 import tensorflow as tf
 import numpy as np
@@ -640,7 +640,28 @@ class GeometricAlgebra:
             result = self.geom_prod(result, a)
         return result
 
-    def keep_blades(self, a: tf.Tensor, blade_names: Union[List[str], str]) -> tf.Tensor:
+    def keep_blades(self, a: tf.Tensor, blade_indices: List[int]) -> tf.Tensor:
+        """Takes a geometric algebra tensor and returns it with only the given
+        blade_indices as non-zeros.
+
+        Args:
+            a: Geometric algebra tensor to copy
+            blade_indices: Indices for blades to keep
+
+        Returns:
+            `a` with only `blade_indices` components as non-zeros
+        """
+        a = tf.convert_to_tensor(a, dtype_hint=tf.float32)
+        blade_indices = tf.cast(
+            tf.convert_to_tensor(blade_indices, dtype_hint=tf.int64),
+            dtype=tf.int64
+        )
+
+        blade_values = tf.gather(a, blade_indices, axis=-1)
+
+        return self.from_tensor(blade_values, blade_indices)
+
+    def keep_blades_with_name(self, a: tf.Tensor, blade_names: Union[List[str], str]) -> tf.Tensor:
         """Takes a geometric algebra tensor and returns it with only the given
         blades as non-zeros.
 
@@ -649,21 +670,39 @@ class GeometricAlgebra:
             blade_names: Blades to keep
 
         Returns:
-            `a` with only `blade_names` elements as non-zeros
+            `a` with only `blade_names` components as non-zeros
         """
-        a = tf.convert_to_tensor(a, dtype_hint=tf.float32)
-
         if isinstance(blade_names, str):
             blade_names = [blade_names]
 
         _, blade_indices = get_blade_indices_from_names(
             blade_names, self.blades)
 
-        blade_values = tf.gather(a, blade_indices, axis=-1)
+        return self.keep_blades(a, blade_indices)
 
-        return self.from_tensor(blade_values, blade_indices)
+    def select_blades(self, a: tf.Tensor, blade_indices: List[int]) -> tf.Tensor:
+        """Takes a geometric algebra tensor and returns a `tf.Tensor` with the
+        blades in blade_indices on the last axis.
 
-    def select_blades(self, a: tf.Tensor, blade_names: Union[List[str], str]) -> tf.Tensor:
+
+        Args:
+            a: Geometric algebra tensor to copy
+            blade_indices: Indices for blades to select
+
+        Returns:
+            `tf.Tensor` based on `a` with `blade_indices` on last axis.
+        """
+        a = tf.convert_to_tensor(a, dtype_hint=tf.float32)
+        blade_indices = tf.cast(
+            tf.convert_to_tensor(blade_indices, dtype_hint=tf.int64),
+            dtype=tf.int64
+        )
+
+        result = tf.gather(a, blade_indices, axis=-1)
+
+        return result
+
+    def select_blades_with_name(self, a: tf.Tensor, blade_names: Union[List[str], str]) -> tf.Tensor:
         """Takes a geometric algebra tensor and returns a `tf.Tensor` with the
         blades in blade_names on the last axis.
 
@@ -684,7 +723,7 @@ class GeometricAlgebra:
         blade_signs, blade_indices = get_blade_indices_from_names(
             blade_names, self.blades)
 
-        result = blade_signs * tf.gather(a, blade_indices, axis=-1)
+        result = blade_signs * self.select_blades(a, blade_indices)
 
         if is_single_blade:
             return result[..., 0]

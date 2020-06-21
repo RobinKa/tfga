@@ -56,10 +56,10 @@ ga.print(ga.reversion(quaternion))
 ga.print(quaternion[0])
 
 # tf.Tensor of shape [1]: -5 (ie. reversed sign of e_01 component)
-ga.print(ga.select_blades(quaternion, "10"))
+ga.print(ga.select_blades_with_name(quaternion, "10"))
 
 # tf.Tensor of shape [8] with only e_01 component equal to 5
-ga.print(ga.keep_blades(quaternion, "10"))
+ga.print(ga.keep_blades_with_name(quaternion, "10"))
 ```
 
 Alternatively we can convert the geometric algebra [`tf.Tensor`](https://www.tensorflow.org/api_docs/python/tf/Tensor) instance to [`MultiVector`](https://tfga.warlock.ai/tfga.html#tfga.mv.MultiVector)
