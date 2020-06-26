@@ -104,7 +104,7 @@ class MultiVector:
             self._algebra
         )
 
-    def __negate__(self) -> self:
+    def __neg__(self) -> self:
         """Negation."""
         return MultiVector(
             -self._blade_values,
