@@ -10,7 +10,9 @@ import numbers
 import tensorflow as tf
 import numpy as np
 
-from .cayley import get_cayley_tensor, blades_from_bases
+from .cayley import (
+    get_cayley_tensor, blades_from_bases, get_partial_cayley_tensor
+)
 from .blades import (
     BladeKind, get_blade_of_kind_indices, get_blade_indices_from_names,
     get_blade_repr, invert_blade_indices
@@ -69,6 +71,9 @@ class GeometricAlgebra:
             self._dual_blade_indices, dtype=tf.int64)
         self._dual_blade_signs = tf.convert_to_tensor(
             self._dual_blade_signs, dtype=tf.float32)
+
+        # Cache partial cayley tensors so we don't have to reslice every time
+        self._partial_cayleys = {}
 
     def print(self, *args, **kwargs):
         """Same as the default `print` function but formats `tf.Tensor`
@@ -158,6 +163,24 @@ class GeometricAlgebra:
     def basis_mvs(self) -> tf.Tensor:
         """List of basis vectors as tf.Tensor."""
         return self._basis_mvs
+
+    def _get_partial_cayley(self, blade_indices_a, blade_indices_b,
+                            blade_indices_out):
+        key = (
+            str(blade_indices_a),
+            str(blade_indices_b),
+            str(blade_indices_out)
+        )
+
+        # Check if we already have a cayley tensor for the desired product
+        # in the cache.
+        if key not in self._partial_cayleys:
+            self._partial_cayleys[key] = get_partial_cayley_tensor(
+                self._cayley, blade_indices_a, blade_indices_b,
+                blade_indices_out
+            )
+
+        return self._partial_cayleys[key]
 
     def get_kind_blade_indices(self, kind: BladeKind, invert: bool = False) -> tf.Tensor:
         """Find all indices of blades of a given kind in the algebra.
@@ -442,7 +465,7 @@ class GeometricAlgebra:
 
         return mv_multiply(a, b, self._cayley_outer)
 
-    def geom_prod(self, a: tf.Tensor, b: tf.Tensor) -> tf.Tensor:
+    def geom_prod(self, a: tf.Tensor, b: tf.Tensor, ind_a=None, ind_b=None, ind_out=None) -> tf.Tensor:
         """Returns the geometric product of two geometric
         algebra tensors.
 
@@ -460,7 +483,10 @@ class GeometricAlgebra:
 
         a = tf.convert_to_tensor(a)
         b = tf.convert_to_tensor(b)
-        return mv_multiply(a, b, self._cayley)
+
+        cayley = self._get_partial_cayley(ind_a, ind_b, ind_out)
+
+        return mv_multiply(a, b, cayley)
 
     def inner_prod(self, a: tf.Tensor, b: tf.Tensor) -> tf.Tensor:
         """Returns the inner product of two geometric

@@ -3,6 +3,7 @@ for the geometric product. Used internally.
 """
 from itertools import combinations
 import numpy as np
+import tensorflow as tf
 
 from .blades import get_normal_ordered
 
@@ -73,3 +74,13 @@ def get_cayley_tensor(metric, bases, blades):
                 t_outer[a_index, b_index, out_index] = sign
 
     return t_geom, t_inner, t_outer
+
+
+def get_partial_cayley_tensor(cayley, blade_indices_a, blade_indices_b, blade_indices_out):
+    if blade_indices_a is not None:
+        cayley = tf.gather(cayley, blade_indices_a, axis=0)
+    if blade_indices_b is not None:
+        cayley = tf.gather(cayley, blade_indices_b, axis=1)
+    if blade_indices_out is not None:
+        cayley = tf.gather(cayley, blade_indices_out, axis=2)
+    return cayley
