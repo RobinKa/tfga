@@ -4,15 +4,14 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>tfga.tfga &#8212; tfga  documentation</title>
-    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/language_data.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
    
@@ -418,10 +417,10 @@
         <span class="n">tensor</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">grade_automorphism</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reversion</span><span class="p">(</span><span class="n">tensor</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="GeometricAlgebra.inverse"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.inverse">[docs]</a>    <span class="k">def</span> <span class="nf">inverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<div class="viewcode-block" id="GeometricAlgebra.simple_inverse"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.simple_inverse">[docs]</a>    <span class="k">def</span> <span class="nf">simple_inverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Returns the inverted geometric algebra tensor</span>
-<span class="sd">        `X^-1` such that `X * X^-1 = 1` if</span>
-<span class="sd">        it exists.</span>
+<span class="sd">        `X^-1` such that `X * X^-1 = 1`. Only works for elements that</span>
+<span class="sd">        square to scalars. Faster than the general inverse.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            a: Geometric algebra tensor to return inverse for</span>
@@ -764,6 +763,36 @@
 
         <span class="k">return</span> <span class="n">result</span></div>
 
+<div class="viewcode-block" id="GeometricAlgebra.inverse"><a class="viewcode-back" href="../../tfga.html#tfga.tfga.GeometricAlgebra.inverse">[docs]</a>    <span class="k">def</span> <span class="nf">inverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns the inverted geometric algebra tensor</span>
+<span class="sd">        `X^-1` such that `X * X^-1 = 1`.</span>
+
+<span class="sd">        Using Shirokov&#39;s inverse algorithm that works in arbitrary dimensions,</span>
+<span class="sd">        see https://arxiv.org/abs/2005.04015 Theorem 4.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            a: Geometric algebra tensor to return inverse for</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            inverted geometric algebra tensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">dtype_hint</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="n">n</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">u</span> <span class="o">=</span> <span class="n">a</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">n</span> <span class="o">/</span> <span class="n">k</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">keep_blades_with_name</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">u_minus_c</span> <span class="o">=</span> <span class="n">u</span> <span class="o">-</span> <span class="n">c</span>
+            <span class="n">u</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geom_prod</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">u_minus_c</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_pure_kind</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">BladeKind</span><span class="o">.</span><span class="n">SCALAR</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;Can&#39;t invert multi-vector (det U not scalar: </span><span class="si">%s</span><span class="s2">).&quot;</span> <span class="o">%</span> <span class="n">u</span><span class="p">)</span>
+
+        <span class="c1"># adj / det</span>
+        <span class="k">return</span> <span class="n">u_minus_c</span> <span class="o">/</span> <span class="n">u</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="p">:</span><span class="mi">1</span><span class="p">]</span></div>
+
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiVector</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Creates a `MultiVector` from a geometric algebra tensor.</span>
 <span class="sd">        Mainly used as a wrapper for the algebra&#39;s functions for convenience.</span>
@@ -793,7 +822,7 @@
 
 
 <h3>Navigation</h3>
-<p class="caption"><span class="caption-text">Contents:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../tfga.html">tfga package</a></li>
 </ul>
@@ -811,7 +840,7 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -830,10 +859,10 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2020, Robin 'Tora' Kahlow.
+      &copy;2021, Robin 'Tora' Kahlow.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
