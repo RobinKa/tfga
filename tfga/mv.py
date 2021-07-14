@@ -88,6 +88,18 @@ class MultiVector:
             self._algebra
         )
 
+    def __truediv__(self, other: self) -> self:
+        """Division, ie. multiplication with the inverse."""
+        assert isinstance(other, MultiVector)
+
+        return MultiVector(
+            self._algebra.geom_prod(
+                self._blade_values,
+                self._algebra.inverse(other._blade_values)
+            ),
+            self._algebra
+        )
+
     def __and__(self, other: self) -> self:
         """Regressive product. See `GeometricAlgebra.reg_prod()`"""
         assert isinstance(other, MultiVector)
