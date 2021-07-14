@@ -159,5 +159,10 @@ class TestDualGeometricAlgebraMisc(ut.TestCase):
         # => c * a_inv = b
         self.assertTensorsEqual(ga.geom_prod(c, a_inv), b)
 
-        # b is not invertible and will throw an exception
-        self.assertRaises(Exception, ga.inverse, b)
+        # b is not simply invertible (because it does not square to a scalar)
+        # and will throw an exception
+        self.assertRaises(Exception, ga.simple_inverse, b)
+
+        # b is invertible with the shirokov inverse
+        b_inv = ga.inverse(b)
+        self.assertTensorsEqual(ga.geom_prod(b, b_inv), 1 * ga.e(""))

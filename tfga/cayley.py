@@ -47,7 +47,6 @@ def blades_from_bases(vector_bases):
 
 
 def get_cayley_tensor(metric, bases, blades):
-    dims = len(metric)
     num_blades = len(blades)
 
     t_geom = np.zeros((num_blades, num_blades, num_blades), dtype=np.int32)

@@ -157,6 +157,13 @@ class MultiVector:
             self._algebra
         )
 
+    def simple_inverse(self) -> self:
+        """Simple inverse. See `GeometricAlgebra.simple_inverse()`."""
+        return MultiVector(
+            self._algebra.simple_inverse(self._blade_values),
+            self._algebra
+        )
+
     def dual(self) -> self:
         """Dual. See `GeometricAlgebra.dual()`."""
         return MultiVector(

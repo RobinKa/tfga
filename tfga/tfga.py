@@ -384,10 +384,10 @@ class GeometricAlgebra:
         tensor = tf.convert_to_tensor(tensor, dtype_hint=tf.float32)
         return self.grade_automorphism(self.reversion(tensor))
 
-    def inverse(self, a: tf.Tensor) -> tf.Tensor:
+    def simple_inverse(self, a: tf.Tensor) -> tf.Tensor:
         """Returns the inverted geometric algebra tensor
-        `X^-1` such that `X * X^-1 = 1` if
-        it exists.
+        `X^-1` such that `X * X^-1 = 1`. Only works for elements that
+        square to scalars. Faster than the general inverse.
 
         Args:
             a: Geometric algebra tensor to return inverse for
@@ -729,6 +729,36 @@ class GeometricAlgebra:
             return result[..., 0]
 
         return result
+
+    def inverse(self, a: tf.Tensor) -> tf.Tensor:
+        """Returns the inverted geometric algebra tensor
+        `X^-1` such that `X * X^-1 = 1`.
+
+        Using Shirokov's inverse algorithm that works in arbitrary dimensions,
+        see https://arxiv.org/abs/2005.04015 Theorem 4.
+
+        Args:
+            a: Geometric algebra tensor to return inverse for
+
+        Returns:
+            inverted geometric algebra tensor
+        """
+        a = tf.convert_to_tensor(a, dtype_hint=tf.float32)
+
+        n = 2 ** ((len(self.metric) + 1) // 2)
+
+        u = a
+        for k in range(1, n):
+            c = n / k * self.keep_blades_with_name(a, "")
+            u_minus_c = u - c
+            u = self.geom_prod(a, u_minus_c)
+
+        if not self.is_pure_kind(u, BladeKind.SCALAR):
+            raise Exception(
+                "Can't invert multi-vector (det U not scalar: %s)." % u)
+
+        # adj / det
+        return u_minus_c / u[..., :1]
 
     def __call__(self, a: tf.Tensor) -> MultiVector:
         """Creates a `MultiVector` from a geometric algebra tensor.
