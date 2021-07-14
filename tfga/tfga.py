@@ -749,7 +749,7 @@ class GeometricAlgebra:
 
         u = a
         for k in range(1, n):
-            c = n / k * self.keep_blades_with_name(a, "")
+            c = n / k * self.keep_blades_with_name(u, "")
             u_minus_c = u - c
             u = self.geom_prod(a, u_minus_c)
 

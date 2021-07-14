@@ -44,12 +44,3 @@ class TestDualGeometricAlgebraMultiply(ut.TestCase):
 
         # a a_inv should be 1
         self.assertTensorsApproxEqual(pga.geom_prod(a, a_inv), 1 * pga.e(""))
-
-    def test_inverse_degenerate_fails(self):
-        pga = GeometricAlgebra(pga_signature)
-
-        # a = 3e12 + 5e03
-        a = 3 * pga.e12 + 5 * pga.e03
-
-        # Can't invert because there is no inverse
-        self.assertRaises(Exception, pga.inverse, a)
