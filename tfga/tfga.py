@@ -589,6 +589,80 @@ class GeometricAlgebra:
 
         return tf.where(scalar_self_sq == 0, self.from_scalar(1.0) + a, non_zero_result)
 
+    def exp_bivector(self, a: tf.Tensor) -> tf.Tensor:
+        """Returns the exponential for general bivectors.
+
+        Uses the invariant decomposition introduced in Graded Symmetry Groups: Plane and Simple,
+        see https://arxiv.org/abs/2107.03771 section 6.
+
+        Args:
+            a: Geometric algebra tensor bivector to return exponential for
+
+        Returns:
+            `exp(a)`
+        """
+        # Check that the input is actually a bivector
+        if not self.is_pure_kind(a, "bivector"):
+            raise Exception("Input to exp_bivector is not a bivector")
+
+        k = len(self.metric) // 2
+        r = k // 2
+
+        # Calculate W
+        W = [self.from_scalar(1.0)]
+        for m in range(1, k + 1):
+            W.append(self.ext_prod(a, W[-1]))
+        for m in range(1, k + 1):
+            W[m] /= np.math.factorial(m)
+
+        # Get lambda polynomial coefficients
+        pols = []
+        highest_pol = self.geom_prod(W[0], W[0])[..., 0] * (-1)**k
+        for i in range(k, 0, -1):
+            pols.append(
+                (self.geom_prod(W[i], W[i])[..., 0] * (-1)**(k - i)) / highest_pol)
+        pols = tf.convert_to_tensor(pols)
+
+        # Build companion matrix from polynomial coefficients
+        comp = tf.concat([
+            tf.eye(k)[..., 1:, :],
+            [-pols]
+        ], axis=0)
+
+        # Get eigenvalues of the companion matrix, which will be the roots of the polynomial
+        comp_eig_vals, _ = tf.eig(comp)
+        comp_eig_vals = tf.cast(comp_eig_vals, tf.float32)
+
+        # Calculate the simple bivectors using the roots
+        b = []
+        for lambda_index in range(k):
+            num = 0
+            den = 0
+            for i in range(k + 1):
+                if k % 2 == 0:
+                    exponent = r - (i + 1) // 2
+                    term = comp_eig_vals[lambda_index] ** exponent * W[i]
+                    if i % 2 == 1:
+                        den += term
+                    else:
+                        num += term
+                else:
+                    exponent = r - i // 2
+                    term = comp_eig_vals[lambda_index] ** exponent * W[i]
+                    if i % 2 == 0:
+                        den += term
+                    else:
+                        num += term
+            b.append(self.geom_prod(num, self.inverse(den)))
+
+        # Exponentiate the simple bivectors and multiply them
+        result = None
+        for bb in b:
+            exp_bb = self.exp(bb)
+            result = exp_bb if result is None else self.geom_prod(
+                result, exp_bb)
+        return result
+
     def approx_log(self, a: tf.Tensor, order: int = 50) -> tf.Tensor:
         """Returns an approximation of the natural logarithm using a centered
         taylor series. Only converges for multivectors where `||mv - 1|| < 1`.
@@ -753,9 +827,7 @@ class GeometricAlgebra:
             u_minus_c = u - c
             u = self.geom_prod(a, u_minus_c)
 
-        if not self.is_pure_kind(u, BladeKind.SCALAR):
-            raise Exception(
-                "Can't invert multi-vector (det U not scalar: %s)." % u)
+        # TODO: Check if u is approximately scalar
 
         # adj / det
         return u_minus_c / u[..., :1]
