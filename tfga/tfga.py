@@ -589,38 +589,27 @@ class GeometricAlgebra:
 
         return tf.where(scalar_self_sq == 0, self.from_scalar(1.0) + a, non_zero_result)
 
-    def exp_bivector(self, a: tf.Tensor) -> tf.Tensor:
-        """Returns the exponential for general bivectors.
+    def invariant_decomposition_from_w(self, w: tf.Tensor) -> tf.Tensor:
+        """Returns the simple elements for given W values.
 
         Uses the invariant decomposition introduced in Graded Symmetry Groups: Plane and Simple,
         see https://arxiv.org/abs/2107.03771 section 6.
 
         Args:
-            a: Geometric algebra tensor bivector to return exponential for
+            w: W values (see paper) to return simple elements for
 
         Returns:
-            `exp(a)`
+            Simple elements for `w`
         """
-        # Check that the input is actually a bivector
-        if not self.is_pure_kind(a, "bivector"):
-            raise Exception("Input to exp_bivector is not a bivector")
-
         k = len(self.metric) // 2
         r = k // 2
 
-        # Calculate W
-        W = [self.from_scalar(1.0)]
-        for m in range(1, k + 1):
-            W.append(self.ext_prod(a, W[-1]))
-        for m in range(1, k + 1):
-            W[m] /= np.math.factorial(m)
-
         # Get lambda polynomial coefficients
         pols = []
-        highest_pol = self.geom_prod(W[0], W[0])[..., 0] * (-1)**k
+        highest_pol = self.geom_prod(w[0], w[0])[..., 0] * (-1)**k
         for i in range(k, 0, -1):
             pols.append(
-                (self.geom_prod(W[i], W[i])[..., 0] * (-1)**(k - i)) / highest_pol)
+                (self.geom_prod(w[i], w[i])[..., 0] * (-1)**(k - i)) / highest_pol)
         pols = tf.convert_to_tensor(pols)
 
         # Build companion matrix from polynomial coefficients
@@ -633,34 +622,72 @@ class GeometricAlgebra:
         comp_eig_vals, _ = tf.eig(comp)
         comp_eig_vals = tf.cast(comp_eig_vals, tf.float32)
 
-        # Calculate the simple bivectors using the roots
+        # Calculate the simple elements using the roots
         b = []
+        even_k = k % 2
         for lambda_index in range(k):
             num = 0
             den = 0
             for i in range(k + 1):
-                if k % 2 == 0:
+                if even_k:
                     exponent = r - (i + 1) // 2
-                    term = comp_eig_vals[lambda_index] ** exponent * W[i]
-                    if i % 2 == 1:
-                        den += term
-                    else:
-                        num += term
                 else:
                     exponent = r - i // 2
-                    term = comp_eig_vals[lambda_index] ** exponent * W[i]
-                    if i % 2 == 0:
-                        den += term
-                    else:
-                        num += term
+
+                term = comp_eig_vals[lambda_index] ** exponent * w[i]
+
+                if (even_k and i % 2 == 1) or (not even_k and i % 2 == 0):
+                    den += term
+                else:
+                    num += term
             b.append(self.geom_prod(num, self.inverse(den)))
 
-        # Exponentiate the simple bivectors and multiply them
+        return b
+
+    def invariant_decomposition(self, a: tf.Tensor) -> tf.Tensor:
+        """Returns the simple elements for a geometric algebra tensor.
+        The simple elements square to scalars, mutually commute under the
+        geometric product and sum up to the original multivector.
+
+        Uses the invariant decomposition introduced in Graded Symmetry Groups: Plane and Simple,
+        see https://arxiv.org/abs/2107.03771 section 6.
+
+        Args:
+            a: Geometric algebra tensor to return simple elements for
+
+        Returns:
+            Simple elements that add up to `a`
+        """
+        k = len(self.metric) // 2
+
+        # Calculate w
+        w = [self.from_scalar(1.0)]
+        for m in range(1, k + 1):
+            w.append(self.ext_prod(a, w[-1]))
+        for m in range(1, k + 1):
+            w[m] /= np.math.factorial(m)
+
+        return self.invariant_decomposition_from_w(w)
+
+    def exp_invariant_decomposition(self, a: tf.Tensor) -> tf.Tensor:
+        """Returns the exponential for a geometric algebra tensor.
+        Uses the invariant decomposition (see `GeometricAlgebra.invariant_decomposition()`)
+        and thus only works if one exists.
+
+        Args:
+            a: Geometric algebra tensor to return exponential for
+
+        Returns:
+            `exp(a)`
+        """
+        bs = self.invariant_decomposition(a)
+
+        # Exponentiate the simple elements and multiply them.
+        # exp(a) = exp(bs[0]) * exp(bs[1]) * ...
         result = None
-        for bb in b:
-            exp_bb = self.exp(bb)
-            result = exp_bb if result is None else self.geom_prod(
-                result, exp_bb)
+        exp_bs = [self.exp(b) for b in bs]
+        for exp_b in exp_bs:
+            result = exp_b if result is None else self.geom_prod(result, exp_b)
         return result
 
     def approx_log(self, a: tf.Tensor, order: int = 50) -> tf.Tensor:
