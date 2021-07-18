@@ -691,7 +691,7 @@ class GeometricAlgebraExp(GeometricAlgebraLayer):
 
     def call(self, inputs):
         return self.algebra.exp(
-            inputs, square_scalar_tolerance=self.square_scalar_tolerance
+            inputs
         )
 
     def get_config(self):
