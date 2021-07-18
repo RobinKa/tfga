@@ -5,7 +5,7 @@ The `GeometricAlgebra` class is used to construct the algebra given a metric.
 It exposes methods for operating on `tf.Tensor` instances where their last
 axis is interpreted as blades of the algebra.
 """
-from typing import List, Any, Union, Optional
+from typing import List, Union, Optional
 import numbers
 import tensorflow as tf
 import numpy as np
@@ -547,7 +547,7 @@ class GeometricAlgebra:
             result += v / i_factorial
         return result
 
-    def exp(self, a: tf.Tensor, square_scalar_tolerance: Union[float, None] = 1e-4) -> tf.Tensor:
+    def simple_exp(self, a: tf.Tensor, square_scalar_tolerance: Union[float, None] = 1e-4) -> tf.Tensor:
         """Returns the exponential of the passed geometric algebra tensor.
         Only works for multivectors that square to scalars.
 
@@ -589,7 +589,7 @@ class GeometricAlgebra:
 
         return tf.where(scalar_self_sq == 0, self.from_scalar(1.0) + a, non_zero_result)
 
-    def invariant_decomposition_from_w(self, w: tf.Tensor) -> tf.Tensor:
+    def invariant_decomposition_from_w(self, w: tf.Tensor, B: Optional[tf.Tensor] = None) -> tf.Tensor:
         """Returns the simple elements for given W values.
 
         Uses the invariant decomposition introduced in Graded Symmetry Groups: Plane and Simple,
@@ -599,7 +599,7 @@ class GeometricAlgebra:
             w: W values (see paper) to return simple elements for
 
         Returns:
-            Simple elements for `w`
+            Simple elements for `w` of shape [#dims//2, ...B, #dims]
         """
         k = len(self.metric) // 2
         r = k // 2
@@ -614,13 +614,21 @@ class GeometricAlgebra:
 
         # Build companion matrix from polynomial coefficients
         comp = tf.concat([
-            tf.eye(k)[..., 1:, :],
-            [-pols]
-        ], axis=0)
+            tf.eye(k, batch_shape=w.shape[1:-1])[..., 1:, :], # [...B, k, k]
+            tf.expand_dims(tf.transpose(-pols, list(range(1, len(pols.shape))) + [0]), axis=-2), # [k, ...B] -> [...B, 1, k]
+        ], axis=-2)
 
         # Get eigenvalues of the companion matrix, which will be the roots of the polynomial
+        # [...B, k]
         comp_eig_vals, _ = tf.eig(comp)
         comp_eig_vals = tf.cast(comp_eig_vals, tf.float32)
+
+        if B is not None:
+            # Sort eigenvalues by their absolute values, so zeros will be on the first index.
+            # Instead of using the first index, we will throw it away and add the final simple
+            # elements using B - sum(b).
+            sorted_eig_val_indices = tf.argsort(tf.abs(comp_eig_vals))
+            comp_eig_vals = tf.gather(comp_eig_vals, sorted_eig_val_indices, batch_dims=-1)[..., 1:]
 
         # Calculate the simple elements using the roots
         b = []
@@ -634,13 +642,21 @@ class GeometricAlgebra:
                 else:
                     exponent = r - i // 2
 
-                term = comp_eig_vals[lambda_index] ** exponent * w[i]
+                term = comp_eig_vals[..., lambda_index:lambda_index+1] ** exponent * w[i]
 
                 if (even_k and i % 2 == 1) or (not even_k and i % 2 == 0):
                     den += term
                 else:
                     num += term
-            b.append(self.geom_prod(num, self.inverse(den)))
+            new_b = self.geom_prod(num, self.inverse(den))
+            b.append(tf.where(tf.reduce_any(den != 0, axis=-1, keepdims=True), new_b, tf.zeros_like(new_b)))
+
+        if B is not None:
+            b.append(B - sum(b))
+
+        b = tf.convert_to_tensor(b, dtype=tf.float32)
+        # [k, ...B, #dims]
+
 
         return b
 
@@ -656,20 +672,22 @@ class GeometricAlgebra:
             a: Geometric algebra tensor to return simple elements for
 
         Returns:
-            Simple elements that add up to `a`
+            Simple elements that add up to `a` of shape [#dims//2, ...B, #dims]
         """
         k = len(self.metric) // 2
 
         # Calculate w
-        w = [self.from_scalar(1.0)]
+        w = [tf.ones_like(a) * self.e("")]
         for m in range(1, k + 1):
             w.append(self.ext_prod(a, w[-1]))
         for m in range(1, k + 1):
             w[m] /= np.math.factorial(m)
 
-        return self.invariant_decomposition_from_w(w)
+        w = tf.convert_to_tensor(w, dtype=tf.float32)
 
-    def exp_invariant_decomposition(self, a: tf.Tensor) -> tf.Tensor:
+        return self.invariant_decomposition_from_w(w, a)
+
+    def exp(self, a: tf.Tensor) -> tf.Tensor:
         """Returns the exponential for a geometric algebra tensor.
         Uses the invariant decomposition (see `GeometricAlgebra.invariant_decomposition()`)
         and thus only works if one exists.
@@ -685,7 +703,7 @@ class GeometricAlgebra:
         # Exponentiate the simple elements and multiply them.
         # exp(a) = exp(bs[0]) * exp(bs[1]) * ...
         result = None
-        exp_bs = [self.exp(b) for b in bs]
+        exp_bs = self.simple_exp(bs)
         for exp_b in exp_bs:
             result = exp_b if result is None else self.geom_prod(result, exp_b)
         return result
