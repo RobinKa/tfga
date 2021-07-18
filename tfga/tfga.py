@@ -632,7 +632,9 @@ class GeometricAlgebra:
             # Instead of using the first index, we will throw it away and add the final simple
             # elements using B - sum(b).
             sorted_eig_val_indices = tf.argsort(tf.abs(comp_eig_vals))
-            comp_eig_vals = tf.gather(comp_eig_vals, sorted_eig_val_indices, batch_dims=-1)[..., 1:]
+            comp_eig_vals = tf.gather(
+                comp_eig_vals, sorted_eig_val_indices, batch_dims=-1
+            )[..., 1:]
 
         # Calculate the simple elements using the roots
         b = []
@@ -665,7 +667,6 @@ class GeometricAlgebra:
 
         b = tf.convert_to_tensor(b, dtype=tf.float32)
         # [k, ...B, #dims]
-
 
         return b
 
