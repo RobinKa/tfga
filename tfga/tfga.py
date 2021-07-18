@@ -614,8 +614,12 @@ class GeometricAlgebra:
 
         # Build companion matrix from polynomial coefficients
         comp = tf.concat([
-            tf.eye(k, batch_shape=w.shape[1:-1])[..., 1:, :], # [...B, k, k]
-            tf.expand_dims(tf.transpose(-pols, list(range(1, len(pols.shape))) + [0]), axis=-2), # [k, ...B] -> [...B, 1, k]
+            tf.eye(k, batch_shape=w.shape[1:-1])[..., 1:, :],  # [...B, k, k]
+            # [k, ...B] -> [...B, 1, k]
+            tf.expand_dims(
+                tf.transpose(-pols, list(range(1, len(pols.shape))) + [0]),
+                axis=-2
+            ),
         ], axis=-2)
 
         # Get eigenvalues of the companion matrix, which will be the roots of the polynomial
@@ -633,7 +637,7 @@ class GeometricAlgebra:
         # Calculate the simple elements using the roots
         b = []
         even_k = k % 2
-        for lambda_index in range(k):
+        for lambda_index in range(k if B is None else k - 1):
             num = 0
             den = 0
             for i in range(k + 1):
@@ -642,14 +646,19 @@ class GeometricAlgebra:
                 else:
                     exponent = r - i // 2
 
-                term = comp_eig_vals[..., lambda_index:lambda_index+1] ** exponent * w[i]
+                eig_val = comp_eig_vals[..., lambda_index:lambda_index+1]
+                term = eig_val ** exponent * w[i]
 
                 if (even_k and i % 2 == 1) or (not even_k and i % 2 == 0):
                     den += term
                 else:
                     num += term
             new_b = self.geom_prod(num, self.inverse(den))
-            b.append(tf.where(tf.reduce_any(den != 0, axis=-1, keepdims=True), new_b, tf.zeros_like(new_b)))
+            b.append(tf.where(tf.reduce_any(
+                den != 0, axis=-1, keepdims=True),
+                new_b,
+                tf.zeros_like(new_b)
+            ))
 
         if B is not None:
             b.append(B - sum(b))
