@@ -599,7 +599,8 @@ class GeometricAlgebra:
             w: W values (see paper) to return simple elements for
 
         Returns:
-            Simple elements for `w` of shape [#dims//2, ...B, #dims]
+            Simple elements for `w` of shape [#dims//2, ...B, #dims].
+            Can contain zeros for the simple elements if there are fewer than #dims//2.
         """
         k = len(self.metric) // 2
         r = k // 2
@@ -682,7 +683,8 @@ class GeometricAlgebra:
             a: Geometric algebra tensor to return simple elements for
 
         Returns:
-            Simple elements that add up to `a` of shape [#dims//2, ...B, #dims]
+            Simple elements that add up to `a` of shape [#dims//2, ...B, #dims].
+            Can contain zeros for the simple elements if there are fewer than #dims//2.
         """
         k = len(self.metric) // 2
 
