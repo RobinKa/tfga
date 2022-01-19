@@ -5,14 +5,24 @@ import tensorflow as tf
 
 def mv_multiply(a_blade_values: tf.Tensor, b_blade_values: tf.Tensor,
                 cayley: tf.Tensor) -> tf.Tensor:
-    # ...i, ijk -> ...jk
-    x = tf.tensordot(a_blade_values, cayley, axes=[-1, 0])
 
-    # ...1j, ...jk -> ...1k
-    x = tf.expand_dims(b_blade_values, axis=b_blade_values.shape.ndims - 1) @ x
+    if tf.size(a_blade_values) > tf.size(b_blade_values):
 
-    # ...1k -> ...k
-    x = tf.squeeze(x, axis=-2)
+        # ...j, ijk -> ...ik
+        x = tf.tensordot(b_blade_values, cayley, axes=[-1, 1])
+
+        # ...i, ...ik -> ...k
+        x = tf.tensordot(a_blade_values, x, axes=[-1, -2])
+
+    else:
+        # ...i, ijk -> ...jk
+        x = tf.tensordot(a_blade_values, cayley, axes=[-1, 0])
+
+        # ...1j, ...jk -> ...1k
+        x = tf.expand_dims(b_blade_values, axis=b_blade_values.shape.ndims - 1) @ x
+
+        # ...1k -> ...k
+        x = tf.squeeze(x, axis=-2)
 
     return x
 
