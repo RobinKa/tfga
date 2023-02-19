@@ -7,9 +7,8 @@ algebra = GeometricAlgebra([1, 1, 1])
 
 def get_rotor_loss(values):
     rotor = algebra.from_tensor_with_kind(values, BladeKind.BIVECTOR)
-    return tf.reduce_sum(
-        tf.math.square(algebra.geom_prod(rotor, algebra.reversion(rotor) - 1))
-    )
+    s = algebra.geom_prod(rotor, algebra.reversion(rotor))[..., 0]
+    return tf.reduce_sum(tf.math.square(s - 1))
 
 
 def test_make_rotor():
