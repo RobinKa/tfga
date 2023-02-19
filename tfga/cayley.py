@@ -2,16 +2,17 @@
 for the geometric product. Used internally.
 """
 from itertools import combinations
+
 import numpy as np
 
-from .blades import get_normal_ordered
+from tfga.blades import get_normal_ordered
 
 
 def _collapse_same(x):
     for i in range(len(x) - 1):
         a, b = x[i], x[i + 1]
         if a == b:
-            return False, x[:i] + x[i+2:], a
+            return False, x[:i] + x[i + 2 :], a
     return True, x, None
 
 

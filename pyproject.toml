@@ -1,0 +1,65 @@
+[tool.poetry]
+name = "tfga"
+packages = [{ include = "tfga" }]
+version = "0.2.0"
+authors = ["Robin Kahlow <tora@warlock.ai>"]
+readme = "README.md"
+description = "Clifford and Geometric Algebra with TensorFlow"
+homepage = "https://github.com/RobinKa/tfga"
+repository = "https://github.com/RobinKa/tfga"
+documentation = "https://tfga.warlock.ai/"
+license = "MIT"
+keywords = [
+    "geometric-algebra",
+    "clifford-algebra",
+    "tensorflow",
+    "multi-vector",
+    "para-vector",
+    "mathematics",
+    "machine-learning",
+]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Development Status :: 3 - Alpha",
+
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3 :: Only",
+
+    "Intended Audience :: Education",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.12"
+tensorflow = "^2.11.0"
+numpy = "^1.20.0"
+
+[tool.poetry.extras]
+tf = ["tensorflow"]
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.2.1"
+black = "^23.1.0"
+isort = "^5.12.0"
+
+[tool.poetry.group.docs.dependencies]
+sphinx = "^6.1.3"
+sphinx-material = "^0.0.35"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

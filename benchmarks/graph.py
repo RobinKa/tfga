@@ -1,10 +1,11 @@
-from glob import glob
-import os
-import pandas as pd
 import json
-from matplotlib import pyplot as plt
-import numpy as np
+import os
+from glob import glob
+
 import clifford
+import numpy as np
+import pandas as pd
+from matplotlib import pyplot as plt
 
 
 def load_results(path):
@@ -29,7 +30,7 @@ def load_results(path):
         "fn_name": fn_name,
         "num_elements": num_elements,
         "mean": mean,
-        "stddev": stddev
+        "stddev": stddev,
     }
 
 
@@ -48,7 +49,12 @@ def main():
         for fn_name, fn_df in df.groupby(by="fn_name"):
             plt.figure(figsize=(6, 4))
             for lib_name, lib_df in fn_df.groupby(by="lib_name"):
-                plt.errorbar(lib_df["num_elements"], lib_df["mean"], lib_df["stddev"], label=lib_name)
+                plt.errorbar(
+                    lib_df["num_elements"],
+                    lib_df["mean"],
+                    lib_df["stddev"],
+                    label=lib_name,
+                )
             plt.xscale("log")
             plt.yscale("log")
             plt.xlabel("Number of elements")

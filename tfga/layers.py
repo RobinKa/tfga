@@ -1,13 +1,13 @@
 """Provides Geometric Algebra Keras layers."""
 from typing import List, Union
+
 import tensorflow as tf
-from tensorflow.keras import layers
-from tensorflow.keras import (
-    initializers, activations, regularizers, constraints
-)
+from tensorflow.keras import (activations, constraints, initializers, layers,
+                              regularizers)
 from tensorflow.keras.utils import register_keras_serializable
-from .blades import BladeKind
-from .tfga import GeometricAlgebra
+
+from tfga.blades import BladeKind
+from tfga.tfga import GeometricAlgebra
 
 
 class GeometricAlgebraLayer(layers.Layer):
@@ -29,9 +29,7 @@ class GeometricAlgebraLayer(layers.Layer):
         # Store metric of the algebra. In from_config() we will recreate the
         # algebra from the metric.
         config = super().get_config()
-        config.update({
-            "metric": self.algebra.metric.numpy()
-        })
+        config.update({"metric": self.algebra.metric.numpy()})
         return config
 
 
@@ -46,11 +44,9 @@ class TensorToGeometric(GeometricAlgebraLayer):
         input tensor as
     """
 
-    def __init__(self, algebra: GeometricAlgebra, blade_indices: List[int],
-                 **kwargs):
+    def __init__(self, algebra: GeometricAlgebra, blade_indices: List[int], **kwargs):
         super().__init__(algebra=algebra, **kwargs)
-        self.blade_indices = tf.convert_to_tensor(
-            blade_indices, dtype=tf.int64)
+        self.blade_indices = tf.convert_to_tensor(blade_indices, dtype=tf.int64)
 
     def compute_output_shape(self, input_shape):
         return tf.TensorShape([*input_shape[:-1], self.algebra.num_blades])
@@ -60,9 +56,7 @@ class TensorToGeometric(GeometricAlgebraLayer):
 
     def get_config(self):
         config = super().get_config()
-        config.update({
-            "blade_indices": self.blade_indices.numpy()
-        })
+        config.update({"blade_indices": self.blade_indices.numpy()})
         return config
 
 
@@ -77,22 +71,21 @@ class TensorWithKindToGeometric(GeometricAlgebraLayer):
         input tensor as
     """
 
-    def __init__(self, algebra: GeometricAlgebra, kind: BladeKind,
-                 **kwargs):
+    def __init__(self, algebra: GeometricAlgebra, kind: BladeKind, **kwargs):
         super().__init__(algebra=algebra, **kwargs)
         self.kind = kind
 
     def compute_output_shape(self, input_shape):
-        return tf.TensorShape([*input_shape[:-1], self.algebra.get_kind_blade_indices(self.kind).shape[0]])
+        return tf.TensorShape(
+            [*input_shape[:-1], self.algebra.get_kind_blade_indices(self.kind).shape[0]]
+        )
 
     def call(self, inputs):
         return self.algebra.from_tensor_with_kind(inputs, kind=self.kind)
 
     def get_config(self):
         config = super().get_config()
-        config.update({
-            "kind": self.kind
-        })
+        config.update({"kind": self.kind})
         return config
 
 
@@ -105,11 +98,9 @@ class GeometricToTensor(GeometricAlgebraLayer):
         blade_indices: blade indices to extract
     """
 
-    def __init__(self, algebra: GeometricAlgebra, blade_indices: List[int],
-                 **kwargs):
+    def __init__(self, algebra: GeometricAlgebra, blade_indices: List[int], **kwargs):
         super().__init__(algebra=algebra, **kwargs)
-        self.blade_indices = tf.convert_to_tensor(
-            blade_indices, dtype=tf.int64)
+        self.blade_indices = tf.convert_to_tensor(blade_indices, dtype=tf.int64)
 
     def compute_output_shape(self, input_shape):
         return tf.TensorShape([*input_shape[:-1], self.blade_indices.shape[0]])
@@ -119,9 +110,7 @@ class GeometricToTensor(GeometricAlgebraLayer):
 
     def get_config(self):
         config = super().get_config()
-        config.update({
-            "blade_indices": self.blade_indices.numpy()
-        })
+        config.update({"blade_indices": self.blade_indices.numpy()})
         return config
 
 
@@ -134,11 +123,9 @@ class GeometricToTensorWithKind(GeometricToTensor):
         kind: blade indices of kind to extract
     """
 
-    def __init__(self, algebra: GeometricAlgebra, kind: BladeKind,
-                 **kwargs):
+    def __init__(self, algebra: GeometricAlgebra, kind: BladeKind, **kwargs):
         blade_indices = algebra.get_kind_blade_indices(kind)
-        super().__init__(algebra=algebra, blade_indices=blade_indices,
-                         **kwargs)
+        super().__init__(algebra=algebra, blade_indices=blade_indices, **kwargs)
 
 
 @register_keras_serializable(package="TFGA")
@@ -170,14 +157,18 @@ class GeometricProductDense(GeometricAlgebraLayer):
         bias_constraint=None,
         **kwargs
     ):
-        super().__init__(algebra=algebra, activity_regularizer=activity_regularizer, **kwargs)
+        super().__init__(
+            algebra=algebra, activity_regularizer=activity_regularizer, **kwargs
+        )
 
         self.units = units
         self.blade_indices_kernel = tf.convert_to_tensor(
-            blade_indices_kernel, dtype_hint=tf.int64)
+            blade_indices_kernel, dtype_hint=tf.int64
+        )
         if use_bias:
             self.blade_indices_bias = tf.convert_to_tensor(
-                blade_indices_bias, dtype_hint=tf.int64)
+                blade_indices_bias, dtype_hint=tf.int64
+            )
 
         self.activation = activations.get(activation)
         self.use_bias = use_bias
@@ -193,7 +184,7 @@ class GeometricProductDense(GeometricAlgebraLayer):
         shape_kernel = [
             self.units,
             self.num_input_units,
-            self.blade_indices_kernel.shape[0]
+            self.blade_indices_kernel.shape[0],
         ]
         self.kernel = self.add_weight(
             "kernel",
@@ -202,7 +193,7 @@ class GeometricProductDense(GeometricAlgebraLayer):
             regularizer=self.kernel_regularizer,
             constraint=self.kernel_constraint,
             dtype=self.dtype,
-            trainable=True
+            trainable=True,
         )
         if self.use_bias:
             shape_bias = [self.units, self.blade_indices_bias.shape[0]]
@@ -213,7 +204,7 @@ class GeometricProductDense(GeometricAlgebraLayer):
                 regularizer=self.bias_regularizer,
                 constraint=self.bias_constraint,
                 dtype=self.dtype,
-                trainable=True
+                trainable=True,
             )
         else:
             self.bias = None
@@ -223,52 +214,41 @@ class GeometricProductDense(GeometricAlgebraLayer):
         return tf.TensorShape([*input_shape[:-2], self.units, self.algebra.num_blades])
 
     def call(self, inputs):
-        w_geom = self.algebra.from_tensor(
-            self.kernel, self.blade_indices_kernel)
+        w_geom = self.algebra.from_tensor(self.kernel, self.blade_indices_kernel)
 
         # Perform a matrix-multiply, but using geometric product instead of
         # standard multiplication. To do this we do the geometric product
         # elementwise and then sum over the common axis.
         # [..., 1, I, X] * [..., O, I, X] -> [..., O, I, X] -> [..., O, X]
         inputs_expanded = tf.expand_dims(inputs, axis=inputs.shape.ndims - 2)
-        result = tf.reduce_sum(self.algebra.geom_prod(
-            inputs_expanded, w_geom), axis=-2)
+        result = tf.reduce_sum(self.algebra.geom_prod(inputs_expanded, w_geom), axis=-2)
 
         if self.bias is not None:
-            b_geom = self.algebra.from_tensor(
-                self.bias, self.blade_indices_bias)
+            b_geom = self.algebra.from_tensor(self.bias, self.blade_indices_bias)
             result += b_geom
 
         return self.activation(result)
 
     def get_config(self):
         config = super().get_config()
-        config.update({
-            "blade_indices_kernel":
-                self.blade_indices_kernel.numpy(),
-            "blade_indices_bias":
-                self.blade_indices_bias.numpy(),
-            "units":
-                self.units,
-            "activation":
-                activations.serialize(self.activation),
-            "use_bias":
-                self.use_bias,
-            "kernel_initializer":
-                initializers.serialize(self.kernel_initializer),
-            "bias_initializer":
-                initializers.serialize(self.bias_initializer),
-            "kernel_regularizer":
-                regularizers.serialize(self.kernel_regularizer),
-            "bias_regularizer":
-                regularizers.serialize(self.bias_regularizer),
-            "activity_regularizer":
-                regularizers.serialize(self.activity_regularizer),
-            "kernel_constraint":
-                constraints.serialize(self.kernel_constraint),
-            "bias_constraint":
-                constraints.serialize(self.bias_constraint)
-        })
+        config.update(
+            {
+                "blade_indices_kernel": self.blade_indices_kernel.numpy(),
+                "blade_indices_bias": self.blade_indices_bias.numpy(),
+                "units": self.units,
+                "activation": activations.serialize(self.activation),
+                "use_bias": self.use_bias,
+                "kernel_initializer": initializers.serialize(self.kernel_initializer),
+                "bias_initializer": initializers.serialize(self.bias_initializer),
+                "kernel_regularizer": regularizers.serialize(self.kernel_regularizer),
+                "bias_regularizer": regularizers.serialize(self.bias_regularizer),
+                "activity_regularizer": regularizers.serialize(
+                    self.activity_regularizer
+                ),
+                "kernel_constraint": constraints.serialize(self.kernel_constraint),
+                "bias_constraint": constraints.serialize(self.bias_constraint),
+            }
+        )
         return config
 
 
@@ -285,14 +265,25 @@ class GeometricSandwichProductDense(GeometricProductDense):
     """
 
     def __init__(
-        self, algebra, units, blade_indices_kernel, blade_indices_bias=None,
-        activation=None, use_bias=True, kernel_initializer="glorot_uniform",
-        bias_initializer="zeros", kernel_regularizer=None,
-        bias_regularizer=None, activity_regularizer=None,
-        kernel_constraint=None, bias_constraint=None, **kwargs
+        self,
+        algebra,
+        units,
+        blade_indices_kernel,
+        blade_indices_bias=None,
+        activation=None,
+        use_bias=True,
+        kernel_initializer="glorot_uniform",
+        bias_initializer="zeros",
+        kernel_regularizer=None,
+        bias_regularizer=None,
+        activity_regularizer=None,
+        kernel_constraint=None,
+        bias_constraint=None,
+        **kwargs
     ):
         super().__init__(
-            algebra, units,
+            algebra,
+            units,
             blade_indices_kernel,
             blade_indices_bias=blade_indices_bias,
             activation=activation,
@@ -303,29 +294,25 @@ class GeometricSandwichProductDense(GeometricProductDense):
             bias_regularizer=bias_regularizer,
             activity_regularizer=activity_regularizer,
             kernel_constraint=kernel_constraint,
-            bias_constraint=bias_constraint, **kwargs
+            bias_constraint=bias_constraint,
+            **kwargs
         )
 
     def call(self, inputs):
-        w_geom = self.algebra.from_tensor(
-            self.kernel, self.blade_indices_kernel)
+        w_geom = self.algebra.from_tensor(self.kernel, self.blade_indices_kernel)
 
         # Same as GeometricProductDense but using R*x*~R instead of just R*x
         inputs_expanded = tf.expand_dims(inputs, axis=inputs.shape.ndims - 2)
         result = tf.reduce_sum(
             self.algebra.geom_prod(
                 w_geom,
-                self.algebra.geom_prod(
-                    inputs_expanded,
-                    self.algebra.reversion(w_geom)
-                )
+                self.algebra.geom_prod(inputs_expanded, self.algebra.reversion(w_geom)),
             ),
-            axis=-2
+            axis=-2,
         )
 
         if self.bias is not None:
-            b_geom = self.algebra.from_tensor(
-                self.bias, self.blade_indices_bias)
+            b_geom = self.algebra.from_tensor(self.bias, self.blade_indices_bias)
             result += b_geom
 
         return self.activation(result)
@@ -358,13 +345,17 @@ class GeometricProductElementwise(GeometricAlgebraLayer):
         bias_constraint=None,
         **kwargs
     ):
-        super().__init__(algebra=algebra, activity_regularizer=activity_regularizer, **kwargs)
+        super().__init__(
+            algebra=algebra, activity_regularizer=activity_regularizer, **kwargs
+        )
 
         self.blade_indices_kernel = tf.convert_to_tensor(
-            blade_indices_kernel, dtype_hint=tf.int64)
+            blade_indices_kernel, dtype_hint=tf.int64
+        )
         if use_bias:
             self.blade_indices_bias = tf.convert_to_tensor(
-                blade_indices_bias, dtype_hint=tf.int64)
+                blade_indices_bias, dtype_hint=tf.int64
+            )
 
         self.activation = activations.get(activation)
         self.use_bias = use_bias
@@ -377,10 +368,7 @@ class GeometricProductElementwise(GeometricAlgebraLayer):
 
     def build(self, input_shape: tf.TensorShape):
         self.num_input_units = input_shape[-2]
-        shape_kernel = [
-            self.num_input_units,
-            self.blade_indices_kernel.shape[0]
-        ]
+        shape_kernel = [self.num_input_units, self.blade_indices_kernel.shape[0]]
         self.kernel = self.add_weight(
             "kernel",
             shape=shape_kernel,
@@ -388,11 +376,10 @@ class GeometricProductElementwise(GeometricAlgebraLayer):
             regularizer=self.kernel_regularizer,
             constraint=self.kernel_constraint,
             dtype=self.dtype,
-            trainable=True
+            trainable=True,
         )
         if self.use_bias:
-            shape_bias = [self.num_input_units,
-                          self.blade_indices_bias.shape[0]]
+            shape_bias = [self.num_input_units, self.blade_indices_bias.shape[0]]
             self.bias = self.add_weight(
                 "bias",
                 shape=shape_bias,
@@ -400,7 +387,7 @@ class GeometricProductElementwise(GeometricAlgebraLayer):
                 regularizer=self.bias_regularizer,
                 constraint=self.bias_constraint,
                 dtype=self.dtype,
-                trainable=True
+                trainable=True,
             )
         else:
             self.bias = None
@@ -410,46 +397,37 @@ class GeometricProductElementwise(GeometricAlgebraLayer):
         return tf.TensorShape([*input_shape[:-1], self.algebra.num_blades])
 
     def call(self, inputs):
-        w_geom = self.algebra.from_tensor(
-            self.kernel, self.blade_indices_kernel)
+        w_geom = self.algebra.from_tensor(self.kernel, self.blade_indices_kernel)
 
         # Elementwise multiplication for each unit with a multivector.
         # [..., U, X] * [U, X] -> [..., U, X]
         result = self.algebra.geom_prod(inputs, w_geom)
 
         if self.bias is not None:
-            b_geom = self.algebra.from_tensor(
-                self.bias, self.blade_indices_bias)
+            b_geom = self.algebra.from_tensor(self.bias, self.blade_indices_bias)
             result += b_geom
 
         return self.activation(result)
 
     def get_config(self):
         config = super().get_config()
-        config.update({
-            "blade_indices_kernel":
-                self.blade_indices_kernel.numpy(),
-            "blade_indices_bias":
-                self.blade_indices_bias.numpy(),
-            "activation":
-                activations.serialize(self.activation),
-            "use_bias":
-                self.use_bias,
-            "kernel_initializer":
-                initializers.serialize(self.kernel_initializer),
-            "bias_initializer":
-                initializers.serialize(self.bias_initializer),
-            "kernel_regularizer":
-                regularizers.serialize(self.kernel_regularizer),
-            "bias_regularizer":
-                regularizers.serialize(self.bias_regularizer),
-            "activity_regularizer":
-                regularizers.serialize(self.activity_regularizer),
-            "kernel_constraint":
-                constraints.serialize(self.kernel_constraint),
-            "bias_constraint":
-                constraints.serialize(self.bias_constraint)
-        })
+        config.update(
+            {
+                "blade_indices_kernel": self.blade_indices_kernel.numpy(),
+                "blade_indices_bias": self.blade_indices_bias.numpy(),
+                "activation": activations.serialize(self.activation),
+                "use_bias": self.use_bias,
+                "kernel_initializer": initializers.serialize(self.kernel_initializer),
+                "bias_initializer": initializers.serialize(self.bias_initializer),
+                "kernel_regularizer": regularizers.serialize(self.kernel_regularizer),
+                "bias_regularizer": regularizers.serialize(self.bias_regularizer),
+                "activity_regularizer": regularizers.serialize(
+                    self.activity_regularizer
+                ),
+                "kernel_constraint": constraints.serialize(self.kernel_constraint),
+                "bias_constraint": constraints.serialize(self.bias_constraint),
+            }
+        )
         return config
 
 
@@ -465,11 +443,20 @@ class GeometricSandwichProductElementwise(GeometricProductElementwise):
     """
 
     def __init__(
-        self, algebra, blade_indices_kernel, blade_indices_bias=None,
-        activation=None, use_bias=True, kernel_initializer="glorot_uniform",
-        bias_initializer="zeros", kernel_regularizer=None,
-        bias_regularizer=None, activity_regularizer=None,
-        kernel_constraint=None, bias_constraint=None, **kwargs
+        self,
+        algebra,
+        blade_indices_kernel,
+        blade_indices_bias=None,
+        activation=None,
+        use_bias=True,
+        kernel_initializer="glorot_uniform",
+        bias_initializer="zeros",
+        kernel_regularizer=None,
+        bias_regularizer=None,
+        activity_regularizer=None,
+        kernel_constraint=None,
+        bias_constraint=None,
+        **kwargs
     ):
         super().__init__(
             algebra,
@@ -483,26 +470,21 @@ class GeometricSandwichProductElementwise(GeometricProductElementwise):
             bias_regularizer=bias_regularizer,
             activity_regularizer=activity_regularizer,
             kernel_constraint=kernel_constraint,
-            bias_constraint=bias_constraint, **kwargs
+            bias_constraint=bias_constraint,
+            **kwargs
         )
 
     def call(self, inputs):
-        w_geom = self.algebra.from_tensor(
-            self.kernel, self.blade_indices_kernel)
+        w_geom = self.algebra.from_tensor(self.kernel, self.blade_indices_kernel)
 
         # Elementwise multiplication Rx~R for each unit with a multivector.
         # [..., U, X] * [U, X] -> [..., U, X]
         result = self.algebra.geom_prod(
-            w_geom,
-            self.algebra.geom_prod(
-                inputs,
-                self.algebra.reversion(w_geom)
-            )
+            w_geom, self.algebra.geom_prod(inputs, self.algebra.reversion(w_geom))
         )
 
         if self.bias is not None:
-            b_geom = self.algebra.from_tensor(
-                self.bias, self.blade_indices_bias)
+            b_geom = self.algebra.from_tensor(self.bias, self.blade_indices_bias)
             result += b_geom
 
         return self.activation(result)
@@ -547,9 +529,7 @@ class GeometricProductConv1D(GeometricAlgebraLayer):
         **kwargs
     ):
         super().__init__(
-            algebra=algebra,
-            activity_regularizer=activity_regularizer,
-            **kwargs
+            algebra=algebra, activity_regularizer=activity_regularizer, **kwargs
         )
 
         self.filters = filters
@@ -559,10 +539,12 @@ class GeometricProductConv1D(GeometricAlgebraLayer):
         self.dilations = dilations
 
         self.blade_indices_kernel = tf.convert_to_tensor(
-            blade_indices_kernel, dtype_hint=tf.int64)
+            blade_indices_kernel, dtype_hint=tf.int64
+        )
         if use_bias:
             self.blade_indices_bias = tf.convert_to_tensor(
-                blade_indices_bias, dtype_hint=tf.int64)
+                blade_indices_bias, dtype_hint=tf.int64
+            )
 
         self.activation = activations.get(activation)
         self.use_bias = use_bias
@@ -582,7 +564,7 @@ class GeometricProductConv1D(GeometricAlgebraLayer):
             self.kernel_size,
             self.num_input_filters,
             self.filters,
-            self.blade_indices_kernel.shape[0]
+            self.blade_indices_kernel.shape[0],
         ]
         self.kernel = self.add_weight(
             "kernel",
@@ -591,7 +573,7 @@ class GeometricProductConv1D(GeometricAlgebraLayer):
             regularizer=self.kernel_regularizer,
             constraint=self.kernel_constraint,
             dtype=self.dtype,
-            trainable=True
+            trainable=True,
         )
         if self.use_bias:
             shape_bias = [self.filters, self.blade_indices_bias.shape[0]]
@@ -602,79 +584,67 @@ class GeometricProductConv1D(GeometricAlgebraLayer):
                 regularizer=self.bias_regularizer,
                 constraint=self.bias_constraint,
                 dtype=self.dtype,
-                trainable=True
+                trainable=True,
             )
         else:
             self.bias = None
         self.built = True
 
     def call(self, inputs):
-        k_geom = self.algebra.from_tensor(
-            self.kernel, self.blade_indices_kernel)
+        k_geom = self.algebra.from_tensor(self.kernel, self.blade_indices_kernel)
 
         result = self.algebra.geom_conv1d(
-            inputs, k_geom,
-            stride=self.stride, padding=self.padding,
-            dilations=self.dilations
+            inputs,
+            k_geom,
+            stride=self.stride,
+            padding=self.padding,
+            dilations=self.dilations,
         )
 
         if self.bias is not None:
-            b_geom = self.algebra.from_tensor(
-                self.bias, self.blade_indices_bias)
+            b_geom = self.algebra.from_tensor(self.bias, self.blade_indices_bias)
             result += b_geom
 
         return self.activation(result)
 
     def get_config(self):
         config = super().get_config()
-        config.update({
-            "filters":
-                self.filters,
-            "kernel_size":
-                self.kernel_size,
-            "stride":
-                self.stride,
-            "padding":
-                self.padding,
-            "dilations":
-                self.dilations,
-            "blade_indices_kernel":
-                self.blade_indices_kernel.numpy(),
-            "blade_indices_bias":
-                self.blade_indices_bias.numpy(),
-            "activation":
-                activations.serialize(self.activation),
-            "use_bias":
-                self.use_bias,
-            "kernel_initializer":
-                initializers.serialize(self.kernel_initializer),
-            "bias_initializer":
-                initializers.serialize(self.bias_initializer),
-            "kernel_regularizer":
-                regularizers.serialize(self.kernel_regularizer),
-            "bias_regularizer":
-                regularizers.serialize(self.bias_regularizer),
-            "activity_regularizer":
-                regularizers.serialize(self.activity_regularizer),
-            "kernel_constraint":
-                constraints.serialize(self.kernel_constraint),
-            "bias_constraint":
-                constraints.serialize(self.bias_constraint)
-
-        })
+        config.update(
+            {
+                "filters": self.filters,
+                "kernel_size": self.kernel_size,
+                "stride": self.stride,
+                "padding": self.padding,
+                "dilations": self.dilations,
+                "blade_indices_kernel": self.blade_indices_kernel.numpy(),
+                "blade_indices_bias": self.blade_indices_bias.numpy(),
+                "activation": activations.serialize(self.activation),
+                "use_bias": self.use_bias,
+                "kernel_initializer": initializers.serialize(self.kernel_initializer),
+                "bias_initializer": initializers.serialize(self.bias_initializer),
+                "kernel_regularizer": regularizers.serialize(self.kernel_regularizer),
+                "bias_regularizer": regularizers.serialize(self.bias_regularizer),
+                "activity_regularizer": regularizers.serialize(
+                    self.activity_regularizer
+                ),
+                "kernel_constraint": constraints.serialize(self.kernel_constraint),
+                "bias_constraint": constraints.serialize(self.bias_constraint),
+            }
+        )
 
         return config
 
 
 @register_keras_serializable(package="TFGA")
 class GeometricAlgebraExp(GeometricAlgebraLayer):
-    """Calculates the exponential function of the input. Input must square to
+    """
+    Calculates the exponential function of the input. Input must square to
     a scalar.
 
     Args:
         algebra: GeometricAlgebra instance to use
         square_scalar_tolerance: Tolerance to use for the square scalar check
-            or None if the check should be skipped
+        or None if the check should be skipped
     """
 
     def __init__(
@@ -696,7 +666,5 @@ class GeometricAlgebraExp(GeometricAlgebraLayer):
 
     def get_config(self):
         config = super().get_config()
-        config.update({
-            "square_scalar_tolerance": self.square_scalar_tolerance
-        })
+        config.update({"square_scalar_tolerance": self.square_scalar_tolerance})
         return config

@@ -1,11 +1,13 @@
 """Blade-related definitions and functions used across the library."""
 from enum import Enum
-from typing import List, Tuple
+from typing import List, Tuple, Union
+
 import tensorflow as tf
 
 
 class BladeKind(Enum):
     """Kind of blade depending on its degree."""
+
     MV = "mv"
     EVEN = "even"
     ODD = "odd"
@@ -38,7 +40,9 @@ def get_blade_repr(blade_name: str) -> str:
     return "e_%s" % blade_name
 
 
-def is_blade_kind(blade_degrees: tf.Tensor, kind: [BladeKind, str], max_degree: int) -> tf.Tensor:
+def is_blade_kind(
+    blade_degrees: tf.Tensor, kind: Union[BladeKind, str], max_degree: int
+) -> tf.Tensor:
     """Finds a boolean mask for whether blade degrees are of a given kind.
 
     Args:
@@ -90,14 +94,16 @@ def invert_blade_indices(num_blades: int, blade_indices: tf.Tensor) -> tf.Tensor
     """
 
     all_blades = tf.range(num_blades, dtype=blade_indices.dtype)
-    return tf.sparse.to_dense(tf.sets.difference(
-        tf.expand_dims(all_blades, axis=0),
-        tf.expand_dims(blade_indices, axis=0)
-    ))[0]
+    return tf.sparse.to_dense(
+        tf.sets.difference(
+            tf.expand_dims(all_blades, axis=0), tf.expand_dims(blade_indices, axis=0)
+        )
+    )[0]
 
 
-def get_blade_of_kind_indices(blade_degrees: tf.Tensor, kind: BladeKind,
-                              max_degree: int, invert: bool = False) -> tf.Tensor:
+def get_blade_of_kind_indices(
+    blade_degrees: tf.Tensor, kind: BladeKind, max_degree: int, invert: bool = False
+) -> tf.Tensor:
     """Finds a boolean mask for whether blades are of a given kind.
 
     Args:
@@ -120,7 +126,7 @@ def _normal_swap(x: List[str]) -> List[str]:
     for i in range(len(x) - 1):
         a, b = x[i], x[i + 1]
         if a > b:  # string comparison
-            x[i], x[i+1] = b, a
+            x[i], x[i + 1] = b, a
             return False, x
     return True, x
 
@@ -146,8 +152,9 @@ def get_normal_ordered(blade_name: str) -> Tuple[int, str]:
     return sign, "".join(blade_name)
 
 
-def get_blade_indices_from_names(blade_names: List[str],
-                                 all_blade_names: List[str]) -> tf.Tensor:
+def get_blade_indices_from_names(
+    blade_names: List[str], all_blade_names: List[str]
+) -> tf.Tensor:
     """Finds blade signs and indices for given blade names in a list of blade
     names. Blade names can be unnormalized and their correct sign will be
     returned.
@@ -165,9 +172,10 @@ def get_blade_indices_from_names(blade_names: List[str],
     blade_signs = [sign for sign, blade_name in signs_and_names]
 
     blade_indices = [
-        all_blade_names.index(blade_name)
-        for sign, blade_name in signs_and_names
+        all_blade_names.index(blade_name) for sign, blade_name in signs_and_names
     ]
 
-    return (tf.convert_to_tensor(blade_signs, dtype=tf.float32),
-            tf.convert_to_tensor(blade_indices, dtype=tf.int64))
+    return (
+        tf.convert_to_tensor(blade_signs, dtype=tf.float32),
+        tf.convert_to_tensor(blade_indices, dtype=tf.int64),
+    )

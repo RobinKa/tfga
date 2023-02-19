@@ -1,4 +1,5 @@
 import unittest as ut
+
 from tfga.cayley import blades_from_bases, get_cayley_tensor
 
 dual_metric = [0]
@@ -17,7 +18,8 @@ class TestDualCayleyTensor(ut.TestCase):
 
     def test_cayley_tensor_correct(self):
         cayley, cayley_inner, cayley_outer = get_cayley_tensor(
-            dual_metric, dual_bases, dual_blades)
+            dual_metric, dual_bases, dual_blades
+        )
 
         self.assertSequenceEqual(cayley.shape, [2, 2, 2])
 
