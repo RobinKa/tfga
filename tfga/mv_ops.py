@@ -1,10 +1,12 @@
 """Operations on geometric algebra tensors used internally."""
 from typing import Union
+
 import tensorflow as tf
 
 
-def mv_multiply(a_blade_values: tf.Tensor, b_blade_values: tf.Tensor,
-                cayley: tf.Tensor) -> tf.Tensor:
+def mv_multiply(
+    a_blade_values: tf.Tensor, b_blade_values: tf.Tensor, cayley: tf.Tensor
+) -> tf.Tensor:
     # ...i, ijk -> ...jk
     x = tf.tensordot(a_blade_values, cayley, axes=[-1, 0])
 
@@ -17,9 +19,14 @@ def mv_multiply(a_blade_values: tf.Tensor, b_blade_values: tf.Tensor,
     return x
 
 
-def mv_conv1d(a_blade_values: tf.Tensor, k_blade_values: tf.Tensor, cayley: tf.Tensor,
-              stride: int, padding: str,
-              dilations: Union[int, None] = None) -> tf.Tensor:
+def mv_conv1d(
+    a_blade_values: tf.Tensor,
+    k_blade_values: tf.Tensor,
+    cayley: tf.Tensor,
+    stride: int,
+    padding: str,
+    dilations: Union[int, None] = None,
+) -> tf.Tensor:
     # Winograd convolution
 
     # A: [..., S, CI, BI]
@@ -32,11 +39,14 @@ def mv_conv1d(a_blade_values: tf.Tensor, k_blade_values: tf.Tensor, cayley: tf.T
 
     # Reshape a_blade_values to a 2d image (since that's what the tf op expects)
     # [*, S, 1, CI*BI]
-    a_image_shape = tf.concat([
-        a_batch_shape,
-        tf.shape(a_blade_values)[-3:-2],
-        [1, tf.reduce_prod(tf.shape(a_blade_values)[-2:])]
-    ], axis=0)
+    a_image_shape = tf.concat(
+        [
+            a_batch_shape,
+            tf.shape(a_blade_values)[-3:-2],
+            [1, tf.reduce_prod(tf.shape(a_blade_values)[-2:])],
+        ],
+        axis=0,
+    )
     a_image = tf.reshape(a_blade_values, a_image_shape)
 
     sizes = [1, kernel_size, 1, 1]
@@ -45,18 +55,19 @@ def mv_conv1d(a_blade_values: tf.Tensor, k_blade_values: tf.Tensor, cayley: tf.T
     # [*, P, 1, K*CI*BI] where eg. number of patches P = S * K for
     # stride=1 and "SAME", (S-K+1) * K for "VALID", ...
     a_slices = tf.image.extract_patches(
-        a_image,
-        sizes=sizes, strides=strides,
-        rates=[1, 1, 1, 1], padding=padding
+        a_image, sizes=sizes, strides=strides, rates=[1, 1, 1, 1], padding=padding
     )
 
     # [..., P, K, CI, BI]
-    out_shape = tf.concat([
-        a_batch_shape,
-        tf.shape(a_slices)[-3:-2],
-        tf.shape(k_blade_values)[:1],
-        tf.shape(a_blade_values)[-2:]
-    ], axis=0)
+    out_shape = tf.concat(
+        [
+            a_batch_shape,
+            tf.shape(a_slices)[-3:-2],
+            tf.shape(k_blade_values)[:1],
+            tf.shape(a_blade_values)[-2:],
+        ],
+        axis=0,
+    )
 
     a_slices = tf.reshape(a_slices, out_shape)
 
@@ -72,9 +83,9 @@ def mv_reversion(a_blade_values, algebra_blade_degrees):
     algebra_blade_degrees = tf.cast(algebra_blade_degrees, tf.float32)
 
     # for each blade, 0 if even number of swaps required, else 1
-    odd_swaps = tf.cast(tf.floor(
-        algebra_blade_degrees * (algebra_blade_degrees - 0.5)
-    ) % 2, tf.float32)
+    odd_swaps = tf.cast(
+        tf.floor(algebra_blade_degrees * (algebra_blade_degrees - 0.5)) % 2, tf.float32
+    )
 
     # [0, 1] -> [-1, 1]
     reversion_signs = 1.0 - 2.0 * odd_swaps

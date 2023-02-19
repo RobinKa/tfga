@@ -1,1 +1,1 @@
-from .tfga import GeometricAlgebra
+from tfga.tfga import GeometricAlgebra

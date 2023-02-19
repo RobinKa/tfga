@@ -140,7 +140,5 @@ cython_debug/
 # Visual Studio Code
 .vscode/
 
-# Sphinx documentation (auto-generated)
-sphinx-docs/
-
-benchmarks/results/
+/benchmarks/results/
+/html/

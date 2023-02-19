@@ -5,18 +5,21 @@ The `GeometricAlgebra` class is used to construct the algebra given a metric.
 It exposes methods for operating on `tf.Tensor` instances where their last
 axis is interpreted as blades of the algebra.
 """
-from typing import List, Any, Union, Optional
 import numbers
-import tensorflow as tf
-import numpy as np
+from typing import List, Union
 
-from .cayley import get_cayley_tensor, blades_from_bases
-from .blades import (
-    BladeKind, get_blade_of_kind_indices, get_blade_indices_from_names,
-    get_blade_repr, invert_blade_indices
+import tensorflow as tf
+
+from tfga.blades import (
+    BladeKind,
+    get_blade_indices_from_names,
+    get_blade_of_kind_indices,
+    get_blade_repr,
+    invert_blade_indices,
 )
-from .mv_ops import mv_multiply, mv_reversion, mv_grade_automorphism, mv_conv1d
-from .mv import MultiVector
+from tfga.cayley import blades_from_bases, get_cayley_tensor
+from tfga.mv import MultiVector
+from tfga.mv_ops import mv_conv1d, mv_grade_automorphism, mv_multiply, mv_reversion
 
 
 class GeometricAlgebra:
@@ -46,12 +49,11 @@ class GeometricAlgebra:
 
         # [Blades, Blades, Blades]
         self._cayley, self._cayley_inner, self._cayley_outer = tf.convert_to_tensor(
-            get_cayley_tensor(self.metric, self._bases, self._blades),
-            dtype=tf.float32
+            get_cayley_tensor(self.metric, self._bases, self._blades), dtype=tf.float32
         )
 
         self._blade_mvs = tf.eye(self._num_blades)
-        self._basis_mvs = self._blade_mvs[1:1+self._num_bases]
+        self._basis_mvs = self._blade_mvs[1 : 1 + self._num_bases]
 
         # Find the dual by looking at the anti-diagonal in the Cayley tensor.
         self._dual_blade_indices = []
@@ -60,23 +62,30 @@ class GeometricAlgebra:
         for blade_index in range(self._num_blades):
             dual_index = self.num_blades - blade_index - 1
             anti_diag = self._cayley[blade_index, dual_index]
-            dual_sign = tf.gather(anti_diag, tf.where(
-                anti_diag != 0.0)[..., 0])[..., 0]
+            dual_sign = tf.gather(anti_diag, tf.where(anti_diag != 0.0)[..., 0])[..., 0]
             self._dual_blade_indices.append(dual_index)
             self._dual_blade_signs.append(dual_sign)
 
         self._dual_blade_indices = tf.convert_to_tensor(
-            self._dual_blade_indices, dtype=tf.int64)
+            self._dual_blade_indices, dtype=tf.int64
+        )
         self._dual_blade_signs = tf.convert_to_tensor(
-            self._dual_blade_signs, dtype=tf.float32)
+            self._dual_blade_signs, dtype=tf.float32
+        )
 
     def print(self, *args, **kwargs):
         """Same as the default `print` function but formats `tf.Tensor`
         instances that have as many elements on their last axis
         as the algebra has blades using `mv_repr()`.
         """
+
         def _is_mv(arg):
-            return isinstance(arg, tf.Tensor) and arg.shape.ndims > 0 and arg.shape[-1] == self.num_blades
+            return (
+                isinstance(arg, tf.Tensor)
+                and arg.shape.ndims > 0
+                and arg.shape[-1] == self.num_blades
+            )
+
         new_args = [self.mv_repr(arg) if _is_mv(arg) else arg for arg in args]
 
         print(*new_args, **kwargs)
@@ -159,7 +168,9 @@ class GeometricAlgebra:
         """List of basis vectors as tf.Tensor."""
         return self._basis_mvs
 
-    def get_kind_blade_indices(self, kind: BladeKind, invert: bool = False) -> tf.Tensor:
+    def get_kind_blade_indices(
+        self, kind: BladeKind, invert: bool = False
+    ) -> tf.Tensor:
         """Find all indices of blades of a given kind in the algebra.
 
         Args:
@@ -169,7 +180,9 @@ class GeometricAlgebra:
         Returns:
             indices of blades of a given kind in the algebra
         """
-        return get_blade_of_kind_indices(self.blade_degrees, kind, self.max_degree, invert=invert)
+        return get_blade_of_kind_indices(
+            self.blade_degrees, kind, self.max_degree, invert=invert
+        )
 
     def get_blade_indices_of_degree(self, degree: int) -> tf.Tensor:
         """Find all indices of blades of the given degree.
@@ -180,7 +193,9 @@ class GeometricAlgebra:
         Returns:
             indices of blades with the given degree in the algebra
         """
-        return tf.gather(tf.range(self.num_blades), tf.where(self.blade_degrees == degree)[..., 0])
+        return tf.gather(
+            tf.range(self.num_blades), tf.where(self.blade_degrees == degree)[..., 0]
+        )
 
     def is_pure(self, tensor: tf.Tensor, blade_indices: tf.Tensor) -> bool:
         """Returns whether the given tensor is purely of the given blades
@@ -195,17 +210,11 @@ class GeometricAlgebra:
             and has no non-zero values for blades not in the given blades
         """
         tensor = tf.convert_to_tensor(tensor, dtype_hint=tf.float32)
-        blade_indices = tf.convert_to_tensor(
-            blade_indices, dtype_hint=tf.int64)
+        blade_indices = tf.convert_to_tensor(blade_indices, dtype_hint=tf.int64)
 
-        inverted_blade_indices = invert_blade_indices(
-            self.num_blades, blade_indices)
+        inverted_blade_indices = invert_blade_indices(self.num_blades, blade_indices)
 
-        return tf.reduce_all(tf.gather(
-            tensor,
-            inverted_blade_indices,
-            axis=-1
-        ) == 0)
+        return tf.reduce_all(tf.gather(tensor, inverted_blade_indices, axis=-1) == 0)
 
     def is_pure_kind(self, tensor: tf.Tensor, kind: BladeKind) -> bool:
         """Returns whether the given tensor is purely of a given kind
@@ -222,11 +231,7 @@ class GeometricAlgebra:
         tensor = tf.convert_to_tensor(tensor, dtype_hint=tf.float32)
         inverted_kind_indices = self.get_kind_blade_indices(kind, invert=True)
 
-        return tf.reduce_all(tf.gather(
-            tensor,
-            inverted_kind_indices,
-            axis=-1
-        ) == 0)
+        return tf.reduce_all(tf.gather(tensor, inverted_kind_indices, axis=-1) == 0)
 
     def from_tensor(self, tensor: tf.Tensor, blade_indices: tf.Tensor) -> tf.Tensor:
         """Creates a geometric algebra tf.Tensor from a tf.Tensor and blade
@@ -243,29 +248,28 @@ class GeometricAlgebra:
             Geometric algebra tf.Tensor from tensor and blade indices
         """
         blade_indices = tf.cast(
-            tf.convert_to_tensor(blade_indices, dtype_hint=tf.int64),
-            dtype=tf.int64
+            tf.convert_to_tensor(blade_indices, dtype_hint=tf.int64), dtype=tf.int64
         )
         tensor = tf.convert_to_tensor(tensor, dtype_hint=tf.float32)
 
         # Put last axis on first axis so scatter_nd becomes easier.
         # Later undo the transposition again.
-        t = tf.concat([[tensor.shape.ndims - 1],
-                       tf.range(0, tensor.shape.ndims - 1)], axis=0)
+        t = tf.concat(
+            [[tensor.shape.ndims - 1], tf.range(0, tensor.shape.ndims - 1)], axis=0
+        )
         t_inv = tf.concat([tf.range(1, tensor.shape.ndims), [0]], axis=0)
 
         tensor = tf.transpose(tensor, t)
 
-        shape = tf.concat([
-            tf.convert_to_tensor([self.num_blades], dtype=tf.int64),
-            tf.shape(tensor, tf.int64)[1:]
-        ], axis=0)
-
-        tensor = tf.scatter_nd(
-            tf.expand_dims(blade_indices, axis=-1),
-            tensor,
-            shape
+        shape = tf.concat(
+            [
+                tf.convert_to_tensor([self.num_blades], dtype=tf.int64),
+                tf.shape(tensor, tf.int64)[1:],
+            ],
+            axis=0,
         )
+
+        tensor = tf.scatter_nd(tf.expand_dims(blade_indices, axis=-1), tensor, shape)
 
         return tf.transpose(tensor, t_inv)
 
@@ -296,7 +300,9 @@ class GeometricAlgebra:
         Returns:
             Geometric algebra tf.Tensor from scalars
         """
-        return self.from_tensor_with_kind(tf.expand_dims(scalar, axis=-1), BladeKind.SCALAR)
+        return self.from_tensor_with_kind(
+            tf.expand_dims(scalar, axis=-1), BladeKind.SCALAR
+        )
 
     def e(self, *blades: List[str]) -> tf.Tensor:
         """Returns a geometric algebra tf.Tensor with the given blades set
@@ -308,20 +314,17 @@ class GeometricAlgebra:
         Returns:
             tf.Tensor with blades set to 1
         """
-        blade_signs, blade_indices = get_blade_indices_from_names(
-            blades, self.blades)
+        blade_signs, blade_indices = get_blade_indices_from_names(blades, self.blades)
 
         blade_indices = tf.convert_to_tensor(blade_indices)
 
         # Don't allow duplicate indices
         tf.Assert(
-            blade_indices.shape[0] == tf.unique(blade_indices)[0].shape[0],
-            [blades]
+            blade_indices.shape[0] == tf.unique(blade_indices)[0].shape[0], [blades]
         )
 
-        x = (
-            tf.expand_dims(blade_signs, axis=-1) *
-            tf.gather(self.blade_mvs, blade_indices)
+        x = tf.expand_dims(blade_signs, axis=-1) * tf.gather(
+            self.blade_mvs, blade_indices
         )
 
         # a, b -> b
@@ -343,7 +346,9 @@ class GeometricAlgebra:
             Dual of the geometric algebra tensor
         """
         tensor = tf.convert_to_tensor(tensor, dtype_hint=tf.float32)
-        return self.dual_blade_signs * tf.gather(tensor, self.dual_blade_indices, axis=-1)
+        return self.dual_blade_signs * tf.gather(
+            tensor, self.dual_blade_indices, axis=-1
+        )
 
     def grade_automorphism(self, tensor: tf.Tensor) -> tf.Tensor:
         """Returns the geometric algebra tensor with odd grades negated.
@@ -401,7 +406,9 @@ class GeometricAlgebra:
         divisor = self.geom_prod(a, rev_a)
         if not self.is_pure_kind(divisor, BladeKind.SCALAR):
             raise Exception(
-                "Can't invert multi-vector (inversion divisor V ~V not scalar: %s)." % divisor)
+                "Can't invert multi-vector (inversion divisor V ~V not scalar: %s)."
+                % divisor
+            )
 
         # Divide by scalar part
         return rev_a / divisor[..., :1]
@@ -480,9 +487,14 @@ class GeometricAlgebra:
 
         return mv_multiply(a, b, self._cayley_inner)
 
-    def geom_conv1d(self, a: tf.Tensor, k: tf.Tensor,
-                    stride: int, padding: str,
-                    dilations: Union[int, None] = None) -> tf.Tensor:
+    def geom_conv1d(
+        self,
+        a: tf.Tensor,
+        k: tf.Tensor,
+        stride: int,
+        padding: str,
+        dilations: Union[int, None] = None,
+    ) -> tf.Tensor:
         """Returns the 1D convolution of a sequence with a geometric algebra
         tensor kernel. The convolution is performed using the geometric
         product.
@@ -520,8 +532,7 @@ class GeometricAlgebra:
         if len(a.shape) == 1:
             return "MultiVector[%s]" % " + ".join(
                 "%.2f*%s" % (value, get_blade_repr(blade_name))
-                for value, blade_name
-                in zip(a, self.blades)
+                for value, blade_name in zip(a, self.blades)
                 if value != 0
             )
         else:
@@ -547,7 +558,9 @@ class GeometricAlgebra:
             result += v / i_factorial
         return result
 
-    def exp(self, a: tf.Tensor, square_scalar_tolerance: Union[float, None] = 1e-4) -> tf.Tensor:
+    def exp(
+        self, a: tf.Tensor, square_scalar_tolerance: Union[float, None] = 1e-4
+    ) -> tf.Tensor:
         """Returns the exponential of the passed geometric algebra tensor.
         Only works for multivectors that square to scalars.
 
@@ -565,9 +578,10 @@ class GeometricAlgebra:
         self_sq = self.geom_prod(a, a)
 
         if square_scalar_tolerance is not None:
-            tf.Assert(tf.reduce_all(
-                tf.abs(self_sq[..., 1:]) < square_scalar_tolerance
-            ), [self_sq])
+            tf.Assert(
+                tf.reduce_all(tf.abs(self_sq[..., 1:]) < square_scalar_tolerance),
+                [self_sq],
+            )
 
         scalar_self_sq = self_sq[..., :1]
 
@@ -581,10 +595,8 @@ class GeometricAlgebra:
         #       first.
         non_zero_result = tf.where(
             scalar_self_sq < 0,
-            (self.from_tensor(tf.cos(s_sqrt), [0]) +
-                a / s_sqrt * tf.sin(s_sqrt)),
-            (self.from_tensor(tf.cosh(s_sqrt), [0]) +
-                a / s_sqrt * tf.sinh(s_sqrt))
+            (self.from_tensor(tf.cos(s_sqrt), [0]) + a / s_sqrt * tf.sin(s_sqrt)),
+            (self.from_tensor(tf.cosh(s_sqrt), [0]) + a / s_sqrt * tf.sinh(s_sqrt)),
         )
 
         return tf.where(scalar_self_sq == 0, self.from_scalar(1.0) + a, non_zero_result)
@@ -653,15 +665,16 @@ class GeometricAlgebra:
         """
         a = tf.convert_to_tensor(a, dtype_hint=tf.float32)
         blade_indices = tf.cast(
-            tf.convert_to_tensor(blade_indices, dtype_hint=tf.int64),
-            dtype=tf.int64
+            tf.convert_to_tensor(blade_indices, dtype_hint=tf.int64), dtype=tf.int64
         )
 
         blade_values = tf.gather(a, blade_indices, axis=-1)
 
         return self.from_tensor(blade_values, blade_indices)
 
-    def keep_blades_with_name(self, a: tf.Tensor, blade_names: Union[List[str], str]) -> tf.Tensor:
+    def keep_blades_with_name(
+        self, a: tf.Tensor, blade_names: Union[List[str], str]
+    ) -> tf.Tensor:
         """Takes a geometric algebra tensor and returns it with only the given
         blades as non-zeros.
 
@@ -675,8 +688,7 @@ class GeometricAlgebra:
         if isinstance(blade_names, str):
             blade_names = [blade_names]
 
-        _, blade_indices = get_blade_indices_from_names(
-            blade_names, self.blades)
+        _, blade_indices = get_blade_indices_from_names(blade_names, self.blades)
 
         return self.keep_blades(a, blade_indices)
 
@@ -694,15 +706,16 @@ class GeometricAlgebra:
         """
         a = tf.convert_to_tensor(a, dtype_hint=tf.float32)
         blade_indices = tf.cast(
-            tf.convert_to_tensor(blade_indices, dtype_hint=tf.int64),
-            dtype=tf.int64
+            tf.convert_to_tensor(blade_indices, dtype_hint=tf.int64), dtype=tf.int64
         )
 
         result = tf.gather(a, blade_indices, axis=-1)
 
         return result
 
-    def select_blades_with_name(self, a: tf.Tensor, blade_names: Union[List[str], str]) -> tf.Tensor:
+    def select_blades_with_name(
+        self, a: tf.Tensor, blade_names: Union[List[str], str]
+    ) -> tf.Tensor:
         """Takes a geometric algebra tensor and returns a `tf.Tensor` with the
         blades in blade_names on the last axis.
 
@@ -721,7 +734,8 @@ class GeometricAlgebra:
             blade_names = [blade_names]
 
         blade_signs, blade_indices = get_blade_indices_from_names(
-            blade_names, self.blades)
+            blade_names, self.blades
+        )
 
         result = blade_signs * self.select_blades(a, blade_indices)
 
@@ -754,8 +768,7 @@ class GeometricAlgebra:
             u = self.geom_prod(a, u_minus_c)
 
         if not self.is_pure_kind(u, BladeKind.SCALAR):
-            raise Exception(
-                "Can't invert multi-vector (det U not scalar: %s)." % u)
+            raise Exception("Can't invert multi-vector (det U not scalar: %s)." % u)
 
         # adj / det
         return u_minus_c / u[..., :1]

@@ -1,9 +1,11 @@
 import unittest as ut
+
 import tensorflow as tf
+
 from tfga import GeometricAlgebra
 
 # Make tensorflow not take over the entire GPU memory
-for gpu in tf.config.experimental.list_physical_devices('GPU'):
+for gpu in tf.config.experimental.list_physical_devices("GPU"):
     tf.config.experimental.set_memory_growth(gpu, True)
 
 dual_metric = [0]
@@ -33,10 +35,7 @@ class TestDualGeometricAlgebraMultiply(ut.TestCase):
         self.assertTensorsEqual(ga.geom_prod(zero, zero), zero)
         self.assertTensorsEqual(ga.geom_prod(ten, zero), zero)
         self.assertTensorsEqual(ga.geom_prod(zero, ten), zero)
-        self.assertTensorsEqual(
-            ga.geom_prod(ga.geom_prod(ten, eps), eps),
-            zero
-        )
+        self.assertTensorsEqual(ga.geom_prod(ga.geom_prod(ten, eps), eps), zero)
         self.assertTensorsEqual(ga.geom_prod(ten, one), ten)
         self.assertTensorsEqual(ga.geom_prod(one, ten), ten)
 
@@ -67,10 +66,7 @@ class TestDualGeometricAlgebraMultiply(ut.TestCase):
         self.assertTensorsEqual(ga.geom_prod(zero, ten_tf), zero)
         self.assertTensorsEqual(ga.geom_prod(ten, zero_tf), zero)
         self.assertTensorsEqual(ga.geom_prod(zero_tf, ten), zero)
-        self.assertTensorsEqual(
-            ga.geom_prod(ga.geom_prod(ten_tf, eps), eps),
-            zero
-        )
+        self.assertTensorsEqual(ga.geom_prod(ga.geom_prod(ten_tf, eps), eps), zero)
         self.assertTensorsEqual(ga.geom_prod(ten_tf, one), ten)
         self.assertTensorsEqual(ga.geom_prod(one, ten_tf), ten)
         self.assertTensorsEqual(ga.geom_prod(ten, one_tf), ten)
