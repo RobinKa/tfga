@@ -1,0 +1,405 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="lang:clipboard.copy" content="Copy to clipboard">
+  <meta name="lang:clipboard.copied" content="Copied to clipboard">
+  <meta name="lang:search.language" content="en">
+  <meta name="lang:search.pipeline.stopwords" content="True">
+  <meta name="lang:search.pipeline.trimmer" content="True">
+  <meta name="lang:search.result.none" content="No matching documents">
+  <meta name="lang:search.result.one" content="1 matching document">
+  <meta name="lang:search.result.other" content="# matching documents">
+  <meta name="lang:search.tokenizer" content="[\s\-]+">
+
+  
+    <link href="https://fonts.gstatic.com/" rel="preconnect" crossorigin>
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono:400,500,700|Roboto:300,400,400i,700&display=fallback" rel="stylesheet">
+
+    <style>
+      body,
+      input {
+        font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif
+      }
+
+      code,
+      kbd,
+      pre {
+        font-family: "Roboto Mono", "Courier New", Courier, monospace
+      }
+    </style>
+  
+
+  <link rel="stylesheet" href="../_static/stylesheets/application.css"/>
+  <link rel="stylesheet" href="../_static/stylesheets/application-palette.css"/>
+  <link rel="stylesheet" href="../_static/stylesheets/application-fixes.css"/>
+  
+  <link rel="stylesheet" href="../_static/fonts/material-icons.css"/>
+  
+  <meta name="theme-color" content="#3f51b5">
+  <script src="../_static/javascripts/modernizr.js"></script>
+  
+  
+  
+    <title>tfga &#8212; tfga  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/material.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+  
+   
+
+  </head>
+  <body dir=ltr
+        data-md-color-primary=blue-grey data-md-color-accent=blue>
+  
+  <svg class="md-svg">
+    <defs data-children-count="0">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg>
+      
+    </defs>
+  </svg>
+  
+  <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer">
+  <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search">
+  <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
+  <a href="#_build/modules" tabindex="1" class="md-skip"> Skip to content </a>
+  <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex navheader">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href="../index.html" title="tfga  documentation"
+           class="md-header-nav__button md-logo">
+          
+            &nbsp;
+          
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          <span class="md-header-nav__topic">tfga  documentation</span>
+          <span class="md-header-nav__topic"> tfga </span>
+        </div>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
+        
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" action="../search.html" method="get" name="search">
+      <input type="text" class="md-search__input" name="q" placeholder="Search"
+             autocapitalize="off" autocomplete="off" spellcheck="false"
+             data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="__search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+      </div>
+      
+      
+  
+  <script src="../_static/javascripts/version_dropdown.js"></script>
+  <script>
+    var json_loc = "../"versions.json"",
+        target_loc = "../../",
+        text = "Versions";
+    $( document ).ready( add_version_dropdown(json_loc, target_loc, text));
+  </script>
+  
+
+    </div>
+  </nav>
+</header>
+
+  
+  <div class="md-container">
+    
+    
+    
+  <nav class="md-tabs" data-md-component="tabs">
+    <div class="md-tabs__inner md-grid">
+      <ul class="md-tabs__list">
+          <li class="md-tabs__item"><a href="../index.html" class="md-tabs__link">tfga  documentation</a></li>
+      </ul>
+    </div>
+  </nav>
+    <main class="md-main">
+      <div class="md-main__inner md-grid" data-md-component="container">
+        
+          <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+            <div class="md-sidebar__scrollwrap">
+              <div class="md-sidebar__inner">
+                <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="__drawer">
+    <a href="../index.html" title="tfga documentation" class="md-nav__button md-logo">
+      
+        <img src="../_static/" alt=" logo" width="48" height="48">
+      
+    </a>
+    <a href="../index.html"
+       title="tfga documentation">tfga  documentation</a>
+  </label>
+  
+
+</nav>
+              </div>
+            </div>
+          </div>
+          <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+            <div class="md-sidebar__scrollwrap">
+              <div class="md-sidebar__inner">
+                
+<nav class="md-nav md-nav--secondary">
+  <ul class="md-nav__list" data-md-scrollfix="">
+    
+<li class="md-nav__item"><a class="md-nav__extra_link" href="../_sources/_build/modules.rst.txt">Show Source</a> </li>
+
+<li id="searchbox" class="md-nav__item"></li>
+
+  </ul>
+</nav>
+              </div>
+            </div>
+          </div>
+        
+        <div class="md-content">
+          <article class="md-content__inner md-typeset" role="main">
+            
+  <section id="tfga">
+<h1 id="build-modules--page-root">tfga<a class="headerlink" href="#build-modules--page-root" title="Permalink to this heading">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tfga.html">tfga package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tfga.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tfga.html#module-tfga.blades">tfga.blades module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tfga.html#tfga.blades.BladeKind"><code class="docutils literal notranslate"><span class="pre">BladeKind</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.blades.BladeKind.BIVECTOR"><code class="docutils literal notranslate"><span class="pre">BladeKind.BIVECTOR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.blades.BladeKind.EVEN"><code class="docutils literal notranslate"><span class="pre">BladeKind.EVEN</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.blades.BladeKind.MV"><code class="docutils literal notranslate"><span class="pre">BladeKind.MV</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.blades.BladeKind.ODD"><code class="docutils literal notranslate"><span class="pre">BladeKind.ODD</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.blades.BladeKind.PSEUDOBIVECTOR"><code class="docutils literal notranslate"><span class="pre">BladeKind.PSEUDOBIVECTOR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.blades.BladeKind.PSEUDOSCALAR"><code class="docutils literal notranslate"><span class="pre">BladeKind.PSEUDOSCALAR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.blades.BladeKind.PSEUDOTRIVECTOR"><code class="docutils literal notranslate"><span class="pre">BladeKind.PSEUDOTRIVECTOR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.blades.BladeKind.PSEUDOVECTOR"><code class="docutils literal notranslate"><span class="pre">BladeKind.PSEUDOVECTOR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.blades.BladeKind.SCALAR"><code class="docutils literal notranslate"><span class="pre">BladeKind.SCALAR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.blades.BladeKind.TRIVECTOR"><code class="docutils literal notranslate"><span class="pre">BladeKind.TRIVECTOR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.blades.BladeKind.VECTOR"><code class="docutils literal notranslate"><span class="pre">BladeKind.VECTOR</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tfga.html#tfga.blades.get_blade_indices_from_names"><code class="docutils literal notranslate"><span class="pre">get_blade_indices_from_names()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tfga.html#tfga.blades.get_blade_of_kind_indices"><code class="docutils literal notranslate"><span class="pre">get_blade_of_kind_indices()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tfga.html#tfga.blades.get_blade_repr"><code class="docutils literal notranslate"><span class="pre">get_blade_repr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tfga.html#tfga.blades.get_normal_ordered"><code class="docutils literal notranslate"><span class="pre">get_normal_ordered()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tfga.html#tfga.blades.invert_blade_indices"><code class="docutils literal notranslate"><span class="pre">invert_blade_indices()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tfga.html#tfga.blades.is_blade_kind"><code class="docutils literal notranslate"><span class="pre">is_blade_kind()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tfga.html#module-tfga.cayley">tfga.cayley module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tfga.html#tfga.cayley.blades_from_bases"><code class="docutils literal notranslate"><span class="pre">blades_from_bases()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tfga.html#tfga.cayley.get_cayley_tensor"><code class="docutils literal notranslate"><span class="pre">get_cayley_tensor()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tfga.html#module-tfga.layers">tfga.layers module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tfga.html#tfga.layers.GeometricAlgebraExp"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebraExp</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.layers.GeometricAlgebraExp.call"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebraExp.call()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.layers.GeometricAlgebraExp.compute_output_shape"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebraExp.compute_output_shape()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.layers.GeometricAlgebraExp.get_config"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebraExp.get_config()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tfga.html#tfga.layers.GeometricAlgebraLayer"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebraLayer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.layers.GeometricAlgebraLayer.from_config"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebraLayer.from_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.layers.GeometricAlgebraLayer.get_config"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebraLayer.get_config()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tfga.html#tfga.layers.GeometricProductConv1D"><code class="docutils literal notranslate"><span class="pre">GeometricProductConv1D</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.layers.GeometricProductConv1D.build"><code class="docutils literal notranslate"><span class="pre">GeometricProductConv1D.build()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.layers.GeometricProductConv1D.call"><code class="docutils literal notranslate"><span class="pre">GeometricProductConv1D.call()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.layers.GeometricProductConv1D.get_config"><code class="docutils literal notranslate"><span class="pre">GeometricProductConv1D.get_config()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tfga.html#tfga.layers.GeometricProductDense"><code class="docutils literal notranslate"><span class="pre">GeometricProductDense</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.layers.GeometricProductDense.build"><code class="docutils literal notranslate"><span class="pre">GeometricProductDense.build()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.layers.GeometricProductDense.call"><code class="docutils literal notranslate"><span class="pre">GeometricProductDense.call()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.layers.GeometricProductDense.compute_output_shape"><code class="docutils literal notranslate"><span class="pre">GeometricProductDense.compute_output_shape()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.layers.GeometricProductDense.get_config"><code class="docutils literal notranslate"><span class="pre">GeometricProductDense.get_config()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tfga.html#tfga.layers.GeometricProductElementwise"><code class="docutils literal notranslate"><span class="pre">GeometricProductElementwise</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.layers.GeometricProductElementwise.build"><code class="docutils literal notranslate"><span class="pre">GeometricProductElementwise.build()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.layers.GeometricProductElementwise.call"><code class="docutils literal notranslate"><span class="pre">GeometricProductElementwise.call()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.layers.GeometricProductElementwise.compute_output_shape"><code class="docutils literal notranslate"><span class="pre">GeometricProductElementwise.compute_output_shape()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.layers.GeometricProductElementwise.get_config"><code class="docutils literal notranslate"><span class="pre">GeometricProductElementwise.get_config()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tfga.html#tfga.layers.GeometricSandwichProductDense"><code class="docutils literal notranslate"><span class="pre">GeometricSandwichProductDense</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.layers.GeometricSandwichProductDense.call"><code class="docutils literal notranslate"><span class="pre">GeometricSandwichProductDense.call()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tfga.html#tfga.layers.GeometricSandwichProductElementwise"><code class="docutils literal notranslate"><span class="pre">GeometricSandwichProductElementwise</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.layers.GeometricSandwichProductElementwise.call"><code class="docutils literal notranslate"><span class="pre">GeometricSandwichProductElementwise.call()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tfga.html#tfga.layers.GeometricToTensor"><code class="docutils literal notranslate"><span class="pre">GeometricToTensor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.layers.GeometricToTensor.call"><code class="docutils literal notranslate"><span class="pre">GeometricToTensor.call()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.layers.GeometricToTensor.compute_output_shape"><code class="docutils literal notranslate"><span class="pre">GeometricToTensor.compute_output_shape()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.layers.GeometricToTensor.get_config"><code class="docutils literal notranslate"><span class="pre">GeometricToTensor.get_config()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tfga.html#tfga.layers.GeometricToTensorWithKind"><code class="docutils literal notranslate"><span class="pre">GeometricToTensorWithKind</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tfga.html#tfga.layers.TensorToGeometric"><code class="docutils literal notranslate"><span class="pre">TensorToGeometric</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.layers.TensorToGeometric.call"><code class="docutils literal notranslate"><span class="pre">TensorToGeometric.call()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.layers.TensorToGeometric.compute_output_shape"><code class="docutils literal notranslate"><span class="pre">TensorToGeometric.compute_output_shape()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.layers.TensorToGeometric.get_config"><code class="docutils literal notranslate"><span class="pre">TensorToGeometric.get_config()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tfga.html#tfga.layers.TensorWithKindToGeometric"><code class="docutils literal notranslate"><span class="pre">TensorWithKindToGeometric</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.layers.TensorWithKindToGeometric.call"><code class="docutils literal notranslate"><span class="pre">TensorWithKindToGeometric.call()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.layers.TensorWithKindToGeometric.compute_output_shape"><code class="docutils literal notranslate"><span class="pre">TensorWithKindToGeometric.compute_output_shape()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.layers.TensorWithKindToGeometric.get_config"><code class="docutils literal notranslate"><span class="pre">TensorWithKindToGeometric.get_config()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tfga.html#module-tfga.mv">tfga.mv module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tfga.html#tfga.mv.MultiVector"><code class="docutils literal notranslate"><span class="pre">MultiVector</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.mv.MultiVector.algebra"><code class="docutils literal notranslate"><span class="pre">MultiVector.algebra</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.mv.MultiVector.approx_exp"><code class="docutils literal notranslate"><span class="pre">MultiVector.approx_exp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.mv.MultiVector.approx_log"><code class="docutils literal notranslate"><span class="pre">MultiVector.approx_log()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.mv.MultiVector.batch_shape"><code class="docutils literal notranslate"><span class="pre">MultiVector.batch_shape</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.mv.MultiVector.conjugation"><code class="docutils literal notranslate"><span class="pre">MultiVector.conjugation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.mv.MultiVector.dual"><code class="docutils literal notranslate"><span class="pre">MultiVector.dual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.mv.MultiVector.exp"><code class="docutils literal notranslate"><span class="pre">MultiVector.exp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.mv.MultiVector.geom_conv1d"><code class="docutils literal notranslate"><span class="pre">MultiVector.geom_conv1d()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.mv.MultiVector.grade_automorphism"><code class="docutils literal notranslate"><span class="pre">MultiVector.grade_automorphism()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.mv.MultiVector.inverse"><code class="docutils literal notranslate"><span class="pre">MultiVector.inverse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.mv.MultiVector.is_pure_kind"><code class="docutils literal notranslate"><span class="pre">MultiVector.is_pure_kind()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.mv.MultiVector.simple_inverse"><code class="docutils literal notranslate"><span class="pre">MultiVector.simple_inverse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.mv.MultiVector.tensor"><code class="docutils literal notranslate"><span class="pre">MultiVector.tensor</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tfga.html#module-tfga.mv_ops">tfga.mv_ops module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tfga.html#tfga.mv_ops.mv_conv1d"><code class="docutils literal notranslate"><span class="pre">mv_conv1d()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tfga.html#tfga.mv_ops.mv_grade_automorphism"><code class="docutils literal notranslate"><span class="pre">mv_grade_automorphism()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tfga.html#tfga.mv_ops.mv_multiply"><code class="docutils literal notranslate"><span class="pre">mv_multiply()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tfga.html#tfga.mv_ops.mv_reversion"><code class="docutils literal notranslate"><span class="pre">mv_reversion()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tfga.html#module-tfga.tfga">tfga.tfga module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.approx_exp"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.approx_exp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.approx_log"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.approx_log()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.basis_mvs"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.basis_mvs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.blade_degrees"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.blade_degrees</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.blade_mvs"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.blade_mvs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.blades"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.blades</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.cayley"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.cayley</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.cayley_inner"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.cayley_inner</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.cayley_outer"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.cayley_outer</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.conjugation"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.conjugation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.dual"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.dual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.dual_blade_indices"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.dual_blade_indices</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.dual_blade_signs"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.dual_blade_signs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.e"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.e()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.exp"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.exp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.ext_prod"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.ext_prod()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.from_scalar"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.from_scalar()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.from_tensor"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.from_tensor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.from_tensor_with_kind"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.from_tensor_with_kind()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.geom_conv1d"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.geom_conv1d()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.geom_prod"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.geom_prod()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.get_blade_indices_of_degree"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.get_blade_indices_of_degree()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.get_kind_blade_indices"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.get_kind_blade_indices()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.grade_automorphism"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.grade_automorphism()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.inner_prod"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.inner_prod()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.int_pow"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.int_pow()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.inverse"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.inverse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.is_pure"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.is_pure()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.is_pure_kind"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.is_pure_kind()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.keep_blades"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.keep_blades()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.keep_blades_with_name"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.keep_blades_with_name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.max_degree"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.max_degree</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.metric"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.metric</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.mv_repr"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.mv_repr()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.num_blades"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.num_blades</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.print"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.print()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.reg_prod"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.reg_prod()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.reversion"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.reversion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.select_blades"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.select_blades()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.select_blades_with_name"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.select_blades_with_name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tfga.html#tfga.tfga.GeometricAlgebra.simple_inverse"><code class="docutils literal notranslate"><span class="pre">GeometricAlgebra.simple_inverse()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tfga.html#module-tfga">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+          </article>
+        </div>
+      </div>
+    </main>
+  </div>
+  <footer class="md-footer">
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+          
+          
+        </a>
+        
+      </nav>
+    </div>
+    <div class="md-footer-meta md-typeset">
+      <div class="md-footer-meta__inner md-grid">
+        <div class="md-footer-copyright">
+          <div class="md-footer-copyright__highlight">
+              &#169; Copyright 2023, Robin &#39;Tora&#39; Kahlow.
+              
+          </div>
+            Created using
+            <a href="http://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
+             and
+            <a href="https://github.com/bashtage/sphinx-material/">Material for
+              Sphinx</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <script src="../_static/javascripts/application.js"></script>
+  <script>app.initialize({version: "1.0.4", url: {base: ".."}})</script>
+  </body>
+</html>
