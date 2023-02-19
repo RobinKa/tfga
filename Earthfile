@@ -45,6 +45,7 @@ publish:
 
     RUN --mount=type=cache,target=$PIP_CACHE_DIR \
         pip install poetry
+    RUN poetry config repositories.pypi https://upload.pypi.org/legacy/
     RUN poetry config repositories.testpypi https://test.pypi.org/legacy/
     COPY pyproject.toml poetry.lock README.md .
     COPY tfga tfga
